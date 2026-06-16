@@ -30,7 +30,7 @@ jobs:
     name: Validate R app
     runs-on: ubuntu-latest
     env:
-      R_LIBS_USER: ${{ runner.temp }}/R/library
+      R_LIBS_USER: /tmp/R/library
 
     steps:
       - name: Checkout repository
@@ -41,6 +41,7 @@ jobs:
 
       - name: Install validation dependencies
         run: |
+          mkdir -p "$R_LIBS_USER"
           Rscript -e "install.packages(c('readxl', 'dplyr', 'stringr'), repos = 'https://cloud.r-project.org')"
 
       - name: Validate data preparation

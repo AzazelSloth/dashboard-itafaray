@@ -24,6 +24,8 @@ permissions:
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}
   DOCKERHUB_IMAGE: ${{ secrets.DOCKERHUB_IMAGE }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
   validate:
@@ -120,11 +122,31 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to Docker Hub
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' && env.DOCKERHUB_IMAGE != ''
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+
+      - name: Prepare image tags
+        id: tags
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ steps.resolve.outputs.image_tag }}
+          DOCKERHUB_IMAGE: ${{ secrets.DOCKERHUB_IMAGE }}
+        run: |
+          set -euo pipefail
+
+          TAGS="${IMAGE_NAME}:sha-${GITHUB_SHA}"
+          TAGS+=$'\n'"${IMAGE_NAME}:${IMAGE_TAG}"
+
+          if [ -n "${DOCKERHUB_IMAGE:-}" ]; then
+            TAGS+=$'\n'"${DOCKERHUB_IMAGE}:${IMAGE_TAG}"
+          fi
+
+          echo "tags<<EOF" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$TAGS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Extract Docker metadata
         if: false
@@ -137,10 +159,7 @@ jobs:
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
           load: ${{ github.event_name == 'pull_request' }}
-          tags: |
-            ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-            ${{ env.IMAGE_NAME }}:${{ steps.resolve.outputs.image_tag }}
-            ${{ secrets.DOCKERHUB_IMAGE }}:${{ steps.resolve.outputs.image_tag }}
+          tags: ${{ steps.tags.outputs.tags }}
 
       - name: Smoke test container
         shell: bash
@@ -182,11 +201,12 @@ jobs:
           EC2_HOST: ${{ vars.EC2_HOST }}
           EC2_USER: ${{ vars.EC2_USER }}
           DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+          DOCKERHUB_IMAGE: ${{ secrets.DOCKERHUB_IMAGE }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
           set -euo pipefail
-          if [ -n "$EC2_HOST" ] && [ -n "$EC2_USER" ] && [ -n "$EC2_SSH_KEY" ] && [ -n "$DEPLOY_PATH" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
+          if [ -n "$EC2_HOST" ] && [ -n "$EC2_USER" ] && [ -n "$EC2_SSH_KEY" ] && [ -n "$DEPLOY_PATH" ] && [ -n "$DOCKERHUB_IMAGE" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"

@@ -137,8 +137,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          TAGS="${IMAGE_NAME}:sha-${GITHUB_SHA}"
-          TAGS+=$'\n'"${IMAGE_NAME}:${IMAGE_TAG}"
+          GHCR_IMAGE="$(printf '%s' "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')"
+          SHA_IMAGE="${GHCR_IMAGE}:sha-${GITHUB_SHA}"
+
+          TAGS="$SHA_IMAGE"
+          TAGS+=$'\n'"${GHCR_IMAGE}:${IMAGE_TAG}"
 
           if [ -n "${DOCKERHUB_IMAGE:-}" ]; then
             TAGS+=$'\n'"${DOCKERHUB_IMAGE}:${IMAGE_TAG}"
@@ -147,6 +150,7 @@ jobs:
           echo "tags<<EOF" >> "$GITHUB_OUTPUT"
           printf '%s\n' "$TAGS" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "sha_image=$SHA_IMAGE" >> "$GITHUB_OUTPUT"
 
       - name: Extract Docker metadata
         if: false
@@ -163,9 +167,11 @@ jobs:
 
       - name: Smoke test container
         shell: bash
+        env:
+          SHA_IMAGE: ${{ steps.tags.outputs.sha_image }}
         run: |
           set -euo pipefail
-          IMAGE="${IMAGE_NAME}:sha-${GITHUB_SHA}"
+          IMAGE="$SHA_IMAGE"
 
           if [ "${GITHUB_EVENT_NAME}" != "pull_request" ]; then
             docker pull "$IMAGE"

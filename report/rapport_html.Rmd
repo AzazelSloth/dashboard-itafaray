@@ -1,0 +1,106 @@
+---
+output:
+  html_document:
+    self_contained: true
+    theme: cosmo
+    highlight: null
+    mathjax: null
+    df_print: kable
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+suppressPackageStartupMessages(library(htmltools))
+```
+
+```{css, echo=FALSE}
+body { font-family:'IBM Plex Sans',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  color:#26333F; background:#FFFFFF; max-width:1080px; margin:0 auto; }
+.masthead { background:#1e3a5f; color:#fff; padding:22px 26px; border-radius:8px; margin-bottom:18px; }
+.masthead h1 { font-size:22px; margin:0; font-weight:700; letter-spacing:.2px; }
+.masthead .sub { color:#CFE0EE; font-size:13px; margin-top:5px; }
+.masthead .meta { color:#9FD3EE; font-size:12px; margin-top:8px; }
+.kpis { display:flex; gap:12px; margin:16px 0 6px; flex-wrap:wrap; }
+.kpi { flex:1; min-width:150px; background:#F4F7FA; border:1px solid #D9DEE4;
+  border-radius:8px; padding:14px 10px; text-align:center; }
+.kpi .v { font-size:27px; font-weight:700; color:#1e3a5f; line-height:1; }
+.kpi .l { font-size:12px; color:#5A6672; margin-top:6px; }
+h2.sec { color:#1e3a5f; font-size:16px; border-bottom:2px solid #1e3a5f;
+  padding-bottom:6px; margin:30px 0 12px; }
+.ctx { line-height:1.65; }
+.note { color:#5A6672; font-size:12px; margin-top:6px; }
+ul.reco { line-height:1.8; }
+.footer { color:#8A93A0; font-size:11px; border-top:1px solid #D9DEE4;
+  margin-top:34px; padding-top:10px; }
+```
+
+```{r masthead, results='asis'}
+cat(sprintf(
+  '<div class="masthead"><h1>%s</h1><div class="sub">%s</div><div class="meta">%s</div></div>',
+  paste0(Tr("BULLETIN DE SURVEILLANCE"), " — One Health"),
+  paste0("i-Tafaray — ", Tr("Plateforme nationale Une seule santé - République de Madagascar")),
+  paste0(Tr("Période :"), " ", meta$periode, "   |   ", Tr("arrêté au"), " ", meta$arrete)))
+```
+
+```{r kpis, results='asis'}
+cat(sprintf(
+  '<div class="kpis"><div class="kpi"><div class="v">%s</div><div class="l">%s</div></div><div class="kpi"><div class="v">%s</div><div class="l">%s</div></div><div class="kpi"><div class="v">%s</div><div class="l">%s</div></div><div class="kpi"><div class="v">%s</div><div class="l">%s</div></div></div>',
+  kpi$signaux,   Tr("Signaux validés"),
+  kpi$risque,    Tr("À risque élevé"),
+  kpi$alertes,   Tr("Alertes"),
+  kpi$fokontany, Tr("Fokontany")))
+```
+
+```{r contexte, results='asis'}
+cat(sprintf('<h2 class="sec">1. %s</h2>', Tr("CONTEXTE ET ANALYSE DE LA SITUATION")))
+cat(sprintf('<p class="ctx">%s</p>', htmltools::htmlEscape(contexte)))
+```
+
+```{r trend, results='asis'}
+cat(sprintf('<h2 class="sec">2. %s</h2>', Tr("TENDANCE DE L'ACTIVITÉ (12 DERNIERS MOIS)")))
+```
+```{r trend_w}
+r_trend
+```
+```{r trend_note, results='asis'}
+cat(sprintf('<div class="note">%s</div>',
+  Tr("Figure 1. Nombre de signaux validés par mois et par secteur (humain, animal, environnement).")))
+```
+
+```{r risk, results='asis'}
+cat(sprintf('<h2 class="sec">3. %s</h2>', Tr("NIVEAU DE RISQUE")))
+```
+```{r risk_w}
+if (!is.null(r_risk)) r_risk else htmltools::HTML(
+  sprintf('<p class="note">%s</p>', Tr("Aucun signal évalué sur la période.")))
+```
+
+```{r map, results='asis'}
+cat(sprintf('<h2 class="sec">4. %s</h2>', Tr("Localisation des signaux, alertes et grappes One Health")))
+```
+```{r map_w}
+if (!is.null(r_map)) r_map else htmltools::HTML(
+  sprintf('<p class="note">%s</p>', Tr("Aucun signal géolocalisé.")))
+```
+
+```{r alertes, results='asis'}
+cat(sprintf('<h2 class="sec">5. %s</h2>', Tr("ALERTES PRIORITAIRES")))
+```
+```{r alertes_w}
+r_tab
+```
+
+```{r reco, results='asis'}
+cat(sprintf('<h2 class="sec">6. %s</h2>', Tr("RECOMMANDATIONS")))
+items <- trimws(sub("^-\\s*", "", strsplit(reco, "\n")[[1]]))
+items <- items[nchar(items) > 0]
+cat('<ul class="reco">')
+for (it in items) cat(sprintf('<li>%s</li>', htmltools::htmlEscape(it)))
+cat('</ul>')
+```
+
+```{r footer, results='asis'}
+cat(sprintf('<div class="footer">%s</div>',
+  paste0("i-Tafaray — ", Tr("Surveillance intégrée One Health - Comité de pilotage."),
+         " ", Tr("Document généré automatiquement."))))
+```

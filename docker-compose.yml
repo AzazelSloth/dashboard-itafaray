@@ -1,0 +1,57 @@
+# =====================================================================
+#  i-Tafaray — Déploiement production (EC2 + Docker)
+#  3 services :
+#    app     : l'application Shiny (non exposée directement sur Internet)
+#    nginx   : reverse proxy + terminaison HTTPS (ports 80 / 443)
+#    certbot : obtention et renouvellement automatique des certificats TLS
+#
+#  Démarrage :
+#    1) cp .env.example .env   puis renseigner DOMAIN et EMAIL
+#    2) ./init-letsencrypt.sh  (une seule fois — crée le certificat)
+#    3) docker compose up -d
+# =====================================================================
+
+services:
+  app:
+    build: .
+    image: itafaray-poc:1.1
+    container_name: itafaray-app
+    restart: unless-stopped
+    expose:
+      - "3838"            # accessible uniquement par nginx (réseau interne)
+    networks:
+      - itafaray
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: itafaray-nginx
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    networks:
+      - itafaray
+    # Recharge nginx toutes les 6 h pour prendre en compte les certificats renouvelés
+    command: /bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'
+
+  certbot:
+    image: certbot/certbot
+    container_name: itafaray-certbot
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    # Tente un renouvellement toutes les 12 h (no-op tant que ce n'est pas nécessaire)
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h & wait $${!}; done;'
+
+networks:
+  itafaray:
+    driver: bridge

@@ -1,0 +1,26 @@
+{
+    "id": "70490B46",
+    "path": "~/Documents/Claude/Projects/CIRAD/Dashboard_POC_iTafaray/xroad_client.R",
+    "project_path": "xroad_client.R",
+    "type": "r_source",
+    "hash": "3779399021",
+    "contents": "",
+    "dirty": false,
+    "created": 1781503277952.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "64,0",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1781539896,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1781539896,
+    "read_only": false,
+    "read_only_alternatives": []
+}

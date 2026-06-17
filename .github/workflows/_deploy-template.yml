@@ -251,4 +251,19 @@ jobs:
         run: |
           set -euo pipefail
           ssh "$EC2_USER@$EC2_HOST" \
-            "cd '$DEPLOY_PATH' && APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' docker compose pull app && APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' docker compose up -d --no-build app"
+            "
+              set -euo pipefail
+              if docker info >/dev/null 2>&1; then
+                DOCKER_COMPOSE_CMD='docker compose'
+              elif sudo -n docker info >/dev/null 2>&1; then
+                DOCKER_COMPOSE_CMD='sudo docker compose'
+              else
+                echo 'Docker is not accessible for the deployment user.'
+                echo 'Add the user to the docker group or allow passwordless sudo for docker.'
+                exit 1
+              fi
+
+              cd '$DEPLOY_PATH'
+              APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' \$DOCKER_COMPOSE_CMD pull app
+              APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' \$DOCKER_COMPOSE_CMD up -d --no-build app
+            "

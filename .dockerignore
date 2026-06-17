@@ -1,25 +1,6 @@
-# Ne pas embarquer dans l'image / le contexte de build
-.DS_Store
-.RData
-.Rhistory
-.Rproj.user
-*.Rproj
-deploy.R
-data/
-extract_climate_mdg.R
-xroad_client.R
-DEPLOIEMENT_DOCKER.md
-DEPLOIEMENT_AWS.md
-README.md
-rsconnect/
-
-# Fichiers de déploiement (ne servent pas DANS l'image)
+# Fichiers inutiles dans l'image
+README_DOCKER.md
 docker-compose.yml
 Dockerfile
 .dockerignore
-.rscignore
-.env
-.env.example
-init-letsencrypt.sh
-nginx/
-certbot/
+.DS_Store

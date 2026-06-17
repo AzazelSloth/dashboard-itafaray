@@ -18,7 +18,7 @@
     {
       "fr": "Par signal",
       "en": "By signal",
-      "mg": "Isaky ny famantarana"
+      "mg": "Isaky ny tranga"
     },
     {
       "fr": "Cartographie",
@@ -33,17 +33,17 @@
     {
       "fr": "Alertes",
       "en": "Alerts",
-      "mg": "Fampandrenesana"
+      "mg": "Fanairana"
     },
     {
       "fr": "Indicateurs (18 signaux)",
       "en": "Indicators (18 signals)",
-      "mg": "Tondro (famantarana 18)"
+      "mg": "Tondro (tranga 18)"
     },
     {
       "fr": "One Health (croisements)",
       "en": "One Health (cross-sector)",
-      "mg": "One Health (fampifandraisana)"
+      "mg": "Fahasalamana iray (fampifandraisana)"
     },
     {
       "fr": "Pipeline & qualité",
@@ -98,7 +98,7 @@
     {
       "fr": "Mois en cours",
       "en": "Current month",
-      "mg": "Volana ankehitriny"
+      "mg": "Volana diavina"
     },
     {
       "fr": "3 derniers mois",
@@ -108,7 +108,7 @@
     {
       "fr": "12 derniers mois",
       "en": "Last 12 months",
-      "mg": "Roa ambin'ny folo volana farany"
+      "mg": "12 volana farany"
     },
     {
       "fr": "Tout",
@@ -123,7 +123,7 @@
     {
       "fr": "Visite guidée",
       "en": "Guided tour",
-      "mg": "Fitsidihana mitari-dalana"
+      "mg": "Fitsidihana tarihina"
     },
     {
       "fr": "Guide de la plateforme i-Tafaray",
@@ -133,7 +133,7 @@
     {
       "fr": "Plateforme de surveillance One Health (Une seule santé). Elle réunit les signaux humains, animaux et environnementaux pour révéler, par leur croisement, des menaces qu'aucun secteur ne verrait seul.",
       "en": "One Health surveillance platform. It brings together human, animal and environmental signals to reveal, through their cross-analysis, threats that no single sector would see alone.",
-      "mg": "Sehatra fanaraha-maso One Health (Fahasalamana iray). Manangona ny famantarana eo amin'ny olombelona, biby ary tontolo iainana izy mba hampisehoana, amin'ny fampifandraisana azy ireo, loza tsy ho hitan'ny sehatra tokana."
+      "mg": "Sehatra fanaraha-maso One Health (Fahasalamana iray). Manangona ny tranga eo amin'ny olombelona, biby ary tontolo iainana izy mba hampisehoana, amin'ny fampifandraisana azy ireo, loza tsy ho hitan'ny sehatra tokana."
     },
     {
       "fr": "Les modules",
@@ -158,7 +158,7 @@
     {
       "fr": "Vue d'ensemble pour le comité : chiffres clés, tendance, alertes prioritaires.",
       "en": "Overview for the committee: key figures, trend, priority alerts.",
-      "mg": "Topimaso ho an'ny komity : isa fototra, fironana, fampandrenesana laharam-pahamehana."
+      "mg": "Topimaso ho an'ny komity : isa fototra, fironana, fanairana laharam-pahamehana."
     },
     {
       "fr": "Volumes par mois et secteur, niveau de risque, pathogènes suspectés.",
@@ -168,27 +168,27 @@
     {
       "fr": "Localisation des signaux, anneaux d'alerte et cercles de grappes One Health.",
       "en": "Signal locations, alert rings and One Health cluster circles.",
-      "mg": "Toerana misy ny famantarana, peratra fampandrenesana ary faribolan'ny vondrona One Health."
+      "mg": "Toerana misy ny tranga, boribory fanairana ary faribolan'ny vondrona Fahasalamana iray."
     },
     {
       "fr": "Liste des alertes et leur chaîne de décision, du signalement à l'action.",
       "en": "List of alerts and their decision chain, from report to action.",
-      "mg": "Lisitry ny fampandrenesana sy ny rojo fanapahan-kevitra, hatramin'ny filazana ka hatramin'ny hetsika."
+      "mg": "Lisitry ny fanairana sy ny rojo fanapahan-kevitra, hatramin'ny fitsirihana ka hatramin'ny hetsika."
     },
     {
       "fr": "Les 18 signaux prioritaires et leurs mesures (volumes, cas, décès, alertes).",
       "en": "The 18 priority signals and their metrics (volumes, cases, deaths, alerts).",
-      "mg": "Ny famantarana 18 laharam-pahamehana sy ny fandrefesana azy (habetsahana, tranga, fahafatesana, fampandrenesana)."
+      "mg": "Ny tranga 18 laharam-pahamehana sy ny fandrefesana azy (habetsahana, tranga, fahafatesana, fanairana)."
     },
     {
       "fr": "Grappes inter-secteurs et avance de détection gagnée sur le 1er cas humain.",
       "en": "Cross-sector clusters and detection lead time gained over the first human case.",
-      "mg": "Vondrona maro sehatra sy ny fotoana azo amin'ny fitsikilovana mialoha ny tranga voalohany amin'ny olombelona."
+      "mg": "Vondrona maro sehatra sy ny fotoana azo amin'ny fitsirihana mialoha ny tranga voalohany amin'ny olombelona."
     },
     {
       "fr": "Du signal collecté à l'alerte : délais de vérification, doublons, taux de tri.",
       "en": "From collected signal to alert: verification delays, duplicates, triage rate.",
-      "mg": "Avy amin'ny famantarana voaangona ka hatramin'ny fampandrenesana : fe-potoana fanamarinana, sosona, tahan'ny fanasokajiana."
+      "mg": "Avy amin'ny tranga voaangona ka hatramin'ny fanairana : fe-potoana fanamarinana, sosona, tahan'ny fanasokajiana."
     },
     {
       "fr": "Tendance de l'activité (12 derniers mois)",
@@ -203,17 +203,17 @@
     {
       "fr": "Alertes prioritaires sur la période",
       "en": "Priority alerts over the period",
-      "mg": "Fampandrenesana laharam-pahamehana mandritra ny vanim-potoana"
+      "mg": "Fanairana laharam-pahamehana mandritra ny vanim-potoana"
     },
     {
       "fr": "Volume de signaux par mois et par secteur",
       "en": "Signal volume by month and sector",
-      "mg": "Habetsahan'ny famantarana isam-bolana sy isan-tsehatra"
+      "mg": "Habetsahan'ny tranga isam-bolana sy isan-tsehatra"
     },
     {
       "fr": "Niveau de risque (signaux évalués)",
       "en": "Risk level (evaluated signals)",
-      "mg": "Haavon'ny risika (famantarana voatombana)"
+      "mg": "Haavon'ny risika (tranga voatombana)"
     },
     {
       "fr": "Pathogènes / événements suspectés",
@@ -223,37 +223,37 @@
     {
       "fr": "Répartition par signal",
       "en": "Distribution by signal",
-      "mg": "Fizarana isaky ny famantarana"
+      "mg": "Fizarana isaky ny tranga"
     },
     {
       "fr": "Localisation des signaux, alertes et grappes One Health",
       "en": "Location of signals, alerts and One Health clusters",
-      "mg": "Toerana misy ny famantarana, fampandrenesana ary vondrona One Health"
+      "mg": "Toerana misy ny tranga, fanairana ary vondrona Fahasalamana iray"
     },
     {
       "fr": "Vue d'ensemble — activité par signal et par mois",
       "en": "Overview — activity by signal and month",
-      "mg": "Topimaso — hetsika isaky ny famantarana sy isam-bolana"
+      "mg": "Topimaso — hetsika isaky ny tranga sy isam-bolana"
     },
     {
       "fr": "Vue d'ensemble — activité par signal et par fokontany",
       "en": "Overview — activity by signal and fokontany",
-      "mg": "Topimaso — hetsika isaky ny famantarana sy isam-pokontany"
+      "mg": "Topimaso — hetsika isaky ny tranga sy isam-pokontany"
     },
     {
       "fr": "Indicateurs par signal — les 18 signaux prioritaires",
       "en": "Indicators by signal — the 18 priority signals",
-      "mg": "Tondro isaky ny famantarana — ny famantarana 18 laharam-pahamehana"
+      "mg": "Tondro isaky ny tranga — ny tranga 18 laharam-pahamehana"
     },
     {
       "fr": "Indicateurs One Health — grappes inter-secteurs",
       "en": "One Health indicators — cross-sector clusters",
-      "mg": "Tondro One Health — vondrona maro sehatra"
+      "mg": "Tondro Fahasalamana iray — vondrona maro sehatra"
     },
     {
       "fr": "Alertes (signaux ayant déclenché une alerte)",
       "en": "Alerts (signals that triggered an alert)",
-      "mg": "Fampandrenesana (famantarana niteraka fampandrenesana)"
+      "mg": "Fanairana (tranga niteraka fanairana)"
     },
     {
       "fr": "Pipeline de la surveillance",
@@ -263,7 +263,7 @@
     {
       "fr": "Délai détection → vérification (jours)",
       "en": "Detection → verification delay (days)",
-      "mg": "Fe-potoana fitsikilovana → fanamarinana (andro)"
+      "mg": "Fe-potoana Fitsirihana → fanamarinana (andro)"
     },
     {
       "fr": "Pluviométrie — district d'Ifanadiana",
@@ -283,12 +283,12 @@
     {
       "fr": "Profil saisonnier — signaux environnementaux vs climat",
       "en": "Seasonal profile — environmental signals vs climate",
-      "mg": "Mombamomba ara-potoana — famantarana tontolo iainana vs toetrandro"
+      "mg": "Mombamomba vanim-potoana — tranga tontolo iainana vs toetrandro"
     },
     {
       "fr": "Signaux",
       "en": "Signals",
-      "mg": "Famantarana"
+      "mg": "Tranga"
     },
     {
       "fr": "validés sur la période",
@@ -308,7 +308,7 @@
     {
       "fr": "signaux évalués (TE + haute)",
       "en": "evaluated signals (VH + high)",
-      "mg": "famantarana voatombana (avo dia avo + avo)"
+      "mg": "tranga voatombana (avo dia avo + avo)"
     },
     {
       "fr": "concernés",
@@ -353,12 +353,12 @@
     {
       "fr": "Délai médian détection → vérif.",
       "en": "Median detection → verif. delay",
-      "mg": "Salan'isa fe-potoana fitsikilovana → fanamarinana"
+      "mg": "Salan'isa fe-potoana Fitsirihana → fanamarinana"
     },
     {
       "fr": "Naviguer vers une alerte ou une grappe One Health :",
       "en": "Navigate to an alert or One Health cluster:",
-      "mg": "Mandehana any amin'ny fampandrenesana na vondrona One Health :"
+      "mg": "Mandehana any amin'ny fanairana na vondrona Fahasalamana iray :"
     },
     {
       "fr": "— Vue d'ensemble —",
@@ -373,52 +373,52 @@
     {
       "fr": "Signalements",
       "en": "Reports",
-      "mg": "Filazana"
+      "mg": "Fanairana"
     },
     {
       "fr": "Nombre de signaux validés par mois et par secteur (humain, animal, environnement) sur les 12 derniers mois glissants. Le curseur sous le graphique se cale automatiquement sur la période choisie en haut de page — faites-le glisser pour explorer une autre fenêtre.",
       "en": "Number of validated signals by month and sector (human, animal, environment) over the last 12 rolling months. The slider below the chart automatically matches the period selected at the top — drag it to explore another window.",
-      "mg": "Isan'ny famantarana voamarina isam-bolana sy isan-tsehatra (olombelona, biby, tontolo iainana) nandritra ny 12 volana farany. Ny kursera eo ambany dia mifanaraka amin'ny vanim-potoana voafidy eo ambony — afindrafindrao hijery fotoana hafa."
+      "mg": "Isan'ny tranga voamarina isam-bolana sy isan-tsehatra (olombelona, biby, tontolo iainana) nandritra ny 12 volana farany. Ny kursera eo ambany dia mifanaraka amin'ny vanim-potoana voafidy eo ambony — afindrafindrao hijery fotoana hafa."
     },
     {
       "fr": "Répartition des signaux évalués selon le niveau de risque attribué au triage (très élevé, haute, modéré, faible). Les signaux non encore évalués ne sont pas comptés.",
       "en": "Breakdown of evaluated signals by the risk level assigned at triage (very high, high, moderate, low). Signals not yet evaluated are not counted.",
-      "mg": "Fizaran'ny famantarana voatombana arakaraka ny haavon'ny risika (avo dia avo, avo, antonony, ambany). Tsy isaina ny famantarana mbola tsy voatombana."
+      "mg": "Fizaran'ny tranga voatombana arakaraka ny haavon'ny risika (avo dia avo, avo, antonony, ambany). Tsy isaina ny tranga mbola tsy voatombana."
     },
     {
       "fr": "Signaux ayant déclenché une alerte sur la période, avec secteur, fokontany, suspicion et niveau de risque. La colonne Croisement One Health indique les secteurs croisés autour de l'alerte (même fokontany, fenêtre de 14 jours) et, le cas échéant, l'avance de détection gagnée grâce au signal animal ou environnemental sur le premier cas humain — c'est tout l'intérêt de croiser les trois secteurs. Cliquez le + à gauche pour déplier les signaux de la grappe, ou une ligne pour la chaîne de décision complète.",
       "en": "Signals that triggered an alert over the period, with sector, fokontany, suspicion and risk level. The One Health cross-over column shows the sectors crossed around the alert (same fokontany, 14-day window) and, where applicable, the detection lead time gained from an animal or environmental signal over the first human case — this is the whole point of crossing the three sectors. Click the + on the left to expand the cluster's signals, or a row for the full decision chain.",
-      "mg": "Famantarana niteraka fampandrenesana, miaraka amin'ny sehatra, fokontany, ahiahy ary haavon'ny risika. Ny tsanganana Fampifandraisana One Health dia mampiseho ny sehatra nifanindry manodidina ny fampandrenesana (fokontany iray, 14 andro) sy, raha ilaina, ny fotoana azo noho ny famantarana biby na tontolo iainana mialoha ny tranga voalohany amin'ny olombelona. Tsindrio ny + eo ankavia hanokafana ny famantarana, na andalana ho an'ny rojo fanapahan-kevitra."
+      "mg": "Tranga niteraka fanairana, miaraka amin'ny sehatra, fokontany, ahiahy ary haavon'ny risika. Ny tsanganana Fampifandraisana One Health dia mampiseho ny sehatra nifanindry manodidina ny fanairana (fokontany iray, 14 andro) sy, raha ilaina, ny fotoana azo noho ny tranga biby na tontolo iainana mialoha ny tranga voalohany amin'ny olombelona. Tsindrio ny + eo ankavia hanokafana ny tranga, na andalana ho an'ny rojo fanapahan-kevitra."
     },
     {
       "fr": "Évolution mensuelle du nombre de signaux, ventilée par secteur. Le curseur sous le graphique permet de zoomer sur une fenêtre temporelle ; survolez un point pour le détail.",
       "en": "Monthly evolution of the number of signals, broken down by sector. The slider below the chart lets you zoom into a time window; hover over a point for details.",
-      "mg": "Fivoaran'ny isan'ny famantarana isam-bolana, isan-tsehatra. Ny kursera dia ahafahana manakaiky vanim-potoana; akatony eo ambonin'ny teboka ny antsipiriany."
+      "mg": "Fivoaran'ny isan'ny tranga isam-bolana, isan-tsehatra. Ny kursera dia ahafahana manakaiky vanim-potoana; akatony eo ambonin'ny teboka ny antsipiriany."
     },
     {
       "fr": "Répartition des signaux évalués au triage par niveau de risque. Seuls les signaux ayant fait l'objet d'une évaluation figurent ici.",
       "en": "Breakdown of triaged signals by risk level. Only signals that have been evaluated appear here.",
-      "mg": "Fizaran'ny famantarana voasokajy arakaraka ny haavon'ny risika. Ny famantarana voatombana ihany no aseho eto."
+      "mg": "Fizaran'ny tranga voasokajy arakaraka ny haavon'ny risika. Ny tranga voatombana ihany no aseho eto."
     },
     {
       "fr": "Décompte des signaux par type d'événement ou pathogène suspecté, renseigné lors du triage. Donne un aperçu des menaces dominantes sur la période et les filtres en cours.",
       "en": "Count of signals by type of event or suspected pathogen, recorded at triage. Gives an overview of the dominant threats over the period and the current filters.",
-      "mg": "Fanisana ny famantarana isaky ny karazana tranga na otrik'aretina ahiahiana. Manome topimaso ny loza miavaka mandritra ny vanim-potoana sy ny sivana ankehitriny."
+      "mg": "Fanisana ny tranga isaky ny karazana tranga na otrik'aretina ahiahiana. Manome topimaso ny loza miavaka mandritra ny vanim-potoana sy ny sivana ankehitriny."
     },
     {
       "fr": "Nombre de signalements pour chacun des 18 signaux prioritaires de la nomenclature One Health.",
       "en": "Number of reports for each of the 18 priority signals in the One Health nomenclature.",
-      "mg": "Isan'ny filazana ho an'ny tsirairay amin'ny famantarana 18 laharam-pahamehana One Health."
+      "mg": "Isan'ny filazana ho an'ny tsirairay amin'ny tranga 18 laharam-pahamehana One Health."
     },
     {
       "fr": "Chaque point est un signal, coloré par secteur. Un anneau rouge entoure les signaux ayant déclenché une alerte. Un cercle pointillé délimite chaque grappe One Health inter-secteurs (taille proportionnelle au nombre de signaux). Le sélecteur en haut à droite affiche ou masque chaque couche ; cliquez un élément pour son détail.",
       "en": "Each point is a signal, coloured by sector. A red ring surrounds signals that triggered an alert. A dashed circle outlines each cross-sector One Health cluster (size proportional to the number of signals). The selector at the top right shows or hides each layer; click an element for its details.",
-      "mg": "Ny teboka tsirairay dia famantarana, voaloko isan-tsehatra. Misy peratra mena manodidina ny famantarana niteraka fampandrenesana. Misy faribolana eritra mamaritra ny vondrona One Health (mifanaraka amin'ny isan'ny famantarana ny haben'izy io). Ny safidy eo ambony havanana dia mampiseho na manafina ny sosona; tsindrio singa iray ho an'ny antsipiriany."
+      "mg": "Ny teboka tsirairay dia tranga, voaloko isan-tsehatra. Misy boribory mena manodidina ny tranga niteraka fanairana. Misy faribolana eritra mamaritra ny vondrona Fahasalamana iray (mifanaraka amin'ny isan'ny tranga ny haben'izy io). Ny safidy eo ambony havanana dia mampiseho na manafina ny sosona; tsindrio singa iray ho an'ny antsipiriany."
     },
     {
       "fr": "Cumul de pluie mensuel (barres) comparé à la normale climatologique (ligne). Source : plateforme climatique MDG. Une saison anormalement sèche ou humide modifie les risques (vecteurs, maladies hydriques, feux).",
       "en": "Monthly rainfall total (bars) compared with the climatological normal (line). Source: MDG climate platform. An abnormally dry or wet season changes the risks (vectors, waterborne diseases, fires).",
-      "mg": "Fitambaran'ny orana isam-bolana (baraina) ampitahaina amin'ny mahazatra (tsipika). Loharano : sehatra toetrandro MDG. Ny vanim-potoana karakaina na mando dia manova ny risika (mpitatitra, aretina rano, afo)."
+      "mg": "Fitambaran'ny orana isam-bolana (bara) ampitahaina amin'ny mahazatra (tsipika). Loharano : sehatra toetrandro MDG. Ny vanim-potoana karakaina na mando dia manova ny risika (mpitatitra, aretina rano, afo)."
     },
     {
       "fr": "Température moyenne mensuelle (ligne) comparée à la normale. Les anomalies chaudes/froides influencent la dynamique des pathogènes et des vecteurs.",
@@ -428,62 +428,62 @@
     {
       "fr": "Indice météorologique de risque de feu (Fire Weather Index) comparé à sa normale. À relier aux signaux environnementaux « feux » (E2).",
       "en": "Meteorological fire risk index (Fire Weather Index) compared with its normal. To be linked with the environmental fire signals (E2).",
-      "mg": "Tondro toetrandro momba ny risika afo (Fire Weather Index) ampitahaina amin'ny mahazatra. Ampifandraiso amin'ny famantarana tontolo iainana momba ny afo (E2)."
+      "mg": "Tondro toetrandro momba ny risika afo (Fire Weather Index) ampitahaina amin'ny mahazatra. Ampifandraiso amin'ny tranga tontolo iainana momba ny afo (E2)."
     },
     {
       "fr": "Pour chaque mois de l'année : nombre de signaux environnementaux (barres) et FWI moyen (ligne). L'alignement par mois calendaire suggère les liens saison sèche / risque de feu → signaux. Signaux synthétiques, climat réel — superposition à visée illustrative.",
       "en": "For each month of the year: number of environmental signals (bars) and average FWI (line). Aligning by calendar month suggests links between dry season / fire risk and signals. Synthetic signals, real climate — illustrative overlay.",
-      "mg": "Isam-bolana : isan'ny famantarana tontolo iainana (baraina) sy FWI antonony (tsipika). Ny fampifanarahana isam-bolana dia maneho ny rohy fahamainana / risika afo → famantarana. Famantarana noforonina, toetrandro tena izy — fampifanindriana fanoharana."
+      "mg": "Isam-bolana : isan'ny tranga tontolo iainana (bara) sy FWI antonony (tsipika). Ny fampifanarahana isam-bolana dia maneho ny rohy fahamainana / risika afo → tranga. Tranga noforonina, toetrandro tena izy — fampifanindriana fanoharana."
     },
     {
       "fr": "Carte de chaleur croisant les 18 signaux (lignes) et les mois (colonnes) : plus la cellule est foncée, plus le nombre de signaux est élevé. Repère d'un coup d'œil les montées d'activité par type de signal.",
       "en": "Heatmap crossing the 18 signals (rows) and months (columns): the darker the cell, the higher the number of signals. Spot activity surges by signal type at a glance.",
-      "mg": "Sarintany hafanana mampifanindry ny famantarana 18 (andalana) sy ny volana (tsanganana) : arakaraka ny hamaintisan'ny efitra no maha-betsaka ny famantarana. Fantaro haingana ny fiakaran'ny hetsika isaky ny karazana famantarana."
+      "mg": "Sarintany hafanana mampifanindry ny tranga 18 (andalana) sy ny volana (tsanganana) : arakaraka ny hamaintisan'ny efitra no maha-betsaka ny tranga. Fantaro haingana ny fiakaran'ny hetsika isaky ny karazana tranga."
     },
     {
       "fr": "Carte de chaleur croisant les 18 signaux (lignes) et les fokontany (colonnes) : plus la cellule est foncée, plus le nombre de signaux est élevé. Repère les zones de concentration par type de signal.",
       "en": "Heatmap crossing the 18 signals (rows) and fokontany (columns): the darker the cell, the higher the number of signals. Spot concentration zones by signal type.",
-      "mg": "Sarintany hafanana mampifanindry ny famantarana 18 (andalana) sy ny fokontany (tsanganana) : arakaraka ny hamaintisana no maha-betsaka ny famantarana. Fantaro ny faritra mivondrona isaky ny karazana famantarana."
+      "mg": "Sarintany hafanana mampifanindry ny tranga 18 (andalana) sy ny fokontany (tsanganana) : arakaraka ny hamaintisana no maha-betsaka ny tranga. Fantaro ny faritra mivondrona isaky ny karazana tranga."
     },
     {
       "fr": "Détail de tous les signaux passés en alerte, avec la chaîne de décision (triage, vérification, évaluation du risque). Cliquez une ligne pour afficher le parcours complet du signal.",
       "en": "Details of all signals escalated to alert, with the decision chain (triage, verification, risk evaluation). Click a row to display the signal's full pathway.",
-      "mg": "Antsipirian'ny famantarana rehetra lasa fampandrenesana, miaraka amin'ny rojo fanapahan-kevitra (fanasokajiana, fanamarinana, fanombanana risika). Tsindrio andalana hijery ny dian'ny famantarana."
+      "mg": "Antsipirian'ny tranga rehetra lasa fanairana, miaraka amin'ny rojo fanapahan-kevitra (fanasokajiana, fanamarinana, fanombanana risika). Tsindrio andalana hijery ny dian'ny tranga."
     },
     {
       "fr": "Entonnoir du circuit de l'information : du signal collecté jusqu'à l'alerte, en passant par le tri, la vérification et l'évaluation. Visualise le volume retenu à chaque étape.",
       "en": "Funnel of the information flow: from the collected signal to the alert, through triage, verification and evaluation. Shows the volume retained at each step.",
-      "mg": "Fantsona ny fikorianan'ny vaovao : avy amin'ny famantarana voaangona ka hatramin'ny fampandrenesana, mandalo ny fanasokajiana, fanamarinana sy fanombanana. Aseho ny habetsahana tazonina isaky ny dingana."
+      "mg": "Fantsona ny fikorianan'ny vaovao : avy amin'ny tranga voaangona ka hatramin'ny fanairana, mandalo ny fanasokajiana, fanamarinana sy fanombanana. Aseho ny habetsahana tazonina isaky ny dingana."
     },
     {
       "fr": "Distribution du nombre de jours écoulés entre la détection d'un signal et sa vérification. Indicateur de réactivité du système : plus la distribution est resserrée à gauche, plus le système est rapide.",
       "en": "Distribution of the number of days between the detection of a signal and its verification. A measure of system responsiveness: the more the distribution is shifted to the left, the faster the system.",
-      "mg": "Fizaran'ny isan'ny andro teo anelanelan'ny fahitana famantarana sy ny fanamarinana azy. Mari-pamantarana ny hafainganam-pamerina: arakaraka ny ankavia no mafaingana kokoa ny rafitra."
+      "mg": "Fizaran'ny isan'ny andro teo anelanelan'ny fahitana tranga sy ny fanamarinana azy. Mari-pamantarana ny hafainganam-pamerina: arakaraka ny ankavia no mafaingana kokoa ny rafitra."
     },
     {
       "fr": "Une ligne par signal prioritaire. Volumes, cas, décès, évaluations et alertes calculés sur la période et les filtres sélectionnés. La colonne « En grappe One Health » compte les signalements de ce signal impliqués dans une grappe inter-secteurs — sa fréquence d'usage dans les alertes One Health.",
       "en": "One row per priority signal. Volumes, cases, deaths, evaluations and alerts computed over the selected period and filters. The “In One Health cluster” column counts this signal's reports involved in a cross-sector cluster — its frequency of use in One Health alerts.",
-      "mg": "Andalana iray isaky ny famantarana laharam-pahamehana. Habetsahana, tranga, fahafatesana, fanombanana sy fampandrenesana voakajy mandritra ny vanim-potoana sy sivana voafidy. Ny tsanganana « Ao amin'ny vondrona One Health » dia manisa ny filazan'io famantarana io tafiditra amin'ny vondrona maro sehatra."
+      "mg": "Andalana iray isaky ny tranga laharam-pahamehana. Habetsahana, tranga, fahafatesana, fanombanana sy fanairana voakajy mandritra ny vanim-potoana sy sivana voafidy. Ny tsanganana « Ao amin'ny vondrona One Health » dia manisa ny filazan'io tranga io tafiditra amin'ny vondrona maro sehatra."
     },
     {
       "fr": "Autour de chaque alerte, regroupement des signaux du même fokontany sur les 14 jours précédents : on retient les grappes croisant au moins deux secteurs — le croisement intersectoriel au cœur du One Health. « Avance détection » = nombre de jours entre le 1er signal animal/environnemental et le 1er signal humain de la grappe.",
       "en": "Around each alert, signals from the same fokontany over the previous 14 days are grouped: clusters crossing at least two sectors are kept — the cross-sector linkage at the heart of One Health. “Detection lead” = number of days between the first animal/environmental signal and the first human signal of the cluster.",
-      "mg": "Manodidina ny fampandrenesana tsirairay, atambatra ny famantarana ao amin'ny fokontany iray nandritra ny 14 andro talohany : tazonina ny vondrona mampifanindry sehatra roa farafahakeliny — izay no fototry ny One Health. « Fotoana azo » = isan'ny andro teo anelanelan'ny famantarana biby/tontolo iainana voalohany sy ny famantarana olombelona voalohany."
+      "mg": "Manodidina ny fanairana tsirairay, atambatra ny tranga ao amin'ny fokontany iray nandritra ny 14 andro talohany : tazonina ny vondrona mampifanindry sehatra roa farafahakeliny — izay no fototry ny One Health. « Fotoana azo » = isan'ny andro teo anelanelan'ny tranga biby/tontolo iainana voalohany sy ny tranga olombelona voalohany."
     },
     {
       "fr": "i-Tafaray — Tableau de bord central One Health. Preuve de concept R / Shiny.",
       "en": "i-Tafaray — Central One Health dashboard. R / Shiny proof of concept.",
-      "mg": "i-Tafaray — Tabilao foibe One Health. Porofon-kevitra R / Shiny."
+      "mg": "i-Tafaray — Tabilao foibe Fahasalamana iray. Porofon-kevitra R / Shiny."
     },
     {
       "fr": "Les données sont entièrement synthétiques : un fond de signaux de routine dans lequel sont insérés 6 scénarios One Health (H5N1, peste, rage, Mpox, Ebola, contamination hydrique). Les trois tables — Signaux, Événements, Alertes — sont reliées par l'identifiant id_signal.",
       "en": "The data are entirely synthetic: a background of routine signals into which 6 One Health scenarios are inserted (H5N1, plague, rabies, Mpox, Ebola, water contamination). The three tables — Signals, Events, Alerts — are linked by the id_signal identifier.",
-      "mg": "Noforonina tanteraka ny angona : fototra famantarana mahazatra izay nampidirana tantara One Health 6 (H5N1, pesta, hadratra, Mpox, Ebola, fandotoana rano). Ny tabilao telo — Famantarana, Tranga, Fampandrenesana — dia mifandray amin'ny id_signal."
+      "mg": "Noforonina tanteraka ny angona : fototra tranga mahazatra izay nampidirana tantara Fahasalamana iray 6 (H5N1, pesta, hadratra, Mpox, Ebola, fandotoana rano). Ny tabilao telo — Tranga, Tranga, Fanairana — dia mifandray amin'ny id_signal."
     },
     {
       "fr": "Chaque scénario illustre la valeur de la surveillance événementielle : le signal animal ou faune sauvage précède le signal humain (détection précoce), les signaux se regroupent dans l'espace et le temps, et le croisement inter-secteurs révèle la menace.",
       "en": "Each scenario illustrates the value of event-based surveillance: the animal or wildlife signal precedes the human signal (early detection), signals cluster in space and time, and cross-sector linkage reveals the threat.",
-      "mg": "Ny tantara tsirairay dia maneho ny lanjan'ny fanaraha-maso mifototra amin'ny tranga : ny famantarana biby na bibidia dia mialoha ny famantarana olombelona (fitsikilovana aloha), mivondrona ara-toerana sy ara-potoana ny famantarana, ary ny fampifandraisana sehatra dia mampiharihary ny loza."
+      "mg": "Ny tantara tsirairay dia maneho ny lanjan'ny fanaraha-maso mifototra amin'ny tranga : ny tranga biby na bibidia dia mialoha ny tranga olombelona (Fitsirihana aloha), mivondrona ara-toerana sy ara-potoana ny tranga, ary ny fampifandraisana sehatra dia mampiharihary ny loza."
     },
     {
       "fr": "Outil : R / R Shiny — solution open source.",
@@ -508,17 +508,17 @@
     {
       "fr": "signaux validés sur la période, dont",
       "en": "validated signals over the period, of which",
-      "mg": "famantarana voamarina mandritra ny vanim-potoana, ka"
+      "mg": "tranga voamarina mandritra ny vanim-potoana, ka"
     },
     {
       "fr": "ayant déclenché une alerte.",
       "en": "triggered an alert.",
-      "mg": "niteraka fampandrenesana."
+      "mg": "niteraka fanairana."
     },
     {
       "fr": "Répartition des alertes :",
       "en": "Alert breakdown:",
-      "mg": "Fizaran'ny fampandrenesana :"
+      "mg": "Fizaran'ny fanairana :"
     },
     {
       "fr": "Principales suspicions :",
@@ -583,7 +583,7 @@
     {
       "fr": "Signaux validés",
       "en": "Validated signals",
-      "mg": "Famantarana voamarina"
+      "mg": "Tranga voamarina"
     },
     {
       "fr": "TENDANCE DE L'ACTIVITÉ (12 DERNIERS MOIS)",
@@ -593,7 +593,7 @@
     {
       "fr": "Figure 1. Nombre de signaux validés par mois et par secteur (humain, animal, environnement).",
       "en": "Figure 1. Number of validated signals by month and sector (human, animal, environment).",
-      "mg": "Sary 1. Isan'ny famantarana voamarina isam-bolana sy isan-tsehatra (olombelona, biby, tontolo iainana)."
+      "mg": "Sary 1. Isan'ny tranga voamarina isam-bolana sy isan-tsehatra (olombelona, biby, tontolo iainana)."
     },
     {
       "fr": "Données de démonstration (synthétiques). Document généré automatiquement.",
@@ -613,17 +613,17 @@
     {
       "fr": "Aucun signal évalué sur la période.",
       "en": "No signal evaluated over the period.",
-      "mg": "Tsy nisy famantarana voatombana nandritra ny vanim-potoana."
+      "mg": "Tsy nisy tranga voatombana nandritra ny vanim-potoana."
     },
     {
       "fr": "Figure 2. Répartition des signaux évalués par niveau de risque.",
       "en": "Figure 2. Distribution of evaluated signals by risk level.",
-      "mg": "Sary 2. Fizaran'ny famantarana voatombana araka ny haavon'ny risika."
+      "mg": "Sary 2. Fizaran'ny tranga voatombana araka ny haavon'ny risika."
     },
     {
       "fr": "ALERTES PRIORITAIRES",
       "en": "PRIORITY ALERTS",
-      "mg": "FAMPANDRENESANA LAHARAM-PAHAMEHANA"
+      "mg": "FANAIRANA LAHARAM-PAHAMEHANA"
     },
     {
       "fr": "RECOMMANDATIONS",
@@ -633,12 +633,12 @@
     {
       "fr": "Surveillance intégrée One Health - Comité de pilotage.",
       "en": "Integrated One Health surveillance - Steering Committee.",
-      "mg": "Fanaraha-maso One Health mitambatra - Komity mpitarika."
+      "mg": "Fanaraha-maso Fahasalamana iray mitambatra - Komity mpitarika."
     },
     {
       "fr": "Aucune alerte sur la période.",
       "en": "No alert over the period.",
-      "mg": "Tsy nisy fampandrenesana nandritra ny vanim-potoana."
+      "mg": "Tsy nisy fanairana nandritra ny vanim-potoana."
     },
     {
       "fr": "Date",
@@ -648,7 +648,7 @@
     {
       "fr": "Signal",
       "en": "Signal",
-      "mg": "Famantarana"
+      "mg": "Tranga"
     },
     {
       "fr": "Suspicion",
@@ -688,7 +688,7 @@
     {
       "fr": "Accélérer le triage et la vérification des signaux en attente afin de réduire les délais.",
       "en": "Speed up the triage and verification of pending signals to reduce delays.",
-      "mg": "Hanafaingana ny fanasokajiana sy ny fanamarinana ny famantarana miandry mba hampihena ny fahatarana."
+      "mg": "Hanafaingana ny fanasokajiana sy ny fanamarinana ny tranga miandry mba hampihena ny fahatarana."
     },
     {
       "fr": "Maintenir la coordination One Health entre santé humaine, animale et environnementale.",
@@ -748,7 +748,7 @@
     {
       "fr": "Aucun signal évalué pour ces filtres.",
       "en": "No signal evaluated for these filters.",
-      "mg": "Tsy nisy famantarana voatombana ho an'ireo sivana ireo."
+      "mg": "Tsy nisy tranga voatombana ho an'ireo sivana ireo."
     },
     {
       "fr": "Pluie (mm)",
@@ -768,17 +768,12 @@
     {
       "fr": "Signaux environnementaux",
       "en": "Environmental signals",
-      "mg": "Famantarana tontolo iainana"
+      "mg": "Tranga tontolo iainana"
     },
     {
       "fr": "FWI moyen",
       "en": "Average FWI",
       "mg": "FWI antonony"
-    },
-    {
-      "fr": "Exporter en PNG",
-      "en": "Export as PNG",
-      "mg": "Hanondrana PNG"
     },
     {
       "fr": "Tendance de l'activité",
@@ -791,19 +786,24 @@
       "mg": "Mamorona ny tatitra"
     },
     {
+      "fr": "Croisement One Health",
+      "en": "One Health cross-link",
+      "mg": "Fampifandraisana Fahasalamana iray"
+    },
+    {
+      "fr": "Exporter en PNG",
+      "en": "Export as PNG",
+      "mg": "Hanondrana amin'ny PNG"
+    },
+    {
       "fr": "HTML interactif",
       "en": "Interactive HTML",
-      "mg": "HTML interactive"
+      "mg": "HTML mifaneraserana"
     },
     {
       "fr": "Document généré automatiquement.",
       "en": "Automatically generated document.",
       "mg": "Antontan-taratasy noforonina ho azy."
-    },
-    {
-      "fr": "Croisement One Health",
-      "en": "One Health cross-link",
-      "mg": "Fampifandraisana One Health"
     }
   ]
 }

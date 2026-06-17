@@ -1,0 +1,75 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: Environment cible pour le déploiement
+        required: true
+        type: choice
+        options:
+          - dev
+          - pre-prod
+          - prod
+        default: dev
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  resolve:
+    name: Resolve target environment
+    runs-on: ubuntu-latest
+    outputs:
+      target_environment: ${{ steps.resolve.outputs.target_environment }}
+    steps:
+      - name: Resolve environment
+        id: resolve
+        shell: bash
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
+          TARGET_INPUT: ${{ github.event.inputs.target_environment }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            TARGET_ENV="$TARGET_INPUT"
+          elif [[ "$BRANCH_NAME" == *_prod ]]; then
+            TARGET_ENV="prod"
+          elif [[ "$BRANCH_NAME" == *_pprod ]]; then
+            TARGET_ENV="pre-prod"
+          else
+            TARGET_ENV="dev"
+          fi
+
+          echo "target_environment=$TARGET_ENV" >> "$GITHUB_OUTPUT"
+
+  dev:
+    needs: resolve
+    if: needs.resolve.outputs.target_environment == 'dev'
+    uses: ./.github/workflows/dev.yml
+    with:
+      target_environment: dev
+    secrets: inherit
+
+  pre-prod:
+    needs: resolve
+    if: needs.resolve.outputs.target_environment == 'pre-prod'
+    uses: ./.github/workflows/pre-prod.yml
+    with:
+      target_environment: pre-prod
+    secrets: inherit
+
+  prod:
+    needs: resolve
+    if: needs.resolve.outputs.target_environment == 'prod'
+    uses: ./.github/workflows/prod.yml
+    with:
+      target_environment: prod
+    secrets: inherit

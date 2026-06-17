@@ -151,7 +151,7 @@ jobs:
         id: check
         shell: bash
         env:
-          EC2_HOST: ${{ vars.EC2_HOST }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ vars.EC2_USER }}
           DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
           DOCKERHUB_IMAGE: ${{ secrets.DOCKERHUB_IMAGE }}
@@ -159,17 +159,45 @@ jobs:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
           set -euo pipefail
-          if [ -n "$EC2_HOST" ] && [ -n "$EC2_USER" ] && [ -n "$EC2_SSH_KEY" ] && [ -n "$DEPLOY_PATH" ] && [ -n "$DOCKERHUB_IMAGE" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
+          missing=()
+
+          [ -n "$EC2_HOST" ] || missing+=("EC2_HOST (secret)")
+          [ -n "$EC2_USER" ] || missing+=("EC2_USER (environment variable)")
+          [ -n "$DEPLOY_PATH" ] || missing+=("DEPLOY_PATH (environment variable)")
+          [ -n "$DOCKERHUB_IMAGE" ] || missing+=("DOCKERHUB_IMAGE (secret)")
+          [ -n "$DOCKERHUB_TOKEN" ] || missing+=("DOCKERHUB_TOKEN (secret)")
+          [ -n "$EC2_SSH_KEY" ] || missing+=("EC2_SSH_KEY (secret)")
+
+          if [ "${#missing[@]}" -eq 0 ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "missing_items=" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "missing_items<<EOF"
+              printf '%s\n' "${missing[@]}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Fail when deployment configuration is incomplete
+        if: steps.check.outputs.enabled != 'true'
+        shell: bash
+        env:
+          TARGET_ENV: ${{ needs.docker.outputs.target_environment }}
+          MISSING_ITEMS: ${{ steps.check.outputs.missing_items }}
+        run: |
+          set -euo pipefail
+          echo "Deployment configuration is incomplete for environment '$TARGET_ENV'."
+          echo "Missing configuration:"
+          printf '%s\n' "$MISSING_ITEMS"
+          exit 1
 
       - name: Configure SSH
         if: steps.check.outputs.enabled == 'true'
         shell: bash
         env:
-          EC2_HOST: ${{ vars.EC2_HOST }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
           set -euo pipefail
@@ -182,7 +210,7 @@ jobs:
         if: steps.check.outputs.enabled == 'true'
         shell: bash
         env:
-          EC2_HOST: ${{ vars.EC2_HOST }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ vars.EC2_USER }}
           DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
           DOCKERHUB_IMAGE: ${{ secrets.DOCKERHUB_IMAGE }}

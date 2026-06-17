@@ -75,4 +75,3 @@ docker-compose.yml        lancement en un service
 - **Mise en production (serveur + HTTPS)** : pour un déploiement exposé sur Internet
   avec nom de domaine et certificat, voir la configuration nginx/HTTPS du projet
   principal (`DEPLOIEMENT_AWS.md`).
-```

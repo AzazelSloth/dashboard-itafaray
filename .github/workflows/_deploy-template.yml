@@ -148,6 +148,9 @@ jobs:
     environment: ${{ needs.docker.outputs.target_environment }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Check deployment configuration
         id: check
         shell: bash

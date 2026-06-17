@@ -8,7 +8,7 @@
 services:
   app:
     build: .
-    image: itafaray:latest
+    image: ${APP_IMAGE:-itafaray:latest}
     container_name: itafaray
     restart: unless-stopped
     ports:

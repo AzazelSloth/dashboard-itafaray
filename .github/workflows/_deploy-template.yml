@@ -207,6 +207,19 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
+      - name: Upload Docker Compose file
+        if: steps.check.outputs.enabled == 'true'
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_USER: ${{ vars.EC2_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          ssh "$EC2_USER@$EC2_HOST" "mkdir -p '$DEPLOY_PATH'"
+          scp docker-compose.yml "$EC2_USER@$EC2_HOST:$DEPLOY_PATH/docker-compose.yml"
+
       - name: Deploy application image
         if: steps.check.outputs.enabled == 'true'
         shell: bash

@@ -804,6 +804,86 @@
       "fr": "Document généré automatiquement.",
       "en": "Automatically generated document.",
       "mg": "Antontan-taratasy noforonina ho azy."
+    },
+    {
+      "fr": "Environnement (SMART)",
+      "en": "Environment (SMART)",
+      "mg": "Tontolo iainana (SMART)"
+    },
+    {
+      "fr": "Surveillance environnementale & faune — patrouilles SMART",
+      "en": "Environmental & wildlife surveillance — SMART patrols",
+      "mg": "Fanaraha-maso ny tontolo iainana sy ny bibidia — SMART"
+    },
+    {
+      "fr": "Couche autonome : données de patrouilles SMART en aire protégée (Nord-Est de Madagascar), distinctes du district d'Ifanadiana et de sa période.",
+      "en": "Standalone layer: SMART patrol data in a protected area (north-east Madagascar), distinct from the Ifanadiana district and its period.",
+      "mg": ""
+    },
+    {
+      "fr": "Année",
+      "en": "Year",
+      "mg": "Taona"
+    },
+    {
+      "fr": "Observations",
+      "en": "Observations",
+      "mg": "Fandinihana"
+    },
+    {
+      "fr": "Patrouilles",
+      "en": "Patrols",
+      "mg": "Fisafoana"
+    },
+    {
+      "fr": "Part de menaces",
+      "en": "Share of threats",
+      "mg": "Tahan'ny loza"
+    },
+    {
+      "fr": "Espèces observées",
+      "en": "Species observed",
+      "mg": "Karazana hita"
+    },
+    {
+      "fr": "Contacts domestiques",
+      "en": "Domestic contacts",
+      "mg": "Fifandraisana biby fiompy"
+    },
+    {
+      "fr": "Signaux SBE couverts",
+      "en": "SBE signals covered",
+      "mg": "Famantarana SBE voarakotra"
+    },
+    {
+      "fr": "Localisation des observations SMART",
+      "en": "Location of SMART observations",
+      "mg": "Toerana misy ny fandinihana SMART"
+    },
+    {
+      "fr": "Répartition par catégorie d'observation",
+      "en": "Breakdown by observation category",
+      "mg": "Fizarana isaky ny sokajy fandinihana"
+    },
+    {
+      "fr": "Activité de patrouille par mois",
+      "en": "Patrol activity by month",
+      "mg": "Hetsika fisafoana isam-bolana"
+    },
+    {
+      "fr": "Menaces relevées",
+      "en": "Threats recorded",
+      "mg": "Loza voamarika"
+    },
+    {
+      "fr": "Lecture One Health — correspondance avec les signaux SBE",
+      "en": "One Health reading — mapping to SBE signals",
+      "mg": "Famakiana One Health — fifandraisana amin'ny famantarana SBE"
+    },
+    {
+      "fr": "Faune & contact homme–animal",
+      "en": "Wildlife & human–animal contact",
+      "mg": "Bibidia & fifandraisana olona-biby"
     }
   ]
 }

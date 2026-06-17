@@ -1,0 +1,19 @@
+signal_sbe,categorie,correspondance_smart,type_correspondance
+Constatations d'une série d'avortement chez les ruminants dans une localité en une semaine,Santé animale - Reproduction,"Cause potentielle maladie ou blessure : Maladie infectieuse, Autres maladies non infectieuses, Empoisonnement ou toxine",Correspondance indirecte
+"Toute mortalité inexpliquée d'animaux de toute espèce (rat, aquatiques, oiseaux, et ou marins) dans une localité / aires d'abattage/ aires protégés",Santé animale - Mortalité,"État des animaux morts : Carcasses fraîches, Décomposition précoce, Peau et os, Décomposition avancée",Correspondance directe
+Apparition des signes de maladie inhabituelle et similaire chez le groupe d'animaux de même localité/ aires d'abattage/ aires protégés,Santé animale - Symptômes,"Anomalies chez les animaux malades ou blessés : Comportement anormal, Mauvaise odeur, Saignement, Diarrhée ou vomissement, Respiration difficile, Fracture, Perte de poils/plumes, etc.",Correspondance directe
+Augmentation inhabituelle des vecteurs transmetteurs de la maladie puce dans un village,Santé animale - Vecteurs,"Cause potentielle maladie ou blessure : Maladie infectieuse, Empoisonnement ou toxine",Correspondance indirecte
+"Changement de couleur, de goût, d'odeur des sources d'eau (eau du robinet, eau du puit, rivière, fleuve, …)",Environnement - Eau,Anomalies chez les animaux malades ou blessés : Mauvaise odeur,Correspondance partielle
+"Constatation de plusieurs feux (feu de brousse, feu de forêt, culture sur brulis, …) à une zone et moment défini",Environnement - Feux,Aucune correspondance directe,Non couvert
+Perception d'odeur inhabituelle autour d'une usine implantée ou dans une zone définie au sein de la population,Environnement - Pollution,"Anomalies chez les animaux malades ou blessés : Mauvaise odeur, Huilé/recouvert de substance",Correspondance partielle
+Trace d'exploitation de forêt,Environnement - Dégradation,Cause potentielle maladie ou blessure : Traumatisme ou collision,Correspondance indirecte
+Déchets cumulés,Environnement - Déchets,Anomalies chez les animaux malades ou blessés : Huilé/recouvert de substance,Correspondance partielle
+Cadavre d'animaux sauvages,Environnement - Faune,État des animaux morts : Carcasses fraîches à Décomposition avancée,Correspondance directe
+Maladies des plants,Environnement - Végétal,Aucune correspondance directe,Non couvert
+Espèces envahissantes,Environnement - Biodiversité,Aucune correspondance directe,Non couvert
+Tarissement puits/rivières,Environnement - Ressources,Aucune correspondance directe,Non couvert
+Survenue de signes/symptômes similaires et inhabituels chez deux ou plusieurs personnes dans un village ou une communauté ou une carrière de mine ou une école ou un établissement dans une semaine,Santé humaine - Épidémies,"Anomalies chez les animaux malades ou blessés : Comportement anormal, Diarrhée ou vomissement, Respiration difficile, etc. (symptômes comparables)",Correspondance indirecte
+Décès groupés humains d'apparition soudaine dans la même communauté et au cours d'une semaine,Santé humaine - Mortalité,"Cause potentielle de décès : Inconnu, Maladie infectieuse, Empoisonnement ou toxine",Correspondance indirecte
+Morsures et ou griffures de plusieurs personnes par un seul chien/animal à sang chaud (chat ; Fosa ; chauves-souris …),Santé humaine - Zoonoses,"Anomalies chez les animaux malades ou blessés : Saignement, plaie, contusions",Correspondance directe
+Absentéisme des écoliers issus d'un même établissement scolaire pendant une semaine ou plus,Santé humaine - Absentéisme,"Cause potentielle maladie ou blessure : Maladie infectieuse, Autres maladies non infectieuses",Correspondance indirecte
+Déplacements anormaux de la population d'une communauté à une autre,Santé humaine - Mobilité,"Cause potentielle maladie ou blessure : Famine, Échoué",Correspondance indirecte

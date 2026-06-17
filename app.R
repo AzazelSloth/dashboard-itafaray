@@ -54,6 +54,62 @@ CLIMATE <- local({
   cl
 })
 
+## ---- Données environnementales / faune — patrouilles SMART (couche autonome) ----
+SMART_ENV <- local({
+  cands <- c("data_poc/smart_env.csv", "data/smart_env.csv", "smart_env.csv")
+  f <- cands[file.exists(cands)][1]
+  if (is.na(f)) return(NULL)
+  s <- tryCatch(utils::read.csv(f, stringsAsFactors = FALSE, encoding = "UTF-8"),
+                error = function(e) NULL)
+  if (is.null(s) || nrow(s) == 0) return(NULL)
+  s$date <- suppressWarnings(as.Date(s$date))
+  for (cc in c("lat", "lon", "n_bonne_sante", "n_malades", "n_morts"))
+    if (cc %in% names(s)) s[[cc]] <- suppressWarnings(as.numeric(s[[cc]]))
+  # --- Typologie explicite des menaces (par ordre de priorité) ---
+  nz <- function(x) !is.na(x) & nzchar(x)
+  s$menace_type <- with(s, ifelse(
+    categorie1 %in% c("Braconnage", "Partie d'animal") |
+      categorie2 %in% c("Piégeage", "Chasse active", "Collecte faune"),
+      "Chasse / braconnage",
+    ifelse(type_signe %in% c("Coupe de machette", "Bois de chauffage", "Bois travaillé"),
+      "Exploitation forestière",
+    ifelse(type_signe %in% "Ordures",
+      "Pollution / déchets",
+    ifelse(categorie2 %in% "Divagation d'animaux domestiques" | nz(animaux_rencontres),
+      "Contact domestique",
+    ifelse(categorie1 %in% "Circulation dans l'AP" | type_signe %in% "Voix",
+      "Présence humaine", NA_character_))))))
+  # Quels types comptent comme « menace » (présence humaine incluse, choix utilisateur)
+  MENACE_INCLUT_PRESENCE <- TRUE
+  types_menace <- c("Chasse / braconnage", "Exploitation forestière",
+                    "Pollution / déchets", "Contact domestique",
+                    if (MENACE_INCLUT_PRESENCE) "Présence humaine")
+  # Types pertinents pour le One Health (risque d'émergence / contact inter-espèces)
+  oh_menace <- c("Chasse / braconnage", "Exploitation forestière", "Contact domestique", "Pollution / déchets")
+  s$est_menace   <- !is.na(s$menace_type) & s$menace_type %in% types_menace
+  s$oh_pertinent <- !is.na(s$menace_type) & s$menace_type %in% oh_menace
+  s$contact_dom  <- (s$categorie2 %in% "Divagation d'animaux domestiques") | nz(s$animaux_rencontres)
+  s$annee <- ifelse(is.na(s$date), NA_character_, format(s$date, "%Y"))
+  s
+})
+CORR_ENV <- local({
+  cands <- c("data_poc/correspondance_sbe_env.csv", "data/correspondance_sbe_env.csv", "correspondance_sbe_env.csv")
+  f <- cands[file.exists(cands)][1]
+  if (is.na(f)) return(NULL)
+  tryCatch(utils::read.csv(f, stringsAsFactors = FALSE, encoding = "UTF-8"), error = function(e) NULL)
+})
+# Palette des catégories d'observation SMART
+COL_ENVCAT <- c("Observation directe" = "#5E8B6A", "Circulation dans l'AP" = "#35618E",
+                "Braconnage" = "#9E2A2B", "Partie d'animal" = "#C2703D")
+# Palette des types de menace (typologie One Health)
+COL_MENACE <- c("Chasse / braconnage" = "#9E2A2B", "Exploitation forestière" = "#C2703D",
+                "Contact domestique" = "#B07A3C", "Pollution / déchets" = "#8A6D3B",
+                "Présence humaine" = "#9AA3AB")
+ENV_SECTEURS <- if (!is.null(SMART_ENV))
+  c("Tous", sort(unique(SMART_ENV$secteur[nzchar(SMART_ENV$secteur)]))) else "Tous"
+ENV_ANNEES <- if (!is.null(SMART_ENV))
+  c("Toutes", sort(unique(SMART_ENV$annee[!is.na(SMART_ENV$annee)]), decreasing = TRUE)) else "Toutes"
+
 ## ---- Palettes (sobres / institutionnelles) ----
 INK <- "#26333F"; ACCENT <- "#1e3a5f"
 COL_SECTEUR <- c("Humain" = "#35618E", "Animal" = "#B07A3C",
@@ -382,6 +438,7 @@ ui <- dashboardPage(
       menuItem(i18n$t("Par signal"), tabName = "signal", icon = icon("layer-group")),
       menuItem(i18n$t("Cartographie"), tabName = "carte", icon = icon("map-location-dot")),
       menuItem(i18n$t("Climat & environnement"), tabName = "climat", icon = icon("cloud-sun-rain")),
+      menuItem(i18n$t("Environnement (SMART)"), tabName = "smartenv", icon = icon("tree")),
       menuItem(i18n$t("Alertes"), tabName = "alertes", icon = icon("triangle-exclamation")),
       menuItem(i18n$t("Indicateurs (18 signaux)"), tabName = "indic", icon = icon("table-cells")),
       menuItem(i18n$t("One Health (croisements)"), tabName = "onehealth", icon = icon("diagram-project")),
@@ -634,6 +691,55 @@ ui <- dashboardPage(
                       "clim_overlay", "i-Tafaray_profil_saisonnier", pos = "right"),
                     width = 6, status = "success", solidHeader = TRUE,
                     echarts4rOutput("clim_overlay", height = 300))
+              )
+      ),
+      tabItem("smartenv",
+              tags$div(class = "synth-head",
+                fluidRow(
+                  column(8,
+                    tags$div(class = "synth-title", i18n$t("Surveillance environnementale & faune — patrouilles SMART")),
+                    tags$div(class = "synth-sub", textOutput("env_sub", inline = TRUE)),
+                    tags$div(class = "synth-msg", style = "padding-left:0;",
+                      i18n$t("Couche autonome : données de patrouilles SMART en aire protégée (Nord-Est de Madagascar), distinctes du district d'Ifanadiana et de sa période."))),
+                  column(4,
+                    selectInput("env_secteur", i18n$t("Secteur"), width = "100%",
+                                choices = ENV_SECTEURS, selected = "Tous"),
+                    selectInput("env_annee", i18n$t("Année"), width = "100%",
+                                choices = ENV_ANNEES, selected = "Toutes"))
+                )
+              ),
+              uiOutput("env_kpis"),
+              fluidRow(
+                box(title = titre_info("Localisation des observations SMART",
+                      "Chaque point est une observation de patrouille, colorée par catégorie (observation directe, circulation, braconnage, partie d'animal). Les observations de menace sont entourées d'un anneau rouge."),
+                    width = 8, status = "success", solidHeader = TRUE,
+                    leafletOutput("env_map", height = 430)),
+                box(title = titre_info("Répartition par catégorie d'observation",
+                      "Volume d'observations par catégorie principale relevée lors des patrouilles.", pos = "right"),
+                    width = 4, status = "primary", solidHeader = TRUE,
+                    echarts4rOutput("env_cat", height = 430))
+              ),
+              fluidRow(
+                box(title = titre_dl("Activité de patrouille par mois",
+                      "Nombre d'observations par mois ; en rouge, la part de menaces (braconnage, pièges, coupe de bois…). Reflète la pression sur l'aire protégée dans le temps.",
+                      "env_trend", "i-Tafaray_smart_tendance"),
+                    width = 8, status = "primary", solidHeader = TRUE,
+                    echarts4rOutput("env_trend", height = 300)),
+                box(title = titre_info("Menaces relevées",
+                      "Répartition des observations par type de menace : Chasse / braconnage, Exploitation forestière, Contact domestique (faune–bétail), Pollution / déchets et Présence humaine. Tous ces types sont comptés comme menaces ; le KPI « part de menaces » et les anneaux rouges de la carte suivent cette typologie.", pos = "right"),
+                    width = 4, status = "danger", solidHeader = TRUE,
+                    echarts4rOutput("env_menaces", height = 300))
+              ),
+              fluidRow(
+                box(title = titre_info("Lecture One Health — correspondance avec les signaux SBE",
+                      "Mise en correspondance des observations SMART avec les signaux SBE One Health (santé humaine, animale, environnement), selon la table de correspondance fournie. Indique le degré de couverture (directe, partielle, indirecte, non couvert)."),
+                    width = 7, status = "success", solidHeader = TRUE,
+                    DTOutput("env_corr")),
+                box(title = titre_info("Faune & contact homme–animal",
+                      "Espèces les plus observées et indicateurs de contact faune sauvage / animaux domestiques (divagation de zébus, chiens) — situations à risque de transmission inter-espèces."),
+                    width = 5, status = "warning", solidHeader = TRUE,
+                    echarts4rOutput("env_especes", height = 220),
+                    uiOutput("env_faune"))
               )
       ),
       tabItem("signal",
@@ -1486,6 +1592,144 @@ server <- function(input, output, session) {
       e_y_axis(index = 1, name = "FWI") %>%
       e_tooltip(trigger = "axis") %>% e_legend(top = 4) %>%
       e_grid(left = 46, right = 46, top = 36, bottom = 36)
+  })
+
+  ## ============ Onglet Environnement (SMART) — couche autonome ============
+  env_filtree <- reactive({
+    if (is.null(SMART_ENV)) return(NULL)
+    s <- SMART_ENV
+    if (!is.null(input$env_secteur) && input$env_secteur != "Tous")
+      s <- s[s$secteur == input$env_secteur, , drop = FALSE]
+    if (!is.null(input$env_annee) && input$env_annee != "Toutes")
+      s <- s[!is.na(s$annee) & s$annee == input$env_annee, , drop = FALSE]
+    s
+  })
+
+  output$env_sub <- renderText({
+    s <- env_filtree()
+    if (is.null(s) || nrow(s) == 0) return("Données SMART non chargées.")
+    dr <- suppressWarnings(range(s$date, na.rm = TRUE))
+    paste0(nrow(s), " observations · ", format(dr[1], "%b %Y"), " – ", format(dr[2], "%b %Y"))
+  })
+
+  output$env_kpis <- renderUI({
+    s <- env_filtree()
+    if (is.null(s) || nrow(s) == 0)
+      return(div(class = "synth-msg", "Aucune donnée environnementale SMART disponible."))
+    npat <- length(unique(s$patrol[nzchar(s$patrol)]))
+    nesp <- length(unique(s$especes[nzchar(s$especes)]))
+    pmen <- round(100 * mean(s$est_menace, na.rm = TRUE))
+    ncont <- sum(s$contact_dom, na.rm = TRUE)
+    ncov <- if (!is.null(CORR_ENV))
+      sum(grepl("directe|partielle|indirecte", CORR_ENV$type_correspondance, ignore.case = TRUE)) else 0
+    kp <- function(v, lab, col) column(2,
+      div(style = "background:#fff;border:1px solid #E3E7EB;border-radius:8px;padding:12px 8px;text-align:center;margin-bottom:8px;",
+          div(style = paste0("font-size:23px;font-weight:700;color:", col, ";"), v),
+          div(style = "font-size:11px;color:#5A6672;margin-top:3px;", lab)))
+    fluidRow(
+      kp(nrow(s), i18n$t("Observations"), "#1e3a5f"),
+      kp(npat, i18n$t("Patrouilles"), "#35618E"),
+      kp(paste0(pmen, "%"), i18n$t("Part de menaces"), "#9E2A2B"),
+      kp(nesp, i18n$t("Espèces observées"), "#5E8B6A"),
+      kp(ncont, i18n$t("Contacts domestiques"), "#C2703D"),
+      kp(ncov, i18n$t("Signaux SBE couverts"), "#2E5A40"))
+  })
+
+  output$env_map <- renderLeaflet({
+    s <- env_filtree()
+    shiny::validate(shiny::need(!is.null(s) && nrow(s) > 0, "Aucune donnée."))
+    dm <- s[!is.na(s$lat) & !is.na(s$lon), , drop = FALSE]
+    shiny::validate(shiny::need(nrow(dm) > 0, "Aucune observation géolocalisée."))
+    cats <- names(COL_ENVCAT)
+    dm$catx <- ifelse(dm$categorie1 %in% cats, dm$categorie1, "Observation directe")
+    pal <- colorFactor(unname(COL_ENVCAT[cats]), domain = cats)
+    m <- leaflet(dm) %>% addProviderTiles(providers$CartoDB.Positron) %>%
+      addCircleMarkers(~lon, ~lat, radius = 4, stroke = FALSE, fillOpacity = 0.65,
+        color = ~pal(catx), group = "Observations",
+        popup = ~paste0("<b>", categorie1, "</b>",
+          ifelse(nzchar(categorie2), paste0(" — ", categorie2), ""),
+          "<br>Date : ", ifelse(is.na(date), "—", format(date, "%d/%m/%Y")),
+          "<br>Secteur : ", secteur,
+          ifelse(nzchar(especes), paste0("<br>Espèce : ", especes), ""),
+          ifelse(nzchar(type_signe), paste0("<br>Signe : ", type_signe), "")))
+    da <- dm[dm$est_menace, , drop = FALSE]
+    if (nrow(da) > 0)
+      m <- m %>% addCircleMarkers(data = da, lng = ~lon, lat = ~lat, radius = 8,
+        stroke = TRUE, weight = 2, color = "#9E2A2B", fillOpacity = 0, opacity = 0.9, group = "Menaces")
+    m %>% addLegend("bottomright", pal = pal, values = cats, title = "Catégorie") %>%
+      addLayersControl(overlayGroups = c("Observations", "Menaces"),
+        options = layersControlOptions(collapsed = FALSE))
+  })
+
+  output$env_cat <- renderEcharts4r({
+    s <- env_filtree(); shiny::validate(shiny::need(!is.null(s) && nrow(s) > 0, "Aucune donnée."))
+    d <- s[nzchar(s$categorie1), , drop = FALSE]
+    dd <- as.data.frame(table(categorie = d$categorie1), stringsAsFactors = FALSE)
+    dd <- dd[order(dd$Freq), ]
+    dd %>% e_charts(categorie) %>% e_bar(Freq, legend = FALSE) %>%
+      e_flip_coords() %>% e_color("#5E8B6A") %>% e_tooltip() %>% e_legend(show = FALSE) %>%
+      e_grid(left = 135, right = 16, top = 10, bottom = 24)
+  })
+
+  output$env_trend <- renderEcharts4r({
+    s <- env_filtree(); shiny::validate(shiny::need(!is.null(s) && nrow(s) > 0, "Aucune donnée."))
+    d <- s[!is.na(s$date), , drop = FALSE]
+    shiny::validate(shiny::need(nrow(d) > 0, "Aucune observation datée."))
+    d$mois <- lubridate::floor_date(d$date, "month")
+    d$grp <- ifelse(d$est_menace, "Menace", "Autre observation")
+    agg <- aggregate(rep(1, nrow(d)), by = list(mois = d$mois, grp = d$grp), FUN = sum)
+    names(agg)[3] <- "n"
+    agg %>% group_by(grp) %>% e_charts(mois) %>%
+      e_bar(n, stack = "g") %>% e_color(c("#9AA3AB", "#9E2A2B")) %>%
+      e_tooltip(trigger = "axis") %>% e_legend(top = 4) %>%
+      e_datazoom(type = "slider", bottom = 6, height = 16) %>%
+      e_y_axis(minInterval = 1) %>%
+      e_grid(left = 44, right = 16, top = 40, bottom = 56)
+  })
+
+  output$env_menaces <- renderEcharts4r({
+    s <- env_filtree(); shiny::validate(shiny::need(!is.null(s) && nrow(s) > 0, "Aucune donnée."))
+    d <- s[!is.na(s$menace_type), , drop = FALSE]
+    shiny::validate(shiny::need(nrow(d) > 0, "Aucune menace relevée sur ces filtres."))
+    dd <- as.data.frame(table(type = d$menace_type), stringsAsFactors = FALSE)
+    dd <- dd[order(dd$Freq), ]
+    dd$color <- unname(COL_MENACE[dd$type]); dd$color[is.na(dd$color)] <- "#9AA3AB"
+    dd %>% e_charts(type) %>% e_bar(Freq, legend = FALSE) %>%
+      e_flip_coords() %>% e_add_nested("itemStyle", color) %>%
+      e_tooltip() %>% e_legend(show = FALSE) %>%
+      e_grid(left = 150, right = 16, top = 10, bottom = 24)
+  })
+
+  output$env_corr <- renderDT({
+    shiny::validate(shiny::need(!is.null(CORR_ENV) && nrow(CORR_ENV) > 0, "Table de correspondance indisponible."))
+    tab <- CORR_ENV[, c("categorie", "signal_sbe", "type_correspondance")]
+    names(tab) <- c("Thème", "Signal SBE", "Couverture SMART")
+    datatable(tab, rownames = FALSE, class = "stripe hover compact",
+              options = list(pageLength = 8, dom = "tip", scrollX = TRUE))
+  })
+
+  output$env_especes <- renderEcharts4r({
+    s <- env_filtree(); shiny::validate(shiny::need(!is.null(s) && nrow(s) > 0, "Aucune donnée."))
+    d <- s[nzchar(s$especes), , drop = FALSE]
+    shiny::validate(shiny::need(nrow(d) > 0, "Aucune espèce renseignée."))
+    dd <- as.data.frame(table(espece = d$especes), stringsAsFactors = FALSE)
+    dd <- utils::tail(dd[order(dd$Freq), ], 7)
+    dd %>% e_charts(espece) %>% e_bar(Freq, legend = FALSE) %>%
+      e_flip_coords() %>% e_color("#35618E") %>% e_tooltip() %>% e_legend(show = FALSE) %>%
+      e_grid(left = 165, right = 12, top = 6, bottom = 18)
+  })
+
+  output$env_faune <- renderUI({
+    s <- env_filtree(); if (is.null(s) || nrow(s) == 0) return(NULL)
+    nb_sante <- sum(s$n_bonne_sante, na.rm = TRUE)
+    nb_mal <- sum(s$n_malades, na.rm = TRUE); nb_mort <- sum(s$n_morts, na.rm = TRUE)
+    ncont <- sum(s$contact_dom, na.rm = TRUE)
+    nzebu <- sum(s$animaux_rencontres == "Zébu", na.rm = TRUE)
+    HTML(paste0("<div style='font-size:12.5px;line-height:1.75;color:#26333F;margin-top:6px;'>",
+      "<b>Contact faune / domestique :</b> ", ncont, " observation(s)",
+      " (dont ", nzebu, " zébu(s) en aire protégée).<br>",
+      "<b>Santé faune :</b> ", nb_sante, " en bonne santé · ", nb_mal, " malades · ", nb_mort, " morts.",
+      "<br><span style='color:#7A8593;'>Données sanitaires faune rares ici : la valeur One Health porte surtout sur les menaces et les contacts inter-espèces.</span></div>"))
   })
 
   ## Par signal — vue d'ensemble (cartes de chaleur)

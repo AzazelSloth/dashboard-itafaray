@@ -254,9 +254,9 @@ jobs:
             "
               set -euo pipefail
               if docker info >/dev/null 2>&1; then
-                DOCKER_COMPOSE_CMD='docker compose'
+                USE_SUDO='false'
               elif sudo -n docker info >/dev/null 2>&1; then
-                DOCKER_COMPOSE_CMD='sudo docker compose'
+                USE_SUDO='true'
               else
                 echo 'Docker is not accessible for the deployment user.'
                 echo 'Add the user to the docker group or allow passwordless sudo for docker.'
@@ -264,6 +264,11 @@ jobs:
               fi
 
               cd '$DEPLOY_PATH'
-              APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' \$DOCKER_COMPOSE_CMD pull app
-              APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' \$DOCKER_COMPOSE_CMD up -d --no-build app
+              if [ \"\$USE_SUDO\" = 'true' ]; then
+                APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' sudo docker compose pull app
+                APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' sudo docker compose up -d --no-build app
+              else
+                APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' docker compose pull app
+                APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' docker compose up -d --no-build app
+              fi
             "

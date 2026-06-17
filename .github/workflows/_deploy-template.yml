@@ -220,8 +220,24 @@ jobs:
           DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
         run: |
           set -euo pipefail
-          ssh "$EC2_USER@$EC2_HOST" "mkdir -p '$DEPLOY_PATH'"
-          scp docker-compose.yml "$EC2_USER@$EC2_HOST:$DEPLOY_PATH/docker-compose.yml"
+          REMOTE_TMP="/tmp/dashboard-itafaray-docker-compose.yml"
+
+          scp docker-compose.yml "$EC2_USER@$EC2_HOST:$REMOTE_TMP"
+          ssh "$EC2_USER@$EC2_HOST" "
+            set -euo pipefail
+            if [ -w '$DEPLOY_PATH' ] || { [ ! -e '$DEPLOY_PATH' ] && [ -w \"\$(dirname '$DEPLOY_PATH')\" ]; }; then
+              mkdir -p '$DEPLOY_PATH'
+              install -m 644 '$REMOTE_TMP' '$DEPLOY_PATH/docker-compose.yml'
+            elif sudo -n true 2>/dev/null; then
+              sudo mkdir -p '$DEPLOY_PATH'
+              sudo install -m 644 '$REMOTE_TMP' '$DEPLOY_PATH/docker-compose.yml'
+            else
+              echo 'Unable to write docker-compose.yml to the deployment path.'
+              echo 'Grant write access to the deployment user or allow passwordless sudo for this path.'
+              exit 1
+            fi
+            rm -f '$REMOTE_TMP'
+          "
 
       - name: Deploy application image
         if: steps.check.outputs.enabled == 'true'

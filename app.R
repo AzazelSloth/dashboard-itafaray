@@ -408,7 +408,9 @@ credentials <- data.frame(
 )
 db_path <- "credentials.sqlite"
 passphrase <- "itafaray-poc-2026"   # à externaliser (variable d'environnement) en production
-if (!file.exists(db_path)) {
+# Authentification (shinymanager) : FALSE = accès libre (désactivée). TRUE = réactiver.
+AUTH_ENABLED <- FALSE
+if (AUTH_ENABLED && !file.exists(db_path)) {
   create_db(credentials_data = credentials, sqlite_path = db_path, passphrase = passphrase)
 }
 
@@ -858,7 +860,8 @@ show_guide_modal <- function() {
 ##  SERVER
 ## =====================================================================
 server <- function(input, output, session) {
-  res_auth <- secure_server(check_credentials(db_path, passphrase = passphrase))
+  res_auth <- if (AUTH_ENABLED)
+    secure_server(check_credentials(db_path, passphrase = passphrase)) else NULL
 
   ## ---- Changement de langue (FR / EN / MG) — swap DOM côté client ----
   current_lang <- reactiveVal("fr")
@@ -2069,8 +2072,9 @@ server <- function(input, output, session) {
   })
 }
 
-shinyApp(ui = secure_app(ui, enable_admin = TRUE, language = "fr",
-                         tags_top = tags$div(style = "text-align:center; color:#26333F;",
-                                             tags$h4("i-Tafaray — Tableau de bord One Health"),
-                                             tags$p(style = "color:#5A6672;", "Accès réservé"))),
-         server = server)
+app_ui <- if (AUTH_ENABLED)
+  secure_app(ui, enable_admin = TRUE, language = "fr",
+             tags_top = tags$div(style = "text-align:center; color:#26333F;",
+                                 tags$h4("i-Tafaray — Tableau de bord One Health"),
+                                 tags$p(style = "color:#5A6672;", "Accès réservé"))) else ui
+shinyApp(ui = app_ui, server = server)

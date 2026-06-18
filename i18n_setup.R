@@ -11,7 +11,7 @@ suppressPackageStartupMessages({ library(jsonlite) })
 
 I18N_FILE    <- "translations/translation.json"
 I18N_LANGS   <- c("fr", "en", "mg")
-I18N_DEFAULT <- "fr"
+I18N_DEFAULT <- "mg"
 I18N_LABELS  <- c(fr = "FR", en = "EN", mg = "MG")
 
 i18n_dict <- jsonlite::fromJSON(I18N_FILE, simplifyVector = FALSE)
@@ -62,11 +62,11 @@ detect_browser_lang <- function(session) {
 lang_switcher_ui <- function() {
   shiny::tags$li(class = "dropdown lang-switcher-wrap",
     shiny::tags$div(class = "lang-switcher",
-      shiny::tags$button(id = "lang_btn_fr", type = "button", class = "lang-pill active",
+      shiny::tags$button(id = "lang_btn_fr", type = "button", class = "lang-pill",
         onclick = "Shiny.setInputValue('lang','fr',{priority:'event'})", "FR"),
       shiny::tags$button(id = "lang_btn_en", type = "button", class = "lang-pill",
         onclick = "Shiny.setInputValue('lang','en',{priority:'event'})", "EN"),
-      shiny::tags$button(id = "lang_btn_mg", type = "button", class = "lang-pill",
+      shiny::tags$button(id = "lang_btn_mg", type = "button", class = "lang-pill active",
         onclick = "Shiny.setInputValue('lang','mg',{priority:'event'})", "MG")))
 }
 
@@ -92,7 +92,7 @@ lang_switcher_js <- function() {
     (function() {
       var i18nData = %s;
       window._i18nFwd = i18nData.forward; window._i18nBwd = i18nData.reverse;
-      window._currentLang = 'fr';
+      window._currentLang = 'mg';
       function setActivePill(code) {
         ['fr','en','mg'].forEach(function(c) {
           var el = document.getElementById('lang_btn_' + c); if (!el) return;

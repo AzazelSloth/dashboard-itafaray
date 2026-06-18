@@ -417,7 +417,17 @@ if (AUTH_ENABLED && !file.exists(db_path)) {
 ui <- dashboardPage(
   skin = "blue",
   dashboardHeader(
-    title = "iTafaray · One Health Madagascar", titleWidth = 260,
+    title = tags$span(
+      class = "itafaray-header-title",
+      tags$span(
+        class = "itafaray-brand",
+        tags$span(class = "mg-white", "i"),
+        tags$span(class = "mg-red", "Tafa"),
+        tags$span(class = "mg-green", "ray")
+      ),
+      tags$span(class = "itafaray-separator", HTML("&nbsp;&middot;&nbsp;")),
+      tags$span(class = "itafaray-subtitle", "One Health Madagascar")
+    ), titleWidth = 260,
     lang_switcher_ui()
   ),
   dashboardSidebar(
@@ -472,6 +482,12 @@ ui <- dashboardPage(
       .skin-blue .main-header .navbar { background:#1e3a5f !important; }
       .skin-blue .main-header .logo { color:#FFFFFF; font-weight:700; letter-spacing:.3px; border-bottom:0; }
       .skin-blue .main-header .logo:hover { background:#1e3a5f !important; }
+      .itafaray-header-title { display:inline-flex; align-items:center; gap:0; white-space:nowrap; }
+      .itafaray-brand { font-weight:800; letter-spacing:.2px; }
+      .itafaray-brand .mg-white { color:#FFFFFF; text-shadow:0 0 0.5px rgba(15,23,42,.35); }
+      .itafaray-brand .mg-red { color:#FC3D32; }
+      .itafaray-brand .mg-green { color:#007E3A; }
+      .itafaray-separator, .itafaray-subtitle { color:rgba(255,255,255,.92); font-weight:600; }
       .skin-blue .main-header .navbar .sidebar-toggle { color:#cbd5e1; }
       .skin-blue .main-header .navbar .sidebar-toggle:hover { background:rgba(255,255,255,.08); color:#fff; }
       .skin-blue .main-sidebar { background:#1e3a5f !important; }
@@ -864,14 +880,11 @@ server <- function(input, output, session) {
     secure_server(check_credentials(db_path, passphrase = passphrase)) else NULL
 
   ## ---- Changement de langue (FR / EN / MG) — swap DOM côté client ----
-  current_lang <- reactiveVal("fr")
-  # Détection de la langue du navigateur au démarrage
+  current_lang <- reactiveVal(I18N_DEFAULT)
+  # Applique la langue par défaut dès l'ouverture et synchronise la pilule active.
   observe({
-    bl <- detect_browser_lang(session)
-    if (bl != I18N_DEFAULT) {
-      current_lang(bl)
-      session$sendCustomMessage("i18n_set_lang", bl)
-    }
+    current_lang(I18N_DEFAULT)
+    session$sendCustomMessage("i18n_set_lang", I18N_DEFAULT)
   }, priority = 1000)
   observeEvent(input$lang, {
     if (!input$lang %in% I18N_LANGS) return()
@@ -2073,7 +2086,7 @@ server <- function(input, output, session) {
 }
 
 app_ui <- if (AUTH_ENABLED)
-  secure_app(ui, enable_admin = TRUE, language = "fr",
+  secure_app(ui, enable_admin = TRUE, language = I18N_DEFAULT,
              tags_top = tags$div(style = "text-align:center; color:#26333F;",
                                  tags$h4("iTafaray — Tableau de bord One Health"),
                                  tags$p(style = "color:#5A6672;", "Accès réservé"))) else ui

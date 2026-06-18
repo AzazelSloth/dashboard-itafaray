@@ -8,13 +8,12 @@ on:
   workflow_dispatch:
     inputs:
       target_environment:
-        description: Environment cible pour le déploiement
+        description: Target environment for deployment
         required: true
         type: choice
         options:
           - dev
           - pre-prod
-          - prod
         default: dev
 
 permissions:
@@ -27,6 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       target_environment: ${{ steps.resolve.outputs.target_environment }}
+      publish_image: ${{ steps.resolve.outputs.publish_image }}
+      deploy_application: ${{ steps.resolve.outputs.deploy_application }}
     steps:
       - name: Resolve environment
         id: resolve
@@ -40,15 +41,30 @@ jobs:
 
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             TARGET_ENV="$TARGET_INPUT"
-          elif [[ "$BRANCH_NAME" == *_prod ]]; then
-            TARGET_ENV="prod"
+            if [ "$TARGET_ENV" = "dev" ]; then
+              PUBLISH_IMAGE="false"
+              DEPLOY_APPLICATION="false"
+            else
+              PUBLISH_IMAGE="true"
+              DEPLOY_APPLICATION="true"
+            fi
+          elif [ "$BRANCH_NAME" = "main" ]; then
+            TARGET_ENV="pre-prod"
+            PUBLISH_IMAGE="true"
+            DEPLOY_APPLICATION="true"
           elif [[ "$BRANCH_NAME" == *_pprod ]]; then
             TARGET_ENV="pre-prod"
+            PUBLISH_IMAGE="true"
+            DEPLOY_APPLICATION="true"
           else
             TARGET_ENV="dev"
+            PUBLISH_IMAGE="false"
+            DEPLOY_APPLICATION="false"
           fi
 
           echo "target_environment=$TARGET_ENV" >> "$GITHUB_OUTPUT"
+          echo "publish_image=$PUBLISH_IMAGE" >> "$GITHUB_OUTPUT"
+          echo "deploy_application=$DEPLOY_APPLICATION" >> "$GITHUB_OUTPUT"
 
   dev:
     needs: resolve
@@ -56,6 +72,8 @@ jobs:
     uses: ./.github/workflows/dev.yml
     with:
       target_environment: dev
+      publish_image: ${{ needs.resolve.outputs.publish_image == 'true' }}
+      deploy_application: ${{ needs.resolve.outputs.deploy_application == 'true' }}
     secrets: inherit
 
   pre-prod:
@@ -64,6 +82,8 @@ jobs:
     uses: ./.github/workflows/pre-prod.yml
     with:
       target_environment: pre-prod
+      publish_image: ${{ needs.resolve.outputs.publish_image == 'true' }}
+      deploy_application: ${{ needs.resolve.outputs.deploy_application == 'true' }}
     secrets: inherit
 
   prod:
@@ -72,4 +92,6 @@ jobs:
     uses: ./.github/workflows/prod.yml
     with:
       target_environment: prod
+      publish_image: ${{ needs.resolve.outputs.publish_image == 'true' }}
+      deploy_application: ${{ needs.resolve.outputs.deploy_application == 'true' }}
     secrets: inherit

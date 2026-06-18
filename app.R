@@ -1,5 +1,5 @@
 # =====================================================================
-#  i-Tafaray — Tableau de bord central One Health
+#  iTafaray — Tableau de bord central One Health
 #  PREUVE DE CONCEPT — données de DÉMONSTRATION (synthétiques)
 #  Branché sur le jeu de données à 6 scénarios (H5N1, Peste, Rage,
 #  Mpox, Ebola, contamination hydrique) — voir Scenarios_One_Health.md
@@ -417,7 +417,7 @@ if (AUTH_ENABLED && !file.exists(db_path)) {
 ui <- dashboardPage(
   skin = "blue",
   dashboardHeader(
-    title = "i-Tafaray · One Health", titleWidth = 260,
+    title = "iTafaray · One Health Madagascar", titleWidth = 260,
     lang_switcher_ui()
   ),
   dashboardSidebar(
@@ -796,7 +796,7 @@ ui <- dashboardPage(
       tabItem("apropos",
               box(width = 12, status = "info", solidHeader = TRUE, title = "À propos de cette démonstration",
                   tags$div(style = "font-size:14px; line-height:1.6; color:#26333F;",
-                    tags$p("i-Tafaray — Tableau de bord central One Health. Preuve de concept R / Shiny."),
+                    tags$p("iTafaray — Tableau de bord central One Health. Preuve de concept R / Shiny."),
                     tags$p("Les données sont entièrement synthétiques : un fond de signaux de routine dans lequel sont insérés 6 scénarios One Health (H5N1, peste, rage, Mpox, Ebola, contamination hydrique). Les trois tables — Signaux, Événements, Alertes — sont reliées par l'identifiant id_signal."),
                     tags$p("Chaque scénario illustre la valeur de la surveillance événementielle : le signal animal ou faune sauvage précède le signal humain (détection précoce), les signaux se regroupent dans l'espace et le temps, et le croisement inter-secteurs révèle la menace."),
                     tags$p(tags$i("Outil : R / R Shiny — solution open source."))))
@@ -820,7 +820,7 @@ ui <- dashboardPage(
 show_guide_modal <- function() {
   showModal(modalDialog(
     title = tags$div(style = "color:#1e3a5f; font-weight:700;",
-                     icon("compass"), " ", i18n$t("Guide de la plateforme i-Tafaray")),
+                     icon("compass"), " ", i18n$t("Guide de la plateforme iTafaray")),
     easyClose = TRUE, size = "l", footer = modalButton(i18n$t("Fermer")),
     tags$div(style = "font-size:14px; line-height:1.55;",
       tags$p(i18n$t("Plateforme de surveillance One Health (Une seule santé). Elle réunit les signaux humains, animaux et environnementaux pour révéler, par leur croisement, des menaces qu'aucun secteur ne verrait seul.")),
@@ -1285,7 +1285,7 @@ server <- function(input, output, session) {
       ## ===================== PAGE 1 =====================
       BAND(0.905, 1)
       TXT(0.06, 0.963, paste0(T("BULLETIN DE SURVEILLANCE"), "  -  One Health"), 15, "#FFFFFF", "bold", 0, 0.5)
-      TXT(0.06, 0.927, paste0("i-Tafaray - ", T("Plateforme nationale Une seule santé - République de Madagascar")),
+      TXT(0.06, 0.927, paste0("iTafaray - ", T("Plateforme nationale Une seule santé - République de Madagascar")),
           8.5, "#CFE0EE", "plain", 0, 0.5)
       TXT(0.94, 0.963, T("RAPPORT DE SYNTHÈSE"), 10.5, "#9FD3EE", "bold", 1, 0.5)
       TXT(0.94, 0.927, paste0(T("Période :"), " ", periode_lbl, "   |   ", T("arrêté au"), " ",
@@ -1308,14 +1308,14 @@ server <- function(input, output, session) {
       TXT(0.06, 0.095, T("Figure 1. Nombre de signaux validés par mois et par secteur (humain, animal, environnement)."),
           8, "#5A6672", "plain", 0, 1)
       RULE(0.05, 0.06, 0.94, "#D9DEE4", 0.8)
-      TXT(0.06, 0.033, paste0("i-Tafaray - ", T("Données de démonstration (synthétiques). Document généré automatiquement.")),
+      TXT(0.06, 0.033, paste0("iTafaray - ", T("Données de démonstration (synthétiques). Document généré automatiquement.")),
           7.5, "#8A93A0", "plain", 0, 0.5)
       TXT(0.94, 0.033, "Page 1 / 2", 7.5, "#8A93A0", "plain", 1, 0.5)
 
       ## ===================== PAGE 2 =====================
       grid::grid.newpage()
       BAND(0.95, 1)
-      TXT(0.06, 0.975, paste0("i-Tafaray - ", T("Bulletin de surveillance One Health (suite)")), 10.5, "#FFFFFF", "bold", 0, 0.5)
+      TXT(0.06, 0.975, paste0("iTafaray - ", T("Bulletin de surveillance One Health (suite)")), 10.5, "#FFFFFF", "bold", 0, 0.5)
       TXT(0.94, 0.975, paste0(T("Période :"), " ", periode_lbl), 8, "#CFE0EE", "plain", 1, 0.5)
 
       TXT(0.06, 0.925, paste0("4.  ", T("NIVEAU DE RISQUE")), 11.5, "#1e3a5f", "bold", 0, 1)
@@ -1334,7 +1334,7 @@ server <- function(input, output, session) {
       RULE(sec6_y - 0.018)
       TXT(0.06, sec6_y - 0.030, reco_txt, 9.5, "#26333F", "plain", 0, 1, 1.65)
       RULE(0.05, 0.06, 0.94, "#D9DEE4", 0.8)
-      TXT(0.06, 0.033, paste0("i-Tafaray - ", T("Surveillance intégrée One Health - Comité de pilotage.")),
+      TXT(0.06, 0.033, paste0("iTafaray - ", T("Surveillance intégrée One Health - Comité de pilotage.")),
           7.5, "#8A93A0", "plain", 0, 0.5)
       TXT(0.94, 0.033, "Page 2 / 2", 7.5, "#8A93A0", "plain", 1, 0.5)
     }
@@ -2075,6 +2075,6 @@ server <- function(input, output, session) {
 app_ui <- if (AUTH_ENABLED)
   secure_app(ui, enable_admin = TRUE, language = "fr",
              tags_top = tags$div(style = "text-align:center; color:#26333F;",
-                                 tags$h4("i-Tafaray — Tableau de bord One Health"),
+                                 tags$h4("iTafaray — Tableau de bord One Health"),
                                  tags$p(style = "color:#5A6672;", "Accès réservé"))) else ui
 shinyApp(ui = app_ui, server = server)

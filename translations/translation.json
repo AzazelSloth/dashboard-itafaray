@@ -126,9 +126,9 @@
       "mg": "Fitsidihana tarihina"
     },
     {
-      "fr": "Guide de la plateforme i-Tafaray",
-      "en": "i-Tafaray platform guide",
-      "mg": "Torolàlana momba ny sehatra i-Tafaray"
+      "fr": "Guide de la plateforme iTafaray",
+      "en": "iTafaray platform guide",
+      "mg": "Torolàlana momba ny sehatra iTafaray"
     },
     {
       "fr": "Plateforme de surveillance One Health (Une seule santé). Elle réunit les signaux humains, animaux et environnementaux pour révéler, par leur croisement, des menaces qu'aucun secteur ne verrait seul.",
@@ -471,9 +471,9 @@
       "mg": "Manodidina ny fanairana tsirairay, atambatra ny tranga ao amin'ny fokontany iray nandritra ny 14 andro talohany : tazonina ny vondrona mampifanindry sehatra roa farafahakeliny — izay no fototry ny One Health. « Fotoana azo » = isan'ny andro teo anelanelan'ny tranga biby/tontolo iainana voalohany sy ny tranga olombelona voalohany."
     },
     {
-      "fr": "i-Tafaray — Tableau de bord central One Health. Preuve de concept R / Shiny.",
-      "en": "i-Tafaray — Central One Health dashboard. R / Shiny proof of concept.",
-      "mg": "i-Tafaray — Tabilao foibe Fahasalamana iray. Porofon-kevitra R / Shiny."
+      "fr": "iTafaray — Tableau de bord central One Health. Preuve de concept R / Shiny.",
+      "en": "iTafaray — Central One Health dashboard. R / Shiny proof of concept.",
+      "mg": "iTafaray — Tabilao foibe Fahasalamana iray. Porofon-kevitra R / Shiny."
     },
     {
       "fr": "Les données sont entièrement synthétiques : un fond de signaux de routine dans lequel sont insérés 6 scénarios One Health (H5N1, peste, rage, Mpox, Ebola, contamination hydrique). Les trois tables — Signaux, Événements, Alertes — sont reliées par l'identifiant id_signal.",

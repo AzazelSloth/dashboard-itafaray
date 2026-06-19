@@ -20,7 +20,7 @@ docker compose up -d --build
 La première fois, la construction prend ~5–10 min (téléchargement de R et compilation
 des paquets). Ensuite, ouvrez votre navigateur sur :
 
-```
+```link
 http://localhost:3838
 ```
 
@@ -50,7 +50,7 @@ docker run --rm -p 3838:3838 itafaray
 
 ## Contenu du dossier
 
-```
+```text
 app.R                     application Shiny
 prepare_data.R            chargement / préparation des données
 i18n_setup.R              moteur multilingue (FR / EN / MG)

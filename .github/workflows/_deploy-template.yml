@@ -52,6 +52,7 @@ jobs:
     name: Build and test Docker image
     runs-on: ubuntu-latest
     needs: validate
+    environment: ${{ inputs.target_environment }}
     outputs:
       target_environment: ${{ steps.meta.outputs.target_environment }}
       image_tag: ${{ steps.meta.outputs.image_tag }}
@@ -272,11 +273,31 @@ jobs:
               fi
 
               cd '$DEPLOY_PATH'
+              APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}'
               if [ \"\$USE_SUDO\" = 'true' ]; then
-                APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' sudo docker compose pull app
-                APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' sudo docker compose up -d --no-build app
+                DOCKER_CMD='sudo docker'
               else
-                APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' docker compose pull app
-                APP_IMAGE='${DOCKERHUB_IMAGE}:${IMAGE_TAG}' docker compose up -d --no-build app
+                DOCKER_CMD='docker'
               fi
+
+              APP_IMAGE=\"\$APP_IMAGE\" \$DOCKER_CMD compose pull app
+              APP_IMAGE=\"\$APP_IMAGE\" \$DOCKER_CMD compose up -d --force-recreate --no-build app
+
+              CONTAINER_ID=\$(\$DOCKER_CMD compose ps -q app)
+              if [ -z \"\$CONTAINER_ID\" ]; then
+                echo 'Deployment completed but no app container is running.'
+                exit 1
+              fi
+
+              RUNNING_IMAGE_ID=\$(\$DOCKER_CMD inspect --format '{{.Image}}' \"\$CONTAINER_ID\")
+              EXPECTED_IMAGE_ID=\$(\$DOCKER_CMD image inspect --format '{{.Id}}' \"\$APP_IMAGE\")
+
+              if [ \"\$RUNNING_IMAGE_ID\" != \"\$EXPECTED_IMAGE_ID\" ]; then
+                echo 'The running container is not using the freshly pulled image.'
+                echo \"Running image id: \$RUNNING_IMAGE_ID\"
+                echo \"Expected image id: \$EXPECTED_IMAGE_ID\"
+                exit 1
+              fi
+
+              \$DOCKER_CMD compose ps app
             "

@@ -1,16 +1,3 @@
-# =====================================================================
-#  i-Tafaray — Déploiement production (EC2 + Docker)
-#  3 services :
-#    app     : l'application Shiny (non exposée directement sur Internet)
-#    nginx   : reverse proxy + terminaison HTTPS (ports 80 / 443)
-#    certbot : obtention et renouvellement automatique des certificats TLS
-#
-#  Démarrage :
-#    1) cp .env.example .env   puis renseigner DOMAIN et EMAIL
-#    2) ./init-letsencrypt.sh  (une seule fois — crée le certificat)
-#    3) docker compose up -d
-# =====================================================================
-
 services:
   app:
     image: ${APP_IMAGE:-itafaray-poc:pre-prod}
@@ -19,4 +6,3 @@ services:
     restart: unless-stopped
     ports:
       - "3838:3838"
-

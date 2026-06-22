@@ -6,6 +6,14 @@ on:
       target_environment:
         required: true
         type: string
+      publish_image:
+        required: false
+        type: boolean
+        default: true
+      deploy_application:
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -16,4 +24,6 @@ jobs:
     uses: ./.github/workflows/_deploy-template.yml
     with:
       target_environment: ${{ inputs.target_environment }}
+      publish_image: ${{ inputs.publish_image }}
+      deploy_application: ${{ inputs.deploy_application }}
     secrets: inherit

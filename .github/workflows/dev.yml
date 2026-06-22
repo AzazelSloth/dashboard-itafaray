@@ -6,14 +6,18 @@ on:
       target_environment:
         required: true
         type: string
+      deploy_mode:
+        required: false
+        type: string
+        default: git-sync
       publish_image:
         required: false
         type: boolean
-        default: false
+        default: true
       deploy_application:
         required: false
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: read
@@ -24,6 +28,7 @@ jobs:
     uses: ./.github/workflows/_deploy-template.yml
     with:
       target_environment: ${{ inputs.target_environment }}
+      deploy_mode: ${{ inputs.deploy_mode }}
       publish_image: ${{ inputs.publish_image }}
       deploy_application: ${{ inputs.deploy_application }}
     secrets: inherit

@@ -6,6 +6,10 @@ on:
       target_environment:
         required: true
         type: string
+      deploy_mode:
+        required: false
+        type: string
+        default: docker-compose
       publish_image:
         required: false
         type: boolean
@@ -176,6 +180,7 @@ jobs:
         id: check
         shell: bash
         env:
+          DEPLOY_MODE: ${{ inputs.deploy_mode }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ vars.EC2_USER }}
           DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
@@ -189,9 +194,12 @@ jobs:
           [ -n "$EC2_HOST" ] || missing+=("EC2_HOST (secret)")
           [ -n "$EC2_USER" ] || missing+=("EC2_USER (environment variable)")
           [ -n "$DEPLOY_PATH" ] || missing+=("DEPLOY_PATH (environment variable)")
-          [ -n "$DOCKERHUB_IMAGE" ] || missing+=("DOCKERHUB_IMAGE (secret)")
-          [ -n "$DOCKERHUB_TOKEN" ] || missing+=("DOCKERHUB_TOKEN (secret)")
           [ -n "$EC2_SSH_KEY" ] || missing+=("EC2_SSH_KEY (secret)")
+
+          if [ "$DEPLOY_MODE" = "docker-compose" ]; then
+            [ -n "$DOCKERHUB_IMAGE" ] || missing+=("DOCKERHUB_IMAGE (secret)")
+            [ -n "$DOCKERHUB_TOKEN" ] || missing+=("DOCKERHUB_TOKEN (secret)")
+          fi
 
           if [ "${#missing[@]}" -eq 0 ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
@@ -232,7 +240,7 @@ jobs:
           ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
       - name: Upload Docker Compose file
-        if: steps.check.outputs.enabled == 'true'
+        if: steps.check.outputs.enabled == 'true' && inputs.deploy_mode == 'docker-compose'
         shell: bash
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -261,7 +269,7 @@ jobs:
           "
 
       - name: Deploy application image
-        if: steps.check.outputs.enabled == 'true'
+        if: steps.check.outputs.enabled == 'true' && inputs.deploy_mode == 'docker-compose'
         shell: bash
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -313,3 +321,65 @@ jobs:
 
               \$DOCKER_CMD compose ps app
             "
+
+      - name: Sync repository to deployment path
+        if: steps.check.outputs.enabled == 'true' && inputs.deploy_mode == 'git-sync'
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ vars.EC2_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+          GIT_CLONE_TOKEN: ${{ secrets.GIT_CLONE_TOKEN }}
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}.git
+          GIT_REF: ${{ github.ref_name }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ -n "${GIT_CLONE_TOKEN:-}" ] && [[ "$REPOSITORY_URL" == https://github.com/* ]]; then
+            AUTH_REPOSITORY_URL="https://x-access-token:${GIT_CLONE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          else
+            AUTH_REPOSITORY_URL="$REPOSITORY_URL"
+          fi
+
+          ssh "$EC2_USER@$EC2_HOST" \
+            "DEPLOY_PATH='$DEPLOY_PATH' REPOSITORY_URL='$AUTH_REPOSITORY_URL' GIT_REF='$GIT_REF' GIT_SHA='$GIT_SHA' bash -s" <<'EOF'
+          set -euo pipefail
+
+          ensure_path() {
+            if [ -w "$DEPLOY_PATH" ] || { [ ! -e "$DEPLOY_PATH" ] && [ -w "$(dirname "$DEPLOY_PATH")" ]; }; then
+              mkdir -p "$DEPLOY_PATH"
+            elif sudo -n true 2>/dev/null; then
+              sudo mkdir -p "$DEPLOY_PATH"
+              sudo chown -R "$USER":"$USER" "$DEPLOY_PATH"
+            else
+              echo "Unable to prepare the deployment path for Git synchronization."
+              echo "Grant write access to the deployment user or allow passwordless sudo for this path."
+              exit 1
+            fi
+          }
+
+          ensure_path
+
+          if ! command -v git >/dev/null 2>&1; then
+            echo "Git is required on the deployment host."
+            exit 1
+          fi
+
+          if [ -d "$DEPLOY_PATH/.git" ]; then
+            git -C "$DEPLOY_PATH" remote set-url origin "$REPOSITORY_URL"
+            git -C "$DEPLOY_PATH" fetch --prune origin
+          elif [ -n "$(find "$DEPLOY_PATH" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
+            echo "Deployment path exists and is not an initialized Git repository: $DEPLOY_PATH"
+            exit 1
+          else
+            rmdir "$DEPLOY_PATH"
+            git clone --branch "$GIT_REF" --single-branch "$REPOSITORY_URL" "$DEPLOY_PATH"
+          fi
+
+          git -C "$DEPLOY_PATH" fetch --prune origin
+          git -C "$DEPLOY_PATH" checkout -B "$GIT_REF" "origin/$GIT_REF"
+          git -C "$DEPLOY_PATH" reset --hard "$GIT_SHA"
+          git -C "$DEPLOY_PATH" clean -fd
+          git -C "$DEPLOY_PATH" rev-parse HEAD
+          EOF

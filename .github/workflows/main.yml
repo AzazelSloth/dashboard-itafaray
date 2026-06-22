@@ -42,8 +42,8 @@ jobs:
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             TARGET_ENV="$TARGET_INPUT"
             if [ "$TARGET_ENV" = "dev" ]; then
-              PUBLISH_IMAGE="false"
-              DEPLOY_APPLICATION="false"
+              PUBLISH_IMAGE="true"
+              DEPLOY_APPLICATION="true"
             else
               PUBLISH_IMAGE="true"
               DEPLOY_APPLICATION="true"
@@ -58,8 +58,8 @@ jobs:
             DEPLOY_APPLICATION="true"
           else
             TARGET_ENV="dev"
-            PUBLISH_IMAGE="false"
-            DEPLOY_APPLICATION="false"
+            PUBLISH_IMAGE="true"
+            DEPLOY_APPLICATION="true"
           fi
 
           echo "target_environment=$TARGET_ENV" >> "$GITHUB_OUTPUT"

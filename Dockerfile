@@ -28,6 +28,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
       readxl \
       stringr \
       echarts4r \
+      shinymanager \
       gridExtra \
       jsonlite \
       httr2 \
@@ -61,6 +62,7 @@ COPY app.R prepare_data.R i18n_setup.R xroad_bridge.R ./
 COPY data_poc/ ./data_poc/
 COPY translations/ ./translations/
 COPY report/ ./report/
+COPY www/ ./www/
 
 RUN chown -R shiny:shiny ${APP_HOME}
 

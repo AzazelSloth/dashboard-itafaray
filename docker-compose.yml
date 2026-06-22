@@ -13,25 +13,10 @@
 
 services:
   app:
-    # En déploiement CI/CD, l'image est fournie par la variable APP_IMAGE
-    # (image pré-construite et poussée dans le registre par le pipeline).
-    # En local / déploiement autonome, on retombe sur l'image construite via `build: .`.
-    image: ${APP_IMAGE:-itafaray-poc:1.1}
+    image: ${APP_IMAGE:-itafaray-poc:pre-prod}
     build: .
     container_name: itafaray-app
     restart: unless-stopped
-    expose:
-      - "3838"            # accessible uniquement par nginx (réseau interne)
-    networks:
-      - itafaray
-
-  nginx:
-    image: nginx:1.27-alpine
-    container_name: itafaray-nginx
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
     ports:
       - "3838:3838"
+

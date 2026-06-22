@@ -72,7 +72,7 @@ USER shiny
 EXPOSE 3838
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
-  CMD R -q -e "tryCatch({c<-socketConnection('127.0.0.1',3838,open='r',timeout=4);close(c)},error=function(e)quit(status=1))" || exit 1
+  CMD R --vanilla -q -e "tryCatch({c<-socketConnection('127.0.0.1',3838,open='r',timeout=4);close(c)},error=function(e)quit(status=1))" || exit 1
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["R", "-e", "shiny::runApp('/app', host=Sys.getenv('SHINY_HOST','0.0.0.0'), port=as.integer(Sys.getenv('SHINY_PORT','3838')))"]
+CMD ["R", "--vanilla", "-e", "shiny::runApp('/app', host=Sys.getenv('SHINY_HOST','0.0.0.0'), port=as.integer(Sys.getenv('SHINY_PORT','3838')))"]

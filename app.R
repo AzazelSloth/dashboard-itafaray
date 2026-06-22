@@ -142,6 +142,9 @@ DRANGE <- range(DATA$date_de_survenue, na.rm = TRUE)
 REF18  <- DATA %>% distinct(secteur, code, signal) %>% arrange(secteur, code)
 SEV <- c("Non évalué" = 0, "Faible" = 1, "Modéré" = 2, "Haute" = 3, "Très élevé" = 4)
 RISK_LAB <- setNames(names(SEV), as.character(SEV))
+translate_signal <- function(x, lang = "fr") i18n_vec(x, lang)
+format_signal_label <- function(code, signal, lang = "fr", sep = " — ")
+  paste0(code, sep, translate_signal(signal, lang))
 # Ventilation complète d'un vecteur de niveaux de risque -> phrase qui totalise l'effectif
 repartition_risque <- function(x, lang = "fr") {
   ord <- names(sort(SEV, decreasing = TRUE))
@@ -294,6 +297,7 @@ report_html_render <- function(file, d, d_all, lg, periode_lbl) {
   dm <- d %>% dplyr::filter(!is.na(lat), !is.na(lon))
   r_map <- if (nrow(dm) > 0) {
     pal <- leaflet::colorFactor(unname(COL_SECTEUR[SECTEURS]), domain = SECTEURS)
+    dm <- dm %>% dplyr::mutate(signal_label = format_signal_label(code, signal, lg))
     m <- leaflet::leaflet(dm, height = 460) %>%
       leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) %>%
       leaflet::addCircleMarkers(~lon, ~lat, radius = 5, stroke = FALSE, fillOpacity = 0.7,
@@ -1545,8 +1549,9 @@ server <- function(input, output, session) {
   output$p_signaux <- renderEcharts4r({
     lg <- current_lang()
     d <- filtree(); shiny::validate(shiny::need(nrow(d) > 0, "Aucun signal."))
-    d %>% count(signal, sort = TRUE) %>% head(12) %>% arrange(n) %>%
-      e_charts(signal) %>%
+    d %>% mutate(signal_label = translate_signal(signal, lg)) %>%
+      count(signal_label, sort = TRUE) %>% head(12) %>% arrange(n) %>%
+      e_charts(signal_label) %>%
       e_bar(n, name = i18n_lookup("Signalements", lg), legend = FALSE) %>%
       e_flip_coords() %>% e_color("#35618E") %>%
       e_tooltip(trigger = "axis") %>% e_legend(show = FALSE) %>%
@@ -1555,15 +1560,17 @@ server <- function(input, output, session) {
   
   ## Carte
   output$carte <- renderLeaflet({
+    lg <- current_lang()
     d <- filtree() %>% filter(!is.na(lat), !is.na(lon))
     shiny::validate(shiny::need(nrow(d) > 0, "Aucun signal géolocalisé."))
     pal <- colorFactor(unname(COL_SECTEUR[SECTEURS]), domain = SECTEURS)
     gr <- tryCatch(oh(), error = function(e) NULL)   # grappes inter-secteurs (peut être vide)
+    d <- d %>% mutate(signal_label = format_signal_label(code, signal, lg))
 
     m <- leaflet(d) %>% addProviderTiles(providers$CartoDB.Positron) %>%
       addCircleMarkers(~lon, ~lat, radius = 5, stroke = FALSE, fillOpacity = 0.7,
                        color = ~pal(secteur), group = "Signaux",
-                       popup = ~paste0("<b>", code, " — ", signal, "</b><br>",
+                       popup = ~paste0("<b>", signal_label, "</b><br>",
                                        "Date : ", format(date_de_survenue, "%d/%m/%Y"), "<br>",
                                        "Fokontany : ", fokontany, "<br>",
                                        "Événement : ", classification_event, "<br>",
@@ -1595,7 +1602,7 @@ server <- function(input, output, session) {
       m <- m %>% addCircleMarkers(
         data = da, lng = ~lon, lat = ~lat, radius = 10, stroke = TRUE, weight = 2.5,
         color = "#9E2A2B", fillOpacity = 0, opacity = 1, group = "Alertes",
-        popup = ~paste0("<b>ALERTE — ", code, " — ", signal, "</b><br>",
+        popup = ~paste0("<b>ALERTE — ", signal_label, "</b><br>",
                         "Date : ", format(date_de_survenue, "%d/%m/%Y"), "<br>",
                         "Fokontany : ", fokontany, "<br>",
                         "Niveau de risque : ", niveau_risque, "<br>",
@@ -1878,12 +1885,14 @@ server <- function(input, output, session) {
   output$p_heat_temps <- renderEcharts4r({
     lg <- current_lang()
     d <- filtree(); shiny::validate(shiny::need(nrow(d) > 0, "Aucun signal."))
-    dd <- d %>% mutate(m = floor_date(date_de_survenue, "month")) %>%
-      count(signal, m) %>% arrange(m) %>% mutate(mois = format(m, "%b %y"))
+    sig_order <- rev(translate_signal(.ord_signaux$signal, lg))
+    dd <- d %>% mutate(signal_label = translate_signal(signal, lg),
+                       m = floor_date(date_de_survenue, "month")) %>%
+      count(signal_label, m) %>% arrange(m) %>% mutate(mois = format(m, "%b %y"))
     dd %>% e_charts(mois) %>%
-      e_heatmap(signal, n) %>%
+      e_heatmap(signal_label, n) %>%
       e_visual_map(n, inRange = list(color = c("#EEF3F8", "#8FB3CE", "#16324F"))) %>%
-      e_y_axis(type = "category", data = rev(.ord_signaux$signal)) %>%
+      e_y_axis(type = "category", data = sig_order) %>%
       e_x_axis(type = "category", axisLabel = list(rotate = 45)) %>%
       e_tooltip() %>%
       e_grid(left = 155, right = 18, top = 10, bottom = 55)
@@ -1891,11 +1900,12 @@ server <- function(input, output, session) {
   output$p_heat_geo <- renderEcharts4r({
     lg <- current_lang()
     d <- filtree(); shiny::validate(shiny::need(nrow(d) > 0, "Aucun signal."))
-    dd <- d %>% count(signal, fokontany)
+    sig_order <- rev(translate_signal(.ord_signaux$signal, lg))
+    dd <- d %>% mutate(signal_label = translate_signal(signal, lg)) %>% count(signal_label, fokontany)
     dd %>% e_charts(fokontany) %>%
-      e_heatmap(signal, n) %>%
+      e_heatmap(signal_label, n) %>%
       e_visual_map(n, inRange = list(color = c("#EDF3EE", "#9CC0A6", "#2E5A40"))) %>%
-      e_y_axis(type = "category", data = rev(.ord_signaux$signal)) %>%
+      e_y_axis(type = "category", data = sig_order) %>%
       e_x_axis(type = "category", axisLabel = list(rotate = 45)) %>%
       e_tooltip() %>%
       e_grid(left = 155, right = 18, top = 10, bottom = 70)
@@ -1925,10 +1935,12 @@ server <- function(input, output, session) {
       arrange(secteur, code)
   })
   output$t_indic <- renderDT({
+    lg <- current_lang()
     tab <- ind_ref() %>%
       mutate(Dernier = ifelse(is.na(Dernier), "—",
-                              format(as.Date(Dernier, origin = "1970-01-01"), "%d/%m/%Y"))) %>%
-      transmute(Secteur = secteur, Code = code, Signal = signal,
+                              format(as.Date(Dernier, origin = "1970-01-01"), "%d/%m/%Y")),
+             Signal = translate_signal(signal, lg)) %>%
+      transmute(Secteur = secteur, Code = code, Signal,
                 Signalements, Cas, `Décès` = Deces, `Évalués` = Evalues,
                 Alertes, `En grappe One Health` = OH, `Dernier signalement` = Dernier)
     datatable(tab, rownames = FALSE, selection = "single",
@@ -1946,10 +1958,11 @@ server <- function(input, output, session) {
   })
   ind_sig <- reactive(filtree() %>% filter(code == ind_sel()$code) %>% arrange(date_de_survenue))
   output$ind_summary <- renderUI({
+    lg <- current_lang()
     g <- ind_sel()
     tags$div(style = "margin-bottom:10px;",
              tags$div(style = "font-size:15px; font-weight:600; color:#26333F;",
-                      paste0(g$code, " — ", g$signal, "  ·  ", g$secteur)),
+                      paste0(format_signal_label(g$code, g$signal, lg), "  ·  ", g$secteur)),
              tags$div(style = "color:#5A6672; margin-top:5px;",
                       paste0("Signalements : ", g$Signalements, "  ·  Cas : ", g$Cas,
                              "  ·  Décès : ", g$Deces, "  ·  Évalués : ", g$Evalues,
@@ -2004,10 +2017,11 @@ server <- function(input, output, session) {
       addLegend("bottomright", pal = pal, values = ~n, title = "Signalements", opacity = 0.9)
   })
   observeEvent(input$t_indic_rows_selected, {
+    lg <- current_lang()
     if (length(input$t_indic_rows_selected) != 1) return()
     g <- ind_ref()[input$t_indic_rows_selected, ]
     showModal(modalDialog(
-      title = paste0(g$code, " — ", g$signal),
+      title = format_signal_label(g$code, g$signal, lg),
       uiOutput("ind_summary"),
       echarts4rOutput("ind_trend", height = 220),
       fluidRow(
@@ -2088,9 +2102,10 @@ server <- function(input, output, session) {
                        plot.subtitle = element_text(color = "#5A6672", size = 11))
   }
   oh_signals_dt <- function(d) {
+    lg <- current_lang()
     d <- d %>% transmute(
       Date = format(date_de_survenue, "%d/%m/%Y"), Secteur = secteur,
-      Signal = paste0(code, " — ", signal), Cas = Nombre_cas, `Décès` = Nombre_deces,
+      Signal = format_signal_label(code, signal, lg), Cas = Nombre_cas, `Décès` = Nombre_deces,
       Risque = as.character(niveau_risque),
       Suspicion = ifelse(classification_event == "Non précisé", "—", classification_event),
       Source = ifelse(is.na(classe_source), "—", classe_source),
@@ -2117,9 +2132,10 @@ server <- function(input, output, session) {
     filtree() %>% filter(a_une_alerte) %>% arrange(desc(date_de_survenue))
   })
   output$t_alertes <- renderDT({
+    lg <- current_lang()
     d <- al_data() %>%
       transmute(Date = format(date_de_survenue, "%d/%m/%Y"), Secteur = secteur,
-                Signal = paste0(code, " — ", signal), Fokontany = fokontany,
+                Signal = format_signal_label(code, signal, lg), Fokontany = fokontany,
                 Suspicion = ifelse(classification_event == "Non précisé", "—", classification_event),
                 Cas = Nombre_cas, Décès = Nombre_deces,
                 Risque = as.character(niveau_risque), Alerte = alerte_label)

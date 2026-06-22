@@ -11,5 +11,9 @@ services:
     image: ${APP_IMAGE:-itafaray:latest}
     container_name: itafaray
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     ports:
-      - "3838:3838"
+      - "3838:38

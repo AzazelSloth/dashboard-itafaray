@@ -4,3 +4,8 @@ docker-compose.yml
 Dockerfile
 .dockerignore
 .DS_Store
+.git
+.gitignore
+.env
+credentials.sqlite
+*.log

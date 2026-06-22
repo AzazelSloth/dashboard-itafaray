@@ -7,8 +7,16 @@
 # =====================================================================
 
 required <- c("readxl", "dplyr", "stringr")
-to_install <- required[!vapply(required, requireNamespace, logical(1), quietly = TRUE)]
-if (length(to_install) > 0) install.packages(to_install, repos = "https://cloud.r-project.org")
+missing_pkgs <- required[!vapply(required, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+  stop(
+    paste0(
+      "Packages R manquants: ", paste(missing_pkgs, collapse = ", "),
+      ". Reconstruisez l'image Docker ou installez-les explicitement avant le lancement."
+    ),
+    call. = FALSE
+  )
+}
 suppressPackageStartupMessages({ library(readxl); library(dplyr); library(stringr) })
 
 NIVEAUX_RISQUE <- c("Très élevé", "Haute", "Modéré", "Faible", "Non évalué")

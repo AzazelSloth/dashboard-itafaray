@@ -30,16 +30,10 @@ Pour arrêter :
 docker compose down
 ```
 
-## Identifiants de connexion (POC)
+## Authentification
 
-| Utilisateur | Mot de passe   |
-|-------------|----------------|
-| admin       | itafaray2026   |
-| pivot       | pivot2026      |
-| cirad       | cirad2026      |
-
-> Ce sont des identifiants de démonstration. Pour un usage réel, changez-les
-> (fichier `credentials.sqlite`, voir le paquet R `shinymanager`).
+L'authentification est retiree temporairement du projet. L'application demarre
+donc directement sans ecran de connexion.
 
 ## Variante sans docker compose
 
@@ -55,7 +49,6 @@ app.R                     application Shiny
 prepare_data.R            chargement / préparation des données
 i18n_setup.R              moteur multilingue (FR / EN / MG)
 xroad_bridge.R            pont vers les données réelles X-Road (optionnel)
-credentials.sqlite        comptes de connexion
 data_poc/                 données de démonstration + climat
 translations/             dictionnaire de traduction
 report/                   modèle du rapport HTML interactif
@@ -75,3 +68,7 @@ docker-compose.yml        lancement en un service
 - **Mise en production (serveur + HTTPS)** : pour un déploiement exposé sur Internet
   avec nom de domaine et certificat, voir la configuration nginx/HTTPS du projet
   principal (`DEPLOIEMENT_AWS.md`).
+- **Reduction des CVE** : reconstruisez regulierement l'image
+  (`docker compose build --pull --no-cache`) pour recuperer les correctifs Ubuntu/Rocker,
+  car une partie des CVE visibles dans Docker Hub provient de la base systeme et non du
+  code applicatif.

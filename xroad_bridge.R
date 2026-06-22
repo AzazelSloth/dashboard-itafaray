@@ -16,15 +16,24 @@
 # =====================================================================
 
 charger_xroad <- function() {
+  env_flag_xroad <- function(name, default = FALSE) {
+    val <- trimws(Sys.getenv(name, unset = if (default) "true" else "false"))
+    tolower(val) %in% c("1", "true", "yes", "on")
+  }
+
   if (!requireNamespace("httr2", quietly = TRUE) ||
       !requireNamespace("jsonlite", quietly = TRUE)) {
     stop("Packages httr2 / jsonlite requis pour la connexion X-Road.")
   }
 
-  SS         <- "https://ss.operator.xroad.digital.gov.mg"
-  CLIENT_HDR <- "MG/GOV/UGD-MANAGEMENT/management-client"
-  SVC        <- "MG/GOV/ONGMedicalePivot/SBE/hapifhir"
-  INSECURE   <- FALSE   # passer à TRUE si certificat auto-signé (test)
+  SS         <- Sys.getenv("XROAD_BASE_URL", "https://ss.operator.xroad.digital.gov.mg")
+  CLIENT_HDR <- Sys.getenv("XROAD_CLIENT_HEADER", "MG/GOV/UGD-MANAGEMENT/management-client")
+  SVC        <- Sys.getenv("XROAD_SERVICE_PATH", "MG/GOV/ONGMedicalePivot/SBE/hapifhir")
+  INSECURE   <- env_flag_xroad("XROAD_ALLOW_INSECURE_TLS", FALSE)
+
+  if (INSECURE) {
+    warning("La verification TLS X-Road est desactivee via XROAD_ALLOW_INSECURE_TLS=true.")
+  }
 
   fetch <- function(resource, count = 1000) {
     url <- paste0(SS, "/r1/", SVC, "/", resource, "?_count=", count)

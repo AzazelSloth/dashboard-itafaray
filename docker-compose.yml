@@ -13,8 +13,11 @@
 
 services:
   app:
+    # En déploiement CI/CD, l'image est fournie par la variable APP_IMAGE
+    # (image pré-construite et poussée dans le registre par le pipeline).
+    # En local / déploiement autonome, on retombe sur l'image construite via `build: .`.
+    image: ${APP_IMAGE:-itafaray-poc:1.1}
     build: .
-    image: itafaray-poc:1.1
     container_name: itafaray-app
     restart: unless-stopped
     expose:
@@ -32,7 +35,7 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      - DOMAIN=${DOMAIN}
+      - DOMAIN=${DOMAIN:-}
     volumes:
       - ./nginx/templates:/etc/nginx/templates:ro
       - ./certbot/conf:/etc/letsencrypt:ro

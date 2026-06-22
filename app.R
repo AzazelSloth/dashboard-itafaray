@@ -436,6 +436,16 @@ ui <- dashboardPage(
   skin = "blue",
   dashboardHeader(
     title = "i-Tafaray · One Health", titleWidth = 260,
+    # Bandeau institutionnel dans l'en-tête : Primature puis ministères de tutelle.
+    # Pastille blanche pour que les logos ressortent sur le bleu foncé.
+    tags$li(class = "dropdown",
+      tags$div(style = "display:flex; align-items:center; height:50px; padding:6px 12px;",
+        tags$div(style = "display:flex; align-items:center; gap:10px;
+                          background:#fff; border-radius:6px; padding:4px 10px;",
+          lapply(c("madagascar.png", "sante.png", "elevage.png", "environnement.png"),
+                 function(f) tags$img(src = file.path("logos", f),
+                                      style = "height:30px; width:auto; object-fit:contain;",
+                                      alt = "Logo institutionnel"))))),
     lang_switcher_ui()
   ),
   dashboardSidebar(
@@ -472,7 +482,19 @@ ui <- dashboardPage(
       selectInput("fokontany", "Fokontany (district d'Ifanadiana) :",
                   choices = c("Tous", sort(unique(na.omit(DATA$fokontany)))), selected = "Tous"),
       checkboxInput("verif_only", "Signaux vérifiés uniquement", value = FALSE)
-    )
+    ),
+    # Bandeau de logos partenaires (même ordre que l'onglet « À propos »)
+    tags$div(style = "margin:16px 12px 12px; background:#fff; border-radius:8px; padding:10px 8px;",
+      tags$div(style = "display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+                         align-items:center; justify-items:center;",
+        lapply(c("afd.png", "banque_mondiale.png", "madagascar.png",
+                 "sante.png", "elevage.png", "environnement.png",
+                 "africam_prezode.png", "cirad.png", "pivot.png"),
+               function(f) tags$img(src = file.path("logos", f),
+                                    style = paste0("max-height:",
+                                                   if (f == "afd.png") "22px" else "32px",
+                                                   "; max-width:100%; object-fit:contain;"),
+                                    alt = "Logo partenaire"))))
   ),
   dashboardBody(
     lang_switcher_css(),

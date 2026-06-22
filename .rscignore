@@ -1,0 +1,12 @@
+extract_climate_mdg.R
+xroad_client.R
+deploy.R
+Dockerfile
+.dockerignore
+DEPLOIEMENT_DOCKER.md
+README.md
+data/
+.Rproj.user/
+.RData
+.Rhistory
+rsconnect/

@@ -25,5 +25,4 @@ Dockerfile
 .git
 .gitignore
 .env
-credentials.sqlite
 *.log

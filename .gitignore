@@ -1,0 +1,11 @@
+# Cache d'exécution X-Road (alimenté par ingest_xroad.R sur le serveur) — ne pas versionner
+data_poc/xroad_cache.rds
+data_poc/xroad_cache.rds.tmp
+data_poc/xroad_cache_meta.txt
+
+# Artefacts R / environnement
+.RData
+.Rhistory
+.Rproj.user/
+.DS_Store
+rsconnect/

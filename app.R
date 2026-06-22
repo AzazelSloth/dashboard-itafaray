@@ -1,5 +1,5 @@
 # =====================================================================
-#  iTafaray — Tableau de bord central One Health
+#  i-Tafaray — Tableau de bord central One Health
 #  PREUVE DE CONCEPT — données de DÉMONSTRATION (synthétiques)
 #  Branché sur le jeu de données à 6 scénarios (H5N1, Peste, Rage,
 #  Mpox, Ebola, contamination hydrique) — voir Scenarios_One_Health.md
@@ -32,6 +32,16 @@ DATA <- tryCatch(
     "\nPlacez signaux_*.xlsx / evenement_sbe_*.xlsx / alerte_*.xlsx dans 'data_poc/'.")) }
 )
 DATA_SIM <- DATA   # jeu de démonstration (synthétique) — référence pour la bascule de source
+
+## ---- Cache X-Road (alimenté par ingest_xroad.R, relu en auto-refresh) ----
+# En production, pointer XROAD_CACHE_PATH vers un volume persistant monté dans le conteneur.
+XROAD_CACHE <- Sys.getenv("XROAD_CACHE_PATH", unset = "data_poc/xroad_cache.rds")
+xroad_cache_mtime <- function()
+  if (file.exists(XROAD_CACHE)) as.numeric(file.info(XROAD_CACHE)$mtime) else 0
+lire_cache_xroad <- function() {
+  if (!file.exists(XROAD_CACHE)) return(NULL)
+  tryCatch(readRDS(XROAD_CACHE), error = function(e) NULL)
+}
 
 ## ---- Données climatiques du district (extraites de MDG via extract_climate_mdg.R) ----
 CLIMATE <- local({
@@ -109,6 +119,9 @@ ENV_SECTEURS <- if (!is.null(SMART_ENV))
   c("Tous", sort(unique(SMART_ENV$secteur[nzchar(SMART_ENV$secteur)]))) else "Tous"
 ENV_ANNEES <- if (!is.null(SMART_ENV))
   c("Toutes", sort(unique(SMART_ENV$annee[!is.na(SMART_ENV$annee)]), decreasing = TRUE)) else "Toutes"
+# Année par défaut du sélecteur SMART : la plus récente (plutôt que « Toutes »)
+ENV_ANNEE_DEFAUT <- if (!is.null(SMART_ENV) && any(!is.na(SMART_ENV$annee)))
+  as.character(max(suppressWarnings(as.integer(SMART_ENV$annee)), na.rm = TRUE)) else "Toutes"
 
 ## ---- Palettes (sobres / institutionnelles) ----
 INK <- "#26333F"; ACCENT <- "#1e3a5f"
@@ -234,8 +247,13 @@ report_html_render <- function(file, d, d_all, lg, periode_lbl) {
   al  <- d %>% dplyr::filter(a_une_alerte) %>% dplyr::arrange(dplyr::desc(date_de_survenue))
   gr  <- oh_clusters(d)
 
+  ## Date de référence du bulletin = max de la source active (démo ou réel)
+  rmax <- { mx <- suppressWarnings(max(d_all$date_de_survenue, na.rm = TRUE))
+            if (is.finite(mx)) mx else suppressWarnings(max(d$date_de_survenue, na.rm = TRUE)) }
+  rcur <- lubridate::floor_date(rmax, "month")
+
   ## --- Tendance (12 derniers mois, barres empilées par secteur) ---
-  full_start <- lubridate::floor_date(.cur_start %m-% months(11), "month")
+  full_start <- lubridate::floor_date(rcur %m-% months(11), "month")
   dd <- d_all %>% dplyr::filter(date_de_survenue >= full_start) %>%
     dplyr::mutate(mois = lubridate::floor_date(date_de_survenue, "month")) %>%
     dplyr::count(mois, secteur) %>% dplyr::arrange(mois)
@@ -318,7 +336,7 @@ report_html_render <- function(file, d, d_all, lg, periode_lbl) {
   ## --- Rendu du template ---
   env <- new.env(parent = globalenv())
   env$Tr       <- Tr
-  env$meta     <- list(periode = periode_lbl, arrete = format(.maxdate, "%d/%m/%Y"))
+  env$meta     <- list(periode = periode_lbl, arrete = format(rmax, "%d/%m/%Y"))
   env$kpi      <- list(signaux = nrow(d),
                        risque  = sum(as.character(d$niveau_risque) %in% c("Très élevé", "Haute")),
                        alertes = na, fokontany = dplyr::n_distinct(d$fokontany))
@@ -417,17 +435,17 @@ if (AUTH_ENABLED && !file.exists(db_path)) {
 ui <- dashboardPage(
   skin = "blue",
   dashboardHeader(
-    title = tags$span(
-      class = "itafaray-header-title",
-      tags$span(
-        class = "itafaray-brand",
-        tags$span(class = "mg-white", "i"),
-        tags$span(class = "mg-red", "Tafa"),
-        tags$span(class = "mg-green", "ray")
-      ),
-      tags$span(class = "itafaray-separator", HTML("&nbsp;&middot;&nbsp;")),
-      tags$span(class = "itafaray-subtitle", "One Health Madagascar")
-    ), titleWidth = 260,
+    title = "i-Tafaray · One Health", titleWidth = 260,
+    # Bandeau institutionnel dans l'en-tête : Primature puis ministères de tutelle.
+    # Pastille blanche pour que les logos ressortent sur le bleu foncé.
+    tags$li(class = "dropdown",
+      tags$div(style = "display:flex; align-items:center; height:50px; padding:6px 12px;",
+        tags$div(style = "display:flex; align-items:center; gap:10px;
+                          background:#fff; border-radius:6px; padding:4px 10px;",
+          lapply(c("madagascar.png", "sante.png", "elevage.png", "environnement.png"),
+                 function(f) tags$img(src = file.path("logos", f),
+                                      style = "height:30px; width:auto; object-fit:contain;",
+                                      alt = "Logo institutionnel"))))),
     lang_switcher_ui()
   ),
   dashboardSidebar(
@@ -464,7 +482,19 @@ ui <- dashboardPage(
       selectInput("fokontany", "Fokontany (district d'Ifanadiana) :",
                   choices = c("Tous", sort(unique(na.omit(DATA$fokontany)))), selected = "Tous"),
       checkboxInput("verif_only", "Signaux vérifiés uniquement", value = FALSE)
-    )
+    ),
+    # Bandeau de logos partenaires (même ordre que l'onglet « À propos »)
+    tags$div(style = "margin:16px 12px 12px; background:#fff; border-radius:8px; padding:10px 8px;",
+      tags$div(style = "display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+                         align-items:center; justify-items:center;",
+        lapply(c("afd.png", "banque_mondiale.png", "madagascar.png",
+                 "sante.png", "elevage.png", "environnement.png",
+                 "africam_prezode.png", "cirad.png", "pivot.png"),
+               function(f) tags$img(src = file.path("logos", f),
+                                    style = paste0("max-height:",
+                                                   if (f == "afd.png") "22px" else "32px",
+                                                   "; max-width:100%; object-fit:contain;"),
+                                    alt = "Logo partenaire"))))
   ),
   dashboardBody(
     lang_switcher_css(),
@@ -482,12 +512,6 @@ ui <- dashboardPage(
       .skin-blue .main-header .navbar { background:#1e3a5f !important; }
       .skin-blue .main-header .logo { color:#FFFFFF; font-weight:700; letter-spacing:.3px; border-bottom:0; }
       .skin-blue .main-header .logo:hover { background:#1e3a5f !important; }
-      .itafaray-header-title { display:inline-flex; align-items:center; gap:0; white-space:nowrap; }
-      .itafaray-brand { font-weight:800; letter-spacing:.2px; }
-      .itafaray-brand .mg-white { color:#FFFFFF; text-shadow:0 0 0.5px rgba(15,23,42,.35); }
-      .itafaray-brand .mg-red { color:#FC3D32; }
-      .itafaray-brand .mg-green { color:#007E3A; }
-      .itafaray-separator, .itafaray-subtitle { color:rgba(255,255,255,.92); font-weight:600; }
       .skin-blue .main-header .navbar .sidebar-toggle { color:#cbd5e1; }
       .skin-blue .main-header .navbar .sidebar-toggle:hover { background:rgba(255,255,255,.08); color:#fff; }
       .skin-blue .main-sidebar { background:#1e3a5f !important; }
@@ -723,7 +747,7 @@ ui <- dashboardPage(
                     selectInput("env_secteur", i18n$t("Secteur"), width = "100%",
                                 choices = ENV_SECTEURS, selected = "Tous"),
                     selectInput("env_annee", i18n$t("Année"), width = "100%",
-                                choices = ENV_ANNEES, selected = "Toutes"))
+                                choices = ENV_ANNEES, selected = ENV_ANNEE_DEFAUT))
                 )
               ),
               uiOutput("env_kpis"),
@@ -810,12 +834,50 @@ ui <- dashboardPage(
               )
       ),
       tabItem("apropos",
-              box(width = 12, status = "info", solidHeader = TRUE, title = "À propos de cette démonstration",
-                  tags$div(style = "font-size:14px; line-height:1.6; color:#26333F;",
-                    tags$p("iTafaray — Tableau de bord central One Health. Preuve de concept R / Shiny."),
-                    tags$p("Les données sont entièrement synthétiques : un fond de signaux de routine dans lequel sont insérés 6 scénarios One Health (H5N1, peste, rage, Mpox, Ebola, contamination hydrique). Les trois tables — Signaux, Événements, Alertes — sont reliées par l'identifiant id_signal."),
-                    tags$p("Chaque scénario illustre la valeur de la surveillance événementielle : le signal animal ou faune sauvage précède le signal humain (détection précoce), les signaux se regroupent dans l'espace et le temps, et le croisement inter-secteurs révèle la menace."),
-                    tags$p(tags$i("Outil : R / R Shiny — solution open source."))))
+              box(width = 12, status = "info", solidHeader = TRUE,
+                  title = i18n$t("À propos d'i-Tafaray"),
+                  tags$div(style = "font-size:14px; line-height:1.65; color:#26333F; text-align:justify;",
+                    tags$h4(style = "color:#1e3a5f; margin-top:4px; font-weight:600; text-align:left;",
+                            i18n$t("L'approche One Health (Une seule santé)")),
+                    tags$p(i18n$t("One Health reconnaît que les santés humaine, animale et environnementale sont interdépendantes. La plupart des maladies émergentes sont d'origine animale (zoonoses) et leur apparition est liée aux contacts exacerbés entre hommes et animaux, aux pressions sur les écosystèmes et au changement climatique. Surveiller les trois secteurs — homme, animal, environnement — simultanément permet de détecter plus tôt et d'agir de façon précoce et coordonnée.")),
+                    tags$h4(style = "color:#1e3a5f; font-weight:600;",
+                            i18n$t("Le projet AFRICAM Madagascar")),
+                    tags$p(i18n$t("AFRICAM Madagascar, porté par l'initiative PREZODE et coordonné par le CIRAD avec le financement de l'AFD, vise à renforcer la surveillance des maladies zoonotiques prioritaires selon une approche One Health intégrée. Dans le district d'Ifanadiana, il développe un système de surveillance associant santé humaine, animale, et de la faune et de l'environnement. La réalisation technique est confiée à l'ONG Pivot.")),
+                    tags$h4(style = "color:#1e3a5f; font-weight:600;",
+                            i18n$t("La surveillance à base évènementielle (SBE)")),
+                    tags$p(i18n$t("La SBE repère les évènements inhabituels liés à la santé humaine, animale ou environnementale et potentiellement indicateurs d'émergence, au plus près du terrain — agents communautaires, centres de santé de base, districts. Chaque signal est collecté par les agents de terrain (application CommCare), trié, vérifié puis évalué selon son niveau de risque, et peut déclencher une alerte. i-Tafaray, plateforme digitale One Health gérée par l'Unité de Gouvernance Digitale (UGD), centralise les signaux des trois secteurs et révèle, par leur croisement dans l'espace et le temps, des menaces qu'aucun secteur ne verrait seul.")),
+                    tags$h4(style = "color:#1e3a5f; font-weight:600;",
+                            i18n$t("L'appui de la Banque mondiale")),
+                    tags$p(i18n$t("Le Projet de préparation et de réponse aux pandémies (PPSB), financé par la Banque mondiale, soutient la mise en place d'un système de notification électronique, en temps réel, interopérable et interconnecté, conforme au Règlement sanitaire international (RSI). i-Tafaray contribue à cet objectif via l'interopérabilité des données (standard FHIR, échange par X-Road).")))),
+              box(width = 12, status = "info", solidHeader = TRUE, title = i18n$t("Partenaires"),
+                  tags$div(style = "background:#fff; border-radius:8px; padding:14px 8px;
+                                    display:flex; flex-wrap:wrap; gap:16px;
+                                    align-items:center; justify-content:center;",
+                    # Bailleurs (tailles ajustées individuellement)
+                    tags$div(style = "display:flex; flex-wrap:wrap; gap:22px; align-items:center;",
+                      tags$img(src = "logos/afd.png",
+                               style = "height:42px; width:auto; object-fit:contain;", alt = "AFD"),
+                      tags$img(src = "logos/banque_mondiale.png",
+                               style = "height:66px; width:auto; object-fit:contain;", alt = "Banque mondiale")),
+                    tags$div(style = "width:1px; align-self:stretch; min-height:52px;
+                                      background:#D9DEE4; margin:0 4px;"),
+                    # Gouvernement (Primature)
+                    tags$img(src = "logos/madagascar.png",
+                             style = "height:54px; width:auto; object-fit:contain;", alt = "Primature"),
+                    tags$div(style = "width:1px; align-self:stretch; min-height:52px;
+                                      background:#D9DEE4; margin:0 4px;"),
+                    # Ministères & partenaires de mise en œuvre
+                    tags$div(style = "display:flex; flex-wrap:wrap; gap:22px; align-items:center;",
+                      lapply(c("sante.png", "elevage.png", "environnement.png",
+                               "africam_prezode.png", "cirad.png", "pivot.png"),
+                             function(f) tags$img(src = file.path("logos", f),
+                                                  style = "height:54px; width:auto; object-fit:contain;",
+                                                  alt = "Partenaire"))))),
+              box(width = 12, status = "info", solidHeader = TRUE,
+                  title = i18n$t("À propos de cette démonstration"),
+                  tags$div(style = "font-size:14px; line-height:1.6; color:#26333F; text-align:justify;",
+                    tags$p(i18n$t("Les données affichées sont entièrement synthétiques : un fond de signaux de routine dans lequel sont insérés six scénarios One Health (H5N1, peste, rage, Mpox, Ebola, contamination hydrique). Les trois tables — Signaux, Événements, Alertes — sont reliées par l'identifiant id_signal.")),
+                    tags$p(tags$i(i18n$t("Outil : R / R Shiny — solution open source.")))))
       )
     )
   )
@@ -836,7 +898,7 @@ ui <- dashboardPage(
 show_guide_modal <- function() {
   showModal(modalDialog(
     title = tags$div(style = "color:#1e3a5f; font-weight:700;",
-                     icon("compass"), " ", i18n$t("Guide de la plateforme iTafaray")),
+                     icon("compass"), " ", i18n$t("Guide de la plateforme i-Tafaray")),
     easyClose = TRUE, size = "l", footer = modalButton(i18n$t("Fermer")),
     tags$div(style = "font-size:14px; line-height:1.55;",
       tags$p(i18n$t("Plateforme de surveillance One Health (Une seule santé). Elle réunit les signaux humains, animaux et environnementaux pour révéler, par leur croisement, des menaces qu'aucun secteur ne verrait seul.")),
@@ -880,11 +942,14 @@ server <- function(input, output, session) {
     secure_server(check_credentials(db_path, passphrase = passphrase)) else NULL
 
   ## ---- Changement de langue (FR / EN / MG) — swap DOM côté client ----
-  current_lang <- reactiveVal(I18N_DEFAULT)
-  # Applique la langue par défaut dès l'ouverture et synchronise la pilule active.
+  current_lang <- reactiveVal("fr")
+  # Détection de la langue du navigateur au démarrage
   observe({
-    current_lang(I18N_DEFAULT)
-    session$sendCustomMessage("i18n_set_lang", I18N_DEFAULT)
+    bl <- detect_browser_lang(session)
+    if (bl != I18N_DEFAULT) {
+      current_lang(bl)
+      session$sendCustomMessage("i18n_set_lang", bl)
+    }
   }, priority = 1000)
   observeEvent(input$lang, {
     if (!input$lang %in% I18N_LANGS) return()
@@ -895,13 +960,21 @@ server <- function(input, output, session) {
   ## ---- Source des données : démonstration (synthétique) ou réel (X-Road) ----
   # Presque tous les onglets passent par base_filtree()/filtree()/exec_data() ;
   # il suffit donc de commuter le jeu de données actif ici, en amont.
+  # Cache X-Road relu automatiquement dès que le fichier change (alimenté par ingest_xroad.R).
+  # Toute session ouverte se met ainsi à jour sans rechargement de page.
+  xroad_cache <- reactivePoll(60000, session,
+    checkFunc = xroad_cache_mtime, valueFunc = lire_cache_xroad)
+
   DATA_ACTIVE <- reactive({
     if (identical(input$data_source, "reel")) {
-      d <- tryCatch(
-        if (exists("charger_xroad")) charger_xroad() else stop("Pont X-Road non disponible."),
-        error = function(e) e)
+      d <- xroad_cache()                       # 1. cache local (rafraîchi en continu)
+      if (is.null(d) || !is.data.frame(d) || nrow(d) == 0) {
+        d <- tryCatch(                         # 2. pas de cache -> appel direct si la machine joint X-Road
+          if (exists("charger_xroad")) charger_xroad() else stop("Pont X-Road non disponible."),
+          error = function(e) e)
+      }
       if (inherits(d, "error") || is.null(d) || !is.data.frame(d) || nrow(d) == 0) {
-        showNotification(
+        showNotification(                      # 3. repli sur la démonstration
           paste0("Données réelles X-Road indisponibles — affichage des données de démonstration. ",
                  if (inherits(d, "error")) conditionMessage(d) else ""),
           type = "warning", duration = 7)
@@ -917,7 +990,9 @@ server <- function(input, output, session) {
     if (!reel) {
       tags$span(class = "ds-badge", style = "background:#5E8B6A;color:#fff;", i18n$t("Démo active"))
     } else if (ok) {
-      tags$span(class = "ds-badge", style = "background:#2B6CB0;color:#fff;", i18n$t("X-Road actif"))
+      maj <- if (file.exists(XROAD_CACHE)) format(file.info(XROAD_CACHE)$mtime, "%d/%m %H:%M") else NA
+      tags$span(class = "ds-badge", style = "background:#2B6CB0;color:#fff;",
+                paste0(i18n$t("X-Road actif"), if (!is.na(maj)) paste0(" · ", i18n$t("maj"), " ", maj) else ""))
     } else {
       tags$span(class = "ds-badge", style = "background:#C2703D;color:#fff;", i18n$t("X-Road indisponible — démo"))
     }
@@ -926,11 +1001,28 @@ server <- function(input, output, session) {
   ## ---- Guide de la plateforme (fenêtre modale) ----
   observeEvent(input$tour, show_guide_modal())
 
+  ## Bornes de dates calées sur la SOURCE ACTIVE (démo ou X-Road réel),
+  ## sinon les données réelles (datées après la démo) seraient toutes filtrées.
+  act_max <- reactive({
+    mx <- suppressWarnings(max(DATA_ACTIVE()$date_de_survenue, na.rm = TRUE))
+    if (is.finite(mx)) mx else .maxdate
+  })
+  act_curstart <- reactive(lubridate::floor_date(act_max(), "month"))
+
+  # Bascule de source -> recale le curseur de dates du menu sur la plage active
+  observeEvent(input$data_source, {
+    rng <- suppressWarnings(range(DATA_ACTIVE()$date_de_survenue, na.rm = TRUE))
+    if (all(is.finite(rng))) {
+      if (rng[1] == rng[2]) rng <- c(rng[1] - 1, rng[2] + 1)
+      updateSliderInput(session, "dates", min = rng[1], max = rng[2], value = c(rng[1], rng[2]))
+    }
+  }, ignoreInit = TRUE)
+
   ## ---- Synthèse exécutive (comité de pilotage) ----
   exec_data <- reactive({
-    end <- .maxdate
+    end <- act_max()
     start <- switch(input$exec_period,
-                    "Mois en cours"     = .cur_start,
+                    "Mois en cours"     = act_curstart(),
                     "3 derniers mois"   = end %m-% months(3),
                     "12 derniers mois"  = end %m-% months(12),
                     min(DATA_ACTIVE()$date_de_survenue, na.rm = TRUE))
@@ -940,7 +1032,7 @@ server <- function(input, output, session) {
   output$s_period <- renderText({
     lg <- current_lang()
     paste0(i18n_lookup("Période :", lg), " ", tolower(i18n_lookup(input$exec_period, lg)),
-           " ", i18n_lookup("— données arrêtées au", lg), " ", format(.maxdate, "%d/%m/%Y"))
+           " ", i18n_lookup("— données arrêtées au", lg), " ", format(act_max(), "%d/%m/%Y"))
   })
   output$s_msg <- renderUI({
     lg <- current_lang()
@@ -977,17 +1069,17 @@ server <- function(input, output, session) {
   })
   output$s_trend <- renderEcharts4r({
     lg <- current_lang()
-    full_start <- floor_date(.cur_start %m-% months(11), "month")
+    full_start <- floor_date(act_curstart() %m-% months(11), "month")
     dd <- DATA_ACTIVE() %>% filter(date_de_survenue >= full_start) %>%
       mutate(mois = floor_date(date_de_survenue, "month")) %>% count(mois, secteur) %>% arrange(mois)
     secs <- sort(unique(dd$secteur)); cols <- unname(COL_SECTEUR[secs])
     dd$secteur <- factor(i18n_vec(dd$secteur, lg), levels = i18n_vec(secs, lg))
     # Le curseur cadre automatiquement la fenêtre choisie en haut de page
     zstart <- switch(input$exec_period,
-                     "Mois en cours"   = floor_date(.maxdate, "month"),
-                     "3 derniers mois" = floor_date(.maxdate %m-% months(2), "month"),
+                     "Mois en cours"   = floor_date(act_max(), "month"),
+                     "3 derniers mois" = floor_date(act_max() %m-% months(2), "month"),
                      full_start)
-    zend <- floor_date(.maxdate, "month")
+    zend <- floor_date(act_max(), "month")
     dd %>% group_by(secteur) %>% e_charts(mois) %>%
       e_bar(n, stack = "secteur", barWidth = "60%") %>%
       e_color(cols) %>%
@@ -1221,7 +1313,7 @@ server <- function(input, output, session) {
       reco_txt   <- report_reco(lg)
 
       ## --- Figures ---
-      dd <- DATA_ACTIVE() %>% filter(date_de_survenue >= (.cur_start %m-% months(11))) %>%
+      dd <- DATA_ACTIVE() %>% filter(date_de_survenue >= (act_curstart() %m-% months(11))) %>%
         mutate(mois = floor_date(date_de_survenue, "month")) %>% count(mois, secteur)
       g_trend <- ggplot(dd, aes(mois, n, fill = secteur)) +
         geom_col(width = 22) +
@@ -1298,11 +1390,11 @@ server <- function(input, output, session) {
       ## ===================== PAGE 1 =====================
       BAND(0.905, 1)
       TXT(0.06, 0.963, paste0(T("BULLETIN DE SURVEILLANCE"), "  -  One Health"), 15, "#FFFFFF", "bold", 0, 0.5)
-      TXT(0.06, 0.927, paste0("iTafaray - ", T("Plateforme nationale Une seule santé - République de Madagascar")),
+      TXT(0.06, 0.927, paste0("i-Tafaray - ", T("Plateforme nationale Une seule santé - République de Madagascar")),
           8.5, "#CFE0EE", "plain", 0, 0.5)
       TXT(0.94, 0.963, T("RAPPORT DE SYNTHÈSE"), 10.5, "#9FD3EE", "bold", 1, 0.5)
       TXT(0.94, 0.927, paste0(T("Période :"), " ", periode_lbl, "   |   ", T("arrêté au"), " ",
-                              format(.maxdate, "%d/%m/%Y")), 8, "#CFE0EE", "plain", 1, 0.5)
+                              format(act_max(), "%d/%m/%Y")), 8, "#CFE0EE", "plain", 1, 0.5)
 
       TXT(0.06, 0.875, paste0("1.  ", T("CONTEXTE ET ANALYSE DE LA SITUATION")), 11.5, "#1e3a5f", "bold", 0, 1)
       RULE(0.856)
@@ -1321,14 +1413,14 @@ server <- function(input, output, session) {
       TXT(0.06, 0.095, T("Figure 1. Nombre de signaux validés par mois et par secteur (humain, animal, environnement)."),
           8, "#5A6672", "plain", 0, 1)
       RULE(0.05, 0.06, 0.94, "#D9DEE4", 0.8)
-      TXT(0.06, 0.033, paste0("iTafaray - ", T("Données de démonstration (synthétiques). Document généré automatiquement.")),
+      TXT(0.06, 0.033, paste0("i-Tafaray - ", T("Données de démonstration (synthétiques). Document généré automatiquement.")),
           7.5, "#8A93A0", "plain", 0, 0.5)
       TXT(0.94, 0.033, "Page 1 / 2", 7.5, "#8A93A0", "plain", 1, 0.5)
 
       ## ===================== PAGE 2 =====================
       grid::grid.newpage()
       BAND(0.95, 1)
-      TXT(0.06, 0.975, paste0("iTafaray - ", T("Bulletin de surveillance One Health (suite)")), 10.5, "#FFFFFF", "bold", 0, 0.5)
+      TXT(0.06, 0.975, paste0("i-Tafaray - ", T("Bulletin de surveillance One Health (suite)")), 10.5, "#FFFFFF", "bold", 0, 0.5)
       TXT(0.94, 0.975, paste0(T("Période :"), " ", periode_lbl), 8, "#CFE0EE", "plain", 1, 0.5)
 
       TXT(0.06, 0.925, paste0("4.  ", T("NIVEAU DE RISQUE")), 11.5, "#1e3a5f", "bold", 0, 1)
@@ -1347,7 +1439,7 @@ server <- function(input, output, session) {
       RULE(sec6_y - 0.018)
       TXT(0.06, sec6_y - 0.030, reco_txt, 9.5, "#26333F", "plain", 0, 1, 1.65)
       RULE(0.05, 0.06, 0.94, "#D9DEE4", 0.8)
-      TXT(0.06, 0.033, paste0("iTafaray - ", T("Surveillance intégrée One Health - Comité de pilotage.")),
+      TXT(0.06, 0.033, paste0("i-Tafaray - ", T("Surveillance intégrée One Health - Comité de pilotage.")),
           7.5, "#8A93A0", "plain", 0, 0.5)
       TXT(0.94, 0.033, "Page 2 / 2", 7.5, "#8A93A0", "plain", 1, 0.5)
     }
@@ -1355,6 +1447,10 @@ server <- function(input, output, session) {
 
   base_filtree <- reactive({
     rng <- if (length(input$dates) == 2) input$dates else DRANGE
+    # Si le curseur (calé sur une autre source) ne recouvre pas les données
+    # actives, on prend leur propre plage (évite un affichage vide en mode réel).
+    drng <- suppressWarnings(range(DATA_ACTIVE()$date_de_survenue, na.rm = TRUE))
+    if (all(is.finite(drng)) && (rng[2] < drng[1] || rng[1] > drng[2])) rng <- drng
     fok <- if (is.null(input$fokontany)) "Tous" else input$fokontany
     d <- DATA_ACTIVE() %>% filter(date_de_survenue >= rng[1], date_de_survenue <= rng[2])
     if (fok != "Tous") d <- d %>% filter(fokontany == fok)
@@ -1688,15 +1784,20 @@ server <- function(input, output, session) {
   })
 
   output$env_trend <- renderEcharts4r({
+    lg <- current_lang()
     s <- env_filtree(); shiny::validate(shiny::need(!is.null(s) && nrow(s) > 0, "Aucune donnée."))
     d <- s[!is.na(s$date), , drop = FALSE]
     shiny::validate(shiny::need(nrow(d) > 0, "Aucune observation datée."))
-    d$mois <- lubridate::floor_date(d$date, "month")
-    d$grp <- ifelse(d$est_menace, "Menace", "Autre observation")
-    agg <- aggregate(rep(1, nrow(d)), by = list(mois = d$mois, grp = d$grp), FUN = sum)
-    names(agg)[3] <- "n"
-    agg %>% group_by(grp) %>% e_charts(mois) %>%
-      e_bar(n, stack = "g") %>% e_color(c("#9AA3AB", "#9E2A2B")) %>%
+    d$mois   <- lubridate::floor_date(d$date, "month")
+    d$menace <- ifelse(d$est_menace, "Menace", "Autre")
+    # Format large : un mois = une ligne, tous les mois comblés à 0 (empilement aligné)
+    allm <- seq(min(d$mois), max(d$mois), by = "month"); lv <- as.character(allm)
+    cnt  <- function(g) as.integer(table(factor(as.character(d$mois[d$menace == g]), levels = lv)))
+    wide <- data.frame(mois = allm, autre = cnt("Autre"), menace = cnt("Menace"))
+    wide %>% e_charts(mois) %>%
+      e_bar(autre,  stack = "g", name = i18n_lookup("Autre observation", lg)) %>%
+      e_bar(menace, stack = "g", name = i18n_lookup("Menace", lg)) %>%
+      e_color(c("#9AA3AB", "#9E2A2B")) %>%
       e_tooltip(trigger = "axis") %>% e_legend(top = 4) %>%
       e_datazoom(type = "slider", bottom = 6, height = 16) %>%
       e_y_axis(minInterval = 1) %>%
@@ -2086,8 +2187,8 @@ server <- function(input, output, session) {
 }
 
 app_ui <- if (AUTH_ENABLED)
-  secure_app(ui, enable_admin = TRUE, language = I18N_DEFAULT,
+  secure_app(ui, enable_admin = TRUE, language = "fr",
              tags_top = tags$div(style = "text-align:center; color:#26333F;",
-                                 tags$h4("iTafaray — Tableau de bord One Health"),
+                                 tags$h4("i-Tafaray — Tableau de bord One Health"),
                                  tags$p(style = "color:#5A6672;", "Accès réservé"))) else ui
 shinyApp(ui = app_ui, server = server)

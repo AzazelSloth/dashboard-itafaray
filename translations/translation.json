@@ -126,9 +126,9 @@
       "mg": "Fitsidihana tarihina"
     },
     {
-      "fr": "Guide de la plateforme iTafaray",
-      "en": "iTafaray platform guide",
-      "mg": "Torolàlana momba ny sehatra iTafaray"
+      "fr": "Guide de la plateforme i-Tafaray",
+      "en": "i-Tafaray platform guide",
+      "mg": "Torolàlana momba ny sehatra i-Tafaray"
     },
     {
       "fr": "Plateforme de surveillance One Health (Une seule santé). Elle réunit les signaux humains, animaux et environnementaux pour révéler, par leur croisement, des menaces qu'aucun secteur ne verrait seul.",
@@ -471,9 +471,9 @@
       "mg": "Manodidina ny fanairana tsirairay, atambatra ny tranga ao amin'ny fokontany iray nandritra ny 14 andro talohany : tazonina ny vondrona mampifanindry sehatra roa farafahakeliny — izay no fototry ny One Health. « Fotoana azo » = isan'ny andro teo anelanelan'ny tranga biby/tontolo iainana voalohany sy ny tranga olombelona voalohany."
     },
     {
-      "fr": "iTafaray — Tableau de bord central One Health. Preuve de concept R / Shiny.",
-      "en": "iTafaray — Central One Health dashboard. R / Shiny proof of concept.",
-      "mg": "iTafaray — Tabilao foibe Fahasalamana iray. Porofon-kevitra R / Shiny."
+      "fr": "i-Tafaray — Tableau de bord central One Health. Preuve de concept R / Shiny.",
+      "en": "i-Tafaray — Central One Health dashboard. R / Shiny proof of concept.",
+      "mg": "i-Tafaray — Tabilao foibe Fahasalamana iray. Porofon-kevitra R / Shiny."
     },
     {
       "fr": "Les données sont entièrement synthétiques : un fond de signaux de routine dans lequel sont insérés 6 scénarios One Health (H5N1, peste, rage, Mpox, Ebola, contamination hydrique). Les trois tables — Signaux, Événements, Alertes — sont reliées par l'identifiant id_signal.",
@@ -884,6 +884,86 @@
       "fr": "Faune & contact homme–animal",
       "en": "Wildlife & human–animal contact",
       "mg": "Bibidia & fifandraisana olona-biby"
+    },
+    {
+      "fr": "maj",
+      "en": "upd.",
+      "mg": "fanavaozana"
+    },
+    {
+      "fr": "À propos d'i-Tafaray",
+      "en": "About i-Tafaray",
+      "mg": ""
+    },
+    {
+      "fr": "Le projet AFRICAM Madagascar",
+      "en": "The AFRICAM Madagascar project",
+      "mg": ""
+    },
+    {
+      "fr": "AFRICAM Madagascar, porté par l'initiative PREZODE et coordonné par le CIRAD avec le financement de l'AFD, vise à renforcer la surveillance des maladies zoonotiques prioritaires selon une approche One Health intégrée. Dans le district d'Ifanadiana, il développe un système de surveillance associant santé humaine, animale, et de la faune et de l'environnement. La réalisation technique est confiée à l'ONG Pivot.",
+      "en": "AFRICAM Madagascar, led by the PREZODE initiative and coordinated by CIRAD with funding from AFD, aims to strengthen surveillance of priority zoonotic diseases through an integrated One Health approach. In the Ifanadiana district, it is developing a surveillance system combining human, animal, wildlife and environmental health. Technical implementation is entrusted to the NGO Pivot.",
+      "mg": ""
+    },
+    {
+      "fr": "La surveillance à base évènementielle (SBE)",
+      "en": "Event-based surveillance (EBS)",
+      "mg": ""
+    },
+    {
+      "fr": "La SBE repère les évènements inhabituels au plus près du terrain — agents communautaires, centres de santé de base, districts — plutôt que de s'appuyer uniquement sur des indicateurs de routine. Chaque signal est collecté (application CommCare), trié, vérifié puis évalué selon son niveau de risque, et peut déclencher une alerte. i-Tafaray centralise les signaux des trois secteurs et révèle, par leur croisement dans l'espace et le temps, des menaces qu'aucun secteur ne verrait seul.",
+      "en": "EBS detects unusual events as close to the field as possible — community health workers, basic health centres, districts — rather than relying only on routine indicators. Each signal is collected (CommCare app), triaged, verified and then assessed by its risk level, and may trigger an alert. i-Tafaray centralises signals from the three sectors and reveals, through their cross-analysis in space and time, threats that no single sector would see alone.",
+      "mg": ""
+    },
+    {
+      "fr": "L'appui de la Banque mondiale",
+      "en": "World Bank support",
+      "mg": ""
+    },
+    {
+      "fr": "Le Projet de préparation et de réponse aux pandémies (PPSB), financé par la Banque mondiale, soutient la mise en place d'un système de notification électronique, en temps réel, interopérable et interconnecté, conforme au Règlement sanitaire international (RSI). i-Tafaray contribue à cet objectif via l'interopérabilité des données (standard FHIR, échange par X-Road).",
+      "en": "The Pandemic Preparedness and Response Project (PPSB), funded by the World Bank, supports the establishment of a real-time, interoperable and interconnected electronic notification system, compliant with the International Health Regulations (IHR). i-Tafaray contributes to this goal through data interoperability (FHIR standard, exchange via X-Road).",
+      "mg": ""
+    },
+    {
+      "fr": "L'approche One Health (Une seule santé)",
+      "en": "The One Health approach",
+      "mg": ""
+    },
+    {
+      "fr": "One Health reconnaît que les santés humaine, animale et environnementale sont interdépendantes. La plupart des maladies émergentes sont d'origine animale (zoonoses) et leur apparition est liée aux pressions sur les écosystèmes. Surveiller les trois secteurs ensemble permet de détecter plus tôt et d'agir de façon coordonnée.",
+      "en": "One Health recognises that human, animal and environmental health are interdependent. Most emerging diseases are of animal origin (zoonoses) and their emergence is linked to pressures on ecosystems. Monitoring the three sectors together makes it possible to detect earlier and respond in a coordinated way.",
+      "mg": ""
+    },
+    {
+      "fr": "Partenaires",
+      "en": "Partners",
+      "mg": ""
+    },
+    {
+      "fr": "Les données affichées sont entièrement synthétiques : un fond de signaux de routine dans lequel sont insérés six scénarios One Health (H5N1, peste, rage, Mpox, Ebola, contamination hydrique). Les trois tables — Signaux, Événements, Alertes — sont reliées par l'identifiant id_signal.",
+      "en": "The data shown is entirely synthetic: a background of routine signals into which six One Health scenarios are inserted (H5N1, plague, rabies, Mpox, Ebola, water contamination). The three tables — Signals, Events, Alerts — are linked by the id_signal identifier.",
+      "mg": ""
+    },
+    {
+      "fr": "One Health reconnaît que les santés humaine, animale et environnementale sont interdépendantes. La plupart des maladies émergentes sont d'origine animale (zoonoses) et leur apparition est liée aux contacts exacerbés entre hommes et animaux, aux pressions sur les écosystèmes et au changement climatique. Surveiller les trois secteurs — homme, animal, environnement — simultanément permet de détecter plus tôt et d'agir de façon précoce et coordonnée.",
+      "en": "One Health recognises that human, animal and environmental health are interdependent. Most emerging diseases are of animal origin (zoonoses) and their emergence is linked to intensified human–animal contact, pressures on ecosystems and climate change. Monitoring the three sectors — human, animal, environment — simultaneously makes it possible to detect earlier and respond early and in a coordinated way.",
+      "mg": ""
+    },
+    {
+      "fr": "La SBE repère les évènements inhabituels liés à la santé humaine, animale ou environnementale et potentiellement indicateurs d'émergence, au plus près du terrain — agents communautaires, centres de santé de base, districts. Chaque signal est collecté par les agents de terrain (application CommCare), trié, vérifié puis évalué selon son niveau de risque, et peut déclencher une alerte. i-Tafaray, plateforme digitale One Health gérée par l'Unité de Gouvernance Digitale (UGD), centralise les signaux des trois secteurs et révèle, par leur croisement dans l'espace et le temps, des menaces qu'aucun secteur ne verrait seul.",
+      "en": "EBS detects unusual events related to human, animal or environmental health and potentially indicative of emergence, as close to the field as possible — community health workers, basic health centres, districts. Each signal is collected by field workers (CommCare app), triaged, verified and then assessed by its risk level, and may trigger an alert. i-Tafaray, the One Health digital platform managed by the Digital Governance Unit (UGD), centralises signals from the three sectors and reveals, through their cross-analysis in space and time, threats that no single sector would see alone.",
+      "mg": ""
+    },
+    {
+      "fr": "Menace",
+      "en": "Threat",
+      "mg": "Loza"
+    },
+    {
+      "fr": "Autre observation",
+      "en": "Other observation",
+      "mg": "Fandinihana hafa"
     }
   ]
 }

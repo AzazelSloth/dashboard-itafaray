@@ -1,19 +1,37 @@
 # =====================================================================
-#  i-Tafaray — lancement local en un service
-#  Démarrer :  docker compose up -d --build
-#  Ouvrir   :  http://localhost:3838
-#  Arrêter  :  docker compose down
+#  i-Tafaray — Déploiement production (EC2 + Docker)
+#  3 services :
+#    app     : l'application Shiny (non exposée directement sur Internet)
+#    nginx   : reverse proxy + terminaison HTTPS (ports 80 / 443)
+#    certbot : obtention et renouvellement automatique des certificats TLS
+#
+#  Démarrage :
+#    1) cp .env.example .env   puis renseigner DOMAIN et EMAIL
+#    2) ./init-letsencrypt.sh  (une seule fois — crée le certificat)
+#    3) docker compose up -d
 # =====================================================================
 
 services:
   app:
+    # En déploiement CI/CD, l'image est fournie par la variable APP_IMAGE
+    # (image pré-construite et poussée dans le registre par le pipeline).
+    # En local / déploiement autonome, on retombe sur l'image construite via `build: .`.
+    image: ${APP_IMAGE:-itafaray-poc:1.1}
     build: .
-    image: ${APP_IMAGE:-itafaray:latest}
-    container_name: itafaray
+    container_name: itafaray-app
+    restart: unless-stopped
+    expose:
+      - "3838"            # accessible uniquement par nginx (réseau interne)
+    networks:
+      - itafaray
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: itafaray-nginx
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
     ports:
-      - "3838:38
+      - "3838:3838"

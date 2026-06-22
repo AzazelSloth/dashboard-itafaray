@@ -66,6 +66,7 @@ RUN chown -R shiny:shiny ${APP_HOME}
 
 USER shiny
 
+# Port interne de l'application
 EXPOSE 3838
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \

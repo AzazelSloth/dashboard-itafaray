@@ -129,24 +129,36 @@ jobs:
         run: |
           set -euo pipefail
           IMAGE="$SHA_IMAGE"
+          CONTAINER_NAME="itafaray-smoke"
+
+          cleanup() {
+            docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
 
           if [ "${GITHUB_EVENT_NAME}" != "pull_request" ] && [ "$PUBLISH_IMAGE" = "true" ]; then
             docker pull "$IMAGE"
           fi
 
-          docker run -d --rm --name itafaray-smoke -p 3838:3838 "$IMAGE"
+          docker run -d --name "$CONTAINER_NAME" -p 3838:3838 "$IMAGE"
 
           for _ in $(seq 1 36); do
             if curl -fsS http://127.0.0.1:3838 >/dev/null; then
               echo "Shiny app is reachable"
-              docker stop itafaray-smoke >/dev/null
               exit 0
             fi
+
+            if [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME")" != "true" ]; then
+              break
+            fi
+
             sleep 5
           done
 
-          docker logs itafaray-smoke
-          docker stop itafaray-smoke >/dev/null || true
+          echo "Container state:"
+          docker inspect -f 'status={{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} error={{json .State.Error}} started={{.State.StartedAt}} finished={{.State.FinishedAt}}' "$CONTAINER_NAME"
+          echo "Container logs:"
+          docker logs "$CONTAINER_NAME" || true
           exit 1
 
   deploy:

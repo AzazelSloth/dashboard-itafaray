@@ -99,9 +99,14 @@ lang_switcher_js <- function() {
           if (c === code) el.classList.add('active'); else el.classList.remove('active');
         });
       }
+      function syncDocumentTitle(lang) {
+        var labels = window._i18nFwd[lang] || {};
+        document.title = labels['Tableau de bord iTafaray'] || 'Tableau de bord iTafaray';
+      }
       function swapLanguage(newLang) {
-        if (!newLang || newLang === window._currentLang) return;
         if (['fr','en','mg'].indexOf(newLang) === -1) return;
+        syncDocumentTitle(newLang);
+        if (!newLang || newLang === window._currentLang) { setActivePill(newLang); return; }
         var fromLang = window._currentLang;
         var fwd = window._i18nFwd[newLang] || {};
         var bwd = (fromLang === 'fr') ? null : (window._i18nBwd[fromLang] || {});
@@ -171,6 +176,7 @@ lang_switcher_js <- function() {
         Shiny.addCustomMessageHandler('i18n_set_lang', swapLanguage);
         Shiny.addCustomMessageHandler('set_lang_pill', setActivePill);
       }
+      syncDocumentTitle(window._currentLang);
       registerHandlers(); startObserver();
     })();
   ", payload_json)

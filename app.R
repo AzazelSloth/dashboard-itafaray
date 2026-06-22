@@ -441,6 +441,7 @@ if (AUTH_ENABLED && !file.exists(db_path)) {
 }
 
 ui <- dashboardPage(
+  title = i18n_lookup("Tableau de bord iTafaray", I18N_DEFAULT),
   skin = "blue",
   dashboardHeader(
     title = tags$span(

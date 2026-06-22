@@ -12,18 +12,18 @@
 
 FROM rocker/shiny:4.4.1
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+      libxt6 \
+      pandoc \
       libcurl4-openssl-dev \
       libssl-dev \
       libxml2-dev \
       libfontconfig1-dev \
       libcairo2-dev \
-      libxt6 \
       libsodium-dev \
-      pandoc \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN install2.r --error --skipinstalled \
+    && install2.r --error --skipinstalled \
       shinydashboard \
       dplyr \
       ggplot2 \
@@ -38,7 +38,17 @@ RUN install2.r --error --skipinstalled \
       gridExtra \
       jsonlite \
       httr2 \
-      rmarkdown
+      rmarkdown \
+    # Keep runtime packages only: headers and toolchains are useful to build R libs
+    # but they unnecessarily increase the final image attack surface.
+    && apt-get purge -y --auto-remove \
+      libcurl4-openssl-dev \
+      libssl-dev \
+      libxml2-dev \
+      libfontconfig1-dev \
+      libcairo2-dev \
+      libsodium-dev \
+    && rm -rf /var/lib/apt/lists/* /tmp/downloaded_packages /tmp/*.rds
 
 WORKDIR /app
 COPY app.R prepare_data.R i18n_setup.R xroad_bridge.R credentials.sqlite ./

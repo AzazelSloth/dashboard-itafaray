@@ -938,22 +938,22 @@
     {
       "fr": "One Health reconnaît que les santés humaine, animale et environnementale sont interdépendantes. La plupart des maladies émergentes sont d'origine animale (zoonoses) et leur apparition est liée aux pressions sur les écosystèmes. Surveiller les trois secteurs ensemble permet de détecter plus tôt et d'agir de façon coordonnée.",
       "en": "One Health recognises that human, animal and environmental health are interdependent. Most emerging diseases are of animal origin (zoonoses) and their emergence is linked to pressures on ecosystems. Monitoring the three sectors together makes it possible to detect earlier and respond in a coordinated way.",
-      "mg": ""
+      "mg": "Fahasalamana iray dia mivoy fa mifandray ny fahasalaman'ny olombelona, ny biby ary ny tontolo iainana. Ny ankamaroan'ny aretina vao misondrotra dia avy amin'ny biby (zoonoses) ary mifandray amin'ny tsindry amin'ny tontolo iainana ny fipoirany. Ny fanaraha-maso ireo sehatra telo miaraka dia ahafahana mamantatra haingana kokoa sy mamaly amin'ny fomba voarindra."
     },
     {
       "fr": "Partenaires",
       "en": "Partners",
-      "mg": ""
+      "mg": "Mpiara-miombon'antoka"
     },
     {
       "fr": "Les données affichées sont entièrement synthétiques : un fond de signaux de routine dans lequel sont insérés six scénarios One Health (H5N1, peste, rage, Mpox, Ebola, contamination hydrique). Les trois tables — Signaux, Événements, Alertes — sont reliées par l'identifiant id_signal.",
       "en": "The data shown is entirely synthetic: a background of routine signals into which six One Health scenarios are inserted (H5N1, plague, rabies, Mpox, Ebola, water contamination). The three tables — Signals, Events, Alerts — are linked by the id_signal identifier.",
-      "mg": ""
+      "mg": "Ireo angona miseho ireo dia noforonina tanteraka: fototra tranga mahazatra izay nampidirana tantara Fahasalamana iray 6 (H5N1, pesta, hadratra, Mpox, Ebola, fandotoana rano). Ny tabilao telo — Tranga, Tranga, Fanairana — dia mifandray amin'ny id_signal."
     },
     {
       "fr": "One Health reconnaît que les santés humaine, animale et environnementale sont interdépendantes. La plupart des maladies émergentes sont d'origine animale (zoonoses) et leur apparition est liée aux contacts exacerbés entre hommes et animaux, aux pressions sur les écosystèmes et au changement climatique. Surveiller les trois secteurs — homme, animal, environnement — simultanément permet de détecter plus tôt et d'agir de façon précoce et coordonnée.",
       "en": "One Health recognises that human, animal and environmental health are interdependent. Most emerging diseases are of animal origin (zoonoses) and their emergence is linked to intensified human–animal contact, pressures on ecosystems and climate change. Monitoring the three sectors — human, animal, environment — simultaneously makes it possible to detect earlier and respond early and in a coordinated way.",
-      "mg": ""
+      "mg": "Fahasalamana iray dia mivoy fa mifandray ny fahasalaman'ny olombelona, ny biby ary ny tontolo iainana. Ny ankamaroan'ny aretina vao misondrotra dia avy amin'ny biby (zoonoses) ary mifandray amin'ny tsindry amin'ny tontolo iainana ny fipoirany. Ny fanaraha-maso ireo sehatra telo miaraka dia ahafahana mamantatra haingana kokoa sy mamaly amin'ny fomba voarindra."
     },
     {
       "fr": "Absentéisme scolaire",
@@ -998,7 +998,7 @@
     {
       "fr": "Espèces envahissantes",
       "en": "Invasive species",
-      "mg": "Karazana manafika"
+      "mg": "Karaza mora mihanaka"
     },
     {
       "fr": "Feux multiples",
@@ -1023,7 +1023,7 @@
     {
       "fr": "Mortalité animale inexpliquée",
       "en": "Unexplained animal mortality",
-      "mg": "Fahafatesan-biby tsy hay hazavaina"
+      "mg": "Fahafatesana biby tsy hay hazavaina"
     },
     {
       "fr": "Odeur inhabituelle (pollution)",

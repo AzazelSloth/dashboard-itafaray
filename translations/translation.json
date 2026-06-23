@@ -1046,6 +1046,71 @@
       "mg": "Mariky ny fitrandrahana ala"
     },
     {
+      "fr": "ALERTE - exposition rage (morsures multiples)",
+      "en": "ALERT - rabies exposure (multiple bites)",
+      "mg": "FANAIRANA - fisehoan'ny haromotana (kaikitra maromaro)"
+    },
+    {
+      "fr": "ALERTE - suspicion H5N1 (volailles + humains)",
+      "en": "ALERT - suspected H5N1 (poultry + humans)",
+      "mg": "FANAIRANA - ahiahy H5N1 (akoho amam-borona + olombelona)"
+    },
+    {
+      "fr": "ALERTE - suspicion de Mpox (cas avec éruption)",
+      "en": "ALERT - suspected Mpox (cases with rash)",
+      "mg": "FANAIRANA - ahiahy Mpox (tranga misy fery/eritreritra)"
+    },
+    {
+      "fr": "ALERTE - suspicion de contamination hydrique",
+      "en": "ALERT - suspected water contamination",
+      "mg": "FANAIRANA - ahiahy fandotoana rano"
+    },
+    {
+      "fr": "ALERTE - suspicion de fièvre hémorragique (Ebola)",
+      "en": "ALERT - suspected haemorrhagic fever (Ebola)",
+      "mg": "FANAIRANA - ahiahy tazo mandriaka (Ebola)"
+    },
+    {
+      "fr": "ALERTE - suspicion de peste (décès groupés)",
+      "en": "ALERT - suspected plague (clustered deaths)",
+      "mg": "FANAIRANA - ahiahy pesta (fahafatesana maromaro miaraka)"
+    },
+    {
+      "fr": "Cas humains groupés - investigation",
+      "en": "Clustered human cases - investigation",
+      "mg": "Trangan'olombelona maromaro miaraka - fanadihadiana"
+    },
+    {
+      "fr": "Mortalité animale anormale - investigation",
+      "en": "Abnormal animal mortality - investigation",
+      "mg": "Fahafatesan-biby tsy ara-dalàna - fanadihadiana"
+    },
+    {
+      "fr": "Mortalité aviaire anormale - investigation",
+      "en": "Abnormal bird mortality - investigation",
+      "mg": "Fahafatesan'ny vorona tsy ara-dalàna - fanadihadiana"
+    },
+    {
+      "fr": "Mortalité aviaire sauvage - vigilance",
+      "en": "Wild bird mortality - vigilance",
+      "mg": "Fahafatesan'ny vorona dia - fitandremana"
+    },
+    {
+      "fr": "Mortalité faune (chauves-souris) - investigation",
+      "en": "Wildlife mortality (bats) - investigation",
+      "mg": "Fahafatesan'ny bibidia (ramanavy) - fanadihadiana"
+    },
+    {
+      "fr": "Mortalité faune - surveillance",
+      "en": "Wildlife mortality - surveillance",
+      "mg": "Fahafatesan'ny bibidia - fanaraha-maso"
+    },
+    {
+      "fr": "Vérification / suivi",
+      "en": "Verification / follow-up",
+      "mg": "Fanamarinana / fanaraha-maso"
+    },
+    {
       "fr": "La SBE repère les évènements inhabituels liés à la santé humaine, animale ou environnementale et potentiellement indicateurs d'émergence, au plus près du terrain — agents communautaires, centres de santé de base, districts. Chaque signal est collecté par les agents de terrain (application CommCare), trié, vérifié puis évalué selon son niveau de risque, et peut déclencher une alerte. i-Tafaray, plateforme digitale One Health gérée par l'Unité de Gouvernance Digitale (UGD), centralise les signaux des trois secteurs et révèle, par leur croisement dans l'espace et le temps, des menaces qu'aucun secteur ne verrait seul.",
       "en": "EBS detects unusual events related to human, animal or environmental health and potentially indicative of emergence, as close to the field as possible — community health workers, basic health centres, districts. Each signal is collected by field workers (CommCare app), triaged, verified and then assessed by its risk level, and may trigger an alert. i-Tafaray, the One Health digital platform managed by the Digital Governance Unit (UGD), centralises signals from the three sectors and reveals, through their cross-analysis in space and time, threats that no single sector would see alone.",
       "mg": ""

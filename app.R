@@ -145,6 +145,7 @@ RISK_LAB <- setNames(names(SEV), as.character(SEV))
 translate_signal <- function(x, lang = "fr") i18n_vec(x, lang)
 format_signal_label <- function(code, signal, lang = "fr", sep = " — ")
   paste0(code, sep, translate_signal(signal, lang))
+translate_alert <- function(x, lang = "fr") i18n_vec(x, lang)
 # Ventilation complète d'un vecteur de niveaux de risque -> phrase qui totalise l'effectif
 repartition_risque <- function(x, lang = "fr") {
   ord <- names(sort(SEV, decreasing = TRUE))
@@ -1212,7 +1213,7 @@ server <- function(input, output, session) {
                 Signal = format_signal_label(code, signal, current_lang()), Fokontany = fokontany,
                 Suspicion = ifelse(classification_event == "Non précisé", "—", classification_event),
                 Risque = as.character(niveau_risque),
-                `Croisement One Health` = croise, Alerte = alerte_label,
+                `Croisement One Health` = croise, Alerte = translate_alert(alerte_label, current_lang()),
                 .details = details)
     datatable(
       d, rownames = FALSE, selection = "none", escape = FALSE,
@@ -1366,8 +1367,9 @@ server <- function(input, output, session) {
         transmute(Date = format(date_de_survenue, "%d/%m/%Y"), Secteur = secteur,
                   Signal = format_signal_label(code, signal, lg, sep = " - "), Fokontany = fokontany,
                   Suspicion = ifelse(classification_event == "Non précisé", "-", classification_event),
-                  Risque = as.character(niveau_risque)) %>% head(12)
-      names(alertes) <- c(T("Date"), T("Secteur"), T("Signal"), T("Fokontany"), T("Suspicion"), T("Risque"))
+                  Risque = as.character(niveau_risque),
+                  Alerte = translate_alert(alerte_label, lg)) %>% head(12)
+      names(alertes) <- c(T("Date"), T("Secteur"), T("Signal"), T("Fokontany"), T("Suspicion"), T("Risque"), T("Alerte"))
       tt <- gridExtra::ttheme_minimal(base_size = 8, padding = grid::unit(c(4, 3), "mm"),
               core = list(fg_params = list(hjust = 0, x = 0.04)),
               colhead = list(bg_params = list(fill = "#1e3a5f"),
@@ -1606,7 +1608,7 @@ server <- function(input, output, session) {
                         "Date : ", format(date_de_survenue, "%d/%m/%Y"), "<br>",
                         "Fokontany : ", fokontany, "<br>",
                         "Niveau de risque : ", niveau_risque, "<br>",
-                        "Action : ", alerte_label))
+                        "Action : ", translate_alert(alerte_label, lg)))
 
     m %>%
       addLegend("bottomright", pal = pal, values = SECTEURS, title = "Secteur") %>%
@@ -2138,7 +2140,7 @@ server <- function(input, output, session) {
                 Signal = format_signal_label(code, signal, lg), Fokontany = fokontany,
                 Suspicion = ifelse(classification_event == "Non précisé", "—", classification_event),
                 Cas = Nombre_cas, Décès = Nombre_deces,
-                Risque = as.character(niveau_risque), Alerte = alerte_label)
+                Risque = as.character(niveau_risque), Alerte = translate_alert(alerte_label, lg))
     datatable(d, rownames = FALSE, selection = "single",
               options = list(pageLength = 10, dom = "tip"))
   })
@@ -2155,7 +2157,7 @@ server <- function(input, output, session) {
              tags$div(style = "font-size:15px; font-weight:600; color:#26333F;",
                       paste0(format_signal_label(a$code, a$signal, current_lang()), "  ·  Fokontany ", a$fokontany)),
              tags$div(style = "color:#9E2A2B; font-weight:600; margin-top:5px;",
-                      paste0("Alerte : ", a$alerte_label, "  (", as.character(a$niveau_risque), ")")),
+                      paste0("Alerte : ", translate_alert(a$alerte_label, current_lang()), "  (", as.character(a$niveau_risque), ")")),
              if (a$classification_event != "Non précisé")
                tags$div(style = "color:#5A6672; margin-top:3px;",
                         paste0("Suspicion : ", a$classification_event)) else NULL)
@@ -2175,7 +2177,7 @@ server <- function(input, output, session) {
         paste0("Vérifié : ", .vn(a$is_verifie), " · Véracité : ", .vn(a$veracite)),
         paste0("Q1 sévérité : ", .vn(a$q1), " · Q2 propagation : ", .vn(a$q2),
                " · Q3 traitement/contrôle : ", .vn(a$q3), "  →  Niveau : ", as.character(a$niveau_risque)),
-        a$alerte_label),
+        translate_alert(a$alerte_label, current_lang())),
       check.names = FALSE, stringsAsFactors = FALSE)
     datatable(chain, rownames = FALSE, options = list(dom = "t", ordering = FALSE)) %>%
       formatStyle("Étape", fontWeight = "bold")

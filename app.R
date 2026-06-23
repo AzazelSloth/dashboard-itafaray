@@ -302,7 +302,7 @@ report_html_render <- function(file, d, d_all, lg, periode_lbl) {
       leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) %>%
       leaflet::addCircleMarkers(~lon, ~lat, radius = 5, stroke = FALSE, fillOpacity = 0.7,
         color = ~pal(secteur), group = "Signaux",
-        popup = ~paste0("<b>", code, " — ", signal, "</b><br>",
+        popup = ~paste0("<b>", format_signal_label(code, signal, lg), "</b><br>",
                         "Fokontany : ", fokontany, "<br>",
                         "Date : ", format(date_de_survenue, "%d/%m/%Y"), "<br>",
                         "Risque : ", niveau_risque))
@@ -320,7 +320,7 @@ report_html_render <- function(file, d, d_all, lg, periode_lbl) {
     if (nrow(da) > 0)
       m <- m %>% leaflet::addCircleMarkers(data = da, lng = ~lon, lat = ~lat, radius = 10,
         stroke = TRUE, weight = 2.5, color = "#9E2A2B", fillOpacity = 0, opacity = 1, group = "Alertes",
-        popup = ~paste0("<b>ALERTE — ", code, " — ", signal, "</b><br>",
+        popup = ~paste0("<b>ALERTE — ", format_signal_label(code, signal, lg), "</b><br>",
                         "Fokontany : ", fokontany, "<br>Niveau de risque : ", niveau_risque))
     m %>% leaflet::addLegend("bottomright", pal = pal, values = SECTEURS, title = Tr("Secteur")) %>%
       leaflet::addLayersControl(overlayGroups = c("Signaux", "Grappes One Health", "Alertes"),
@@ -335,7 +335,7 @@ report_html_render <- function(file, d, d_all, lg, periode_lbl) {
   tabdf <- al %>% dplyr::transmute(
     Date = format(date_de_survenue, "%d/%m/%Y"),
     Secteur = i18n_vec(secteur, lg),
-    Signal = paste0(code, " — ", signal),
+    Signal = format_signal_label(code, signal, lg),
     Fokontany = fokontany,
     Suspicion = ifelse(classification_event == "Non précisé", "—", classification_event),
     Risque = i18n_vec(as.character(niveau_risque), lg),
@@ -1209,7 +1209,7 @@ server <- function(input, output, session) {
                               "<div style='padding:6px 14px 6px 46px;color:#9AA3AB;font-size:12px;'>Aucune grappe inter-secteurs associée.</div>",
                               details)) %>%
       transmute(` ` = "", Date = format(date_de_survenue, "%d/%m/%Y"), Secteur = secteur,
-                Signal = paste0(code, " — ", signal), Fokontany = fokontany,
+                Signal = format_signal_label(code, signal, current_lang()), Fokontany = fokontany,
                 Suspicion = ifelse(classification_event == "Non précisé", "—", classification_event),
                 Risque = as.character(niveau_risque),
                 `Croisement One Health` = croise, Alerte = alerte_label,
@@ -1257,7 +1257,7 @@ server <- function(input, output, session) {
     if (is.null(i) || i < 1) return()
     a <- s_al_data()[i, ]
     showModal(modalDialog(
-      title = paste0("Chaîne de décision — ", a$code, " · ", a$fokontany),
+      title = paste0("Chaîne de décision — ", format_signal_label(a$code, a$signal, current_lang()), " · ", a$fokontany),
       uiOutput("s_al_summary"), DTOutput("s_al_chain"),
       size = "l", easyClose = TRUE, footer = modalButton("Fermer")
     ))
@@ -1364,7 +1364,7 @@ server <- function(input, output, session) {
       ## --- Tableau alertes ---
       alertes <- d %>% filter(a_une_alerte) %>% arrange(desc(date_de_survenue)) %>%
         transmute(Date = format(date_de_survenue, "%d/%m/%Y"), Secteur = secteur,
-                  Signal = paste0(code, " - ", signal), Fokontany = fokontany,
+                  Signal = format_signal_label(code, signal, lg, sep = " - "), Fokontany = fokontany,
                   Suspicion = ifelse(classification_event == "Non précisé", "-", classification_event),
                   Risque = as.character(niveau_risque)) %>% head(12)
       names(alertes) <- c(T("Date"), T("Secteur"), T("Signal"), T("Fokontany"), T("Suspicion"), T("Risque"))
@@ -2153,7 +2153,7 @@ server <- function(input, output, session) {
   alerte_summary_ui <- function(a) {
     tags$div(style = "margin-bottom:12px;",
              tags$div(style = "font-size:15px; font-weight:600; color:#26333F;",
-                      paste0(a$code, " — ", a$signal, "  ·  Fokontany ", a$fokontany)),
+                      paste0(format_signal_label(a$code, a$signal, current_lang()), "  ·  Fokontany ", a$fokontany)),
              tags$div(style = "color:#9E2A2B; font-weight:600; margin-top:5px;",
                       paste0("Alerte : ", a$alerte_label, "  (", as.character(a$niveau_risque), ")")),
              if (a$classification_event != "Non précisé")

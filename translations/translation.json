@@ -956,54 +956,59 @@
       "mg": ""
     },
     {
-      "fr": "Constatations d’une série d’avortement chez les ruminants dans une localité en une semaine",
-      "en": "Findings of a series of abortions among ruminants in one locality within a week",
-      "mg": "Tranga fahafahan’anaka nisesisesy teo amin’ny biby fiompy tao anatin’ny herinandro"
+      "fr": "Absentéisme scolaire",
+      "en": "School absenteeism",
+      "mg": "Tsy fahatongavan'ny mpianatra an-tsekoly"
     },
     {
-      "fr": "Toute mortalité inexpliquée d'animaux de toute espece (rat, aquatiques, oiseaux, et ou marins) dans une localité / aires d’abattage/ aires protégés",
-      "en": "Any unexplained mortality of animals of any species (rats, aquatic animals, birds, and/or marine animals) in a locality, slaughter area, or protected area",
-      "mg": "Fisehoan'ny soritr'aretina mitovy sy tsy mahazatra amin'ny vondrona biby avy amin'ny toerana iray / faritra famonoana / faritra arovana"
+      "fr": "Augmentation de vecteurs (puces)",
+      "en": "Increase in vectors (fleas)",
+      "mg": "Fitomboan'ny mpampita aretina (parasy)"
     },
     {
-      "fr": "Apparition des signes de maladie inhabituelle et similaire chez le groupe d’animaux de même localité/ aires d’abattage/ aires protégés",
-      "en": "Appearance of unusual and similar signs of disease among a group of animals from the same locality, slaughter area, or protected area",
-      "mg": "Ny fahafatesan'ny biby an-tanety na an-dranomandry tsy hay hazavaina ao amin'ny toerana iray / faritra famonoana / faritra arovana"
+      "fr": "Avortements en série (ruminants)",
+      "en": "Series of abortions (ruminants)",
+      "mg": "Tranga fahafahan'anaka misesy (biby fiompy mandinika)"
     },
     {
-      "fr": "Augmentation inhabituelle des vecteurs transmetteurs de la maladie puce dans un village",
-      "en": "Unusual increase in flea-borne disease vectors in a village",
-      "mg": "Fitomboan’ny bibikely tsy mahazatra mamindra ny aretina amin'ny tanàna iray"
+      "fr": "Cadavres d'animaux sauvages",
+      "en": "Wild animal carcasses",
+      "mg": "Fatim-biby dia"
     },
     {
-      "fr": "Changement de couleur, de goût, d’odeur des sources d'eau (eau du robinet, eau du puit, rivière, fleuve, …)",
-      "en": "Change in colour, taste, or odour of water sources (tap water, well water, river, stream, ...)",
-      "mg": "Fiovana loko, tsiro, fofon'ny rano fisotro na paompy na loharanon-dranom-piarahamonina ao anatin'ny herinandro"
+      "fr": "Changement couleur/goût/odeur de l'eau",
+      "en": "Change in water colour/taste/odour",
+      "mg": "Fiovan'ny loko/tsiro/fofon'ny rano"
     },
     {
-      "fr": "Constatation de plusieurs feux (feu de brousse, feu de forêt, culture sur brulis, …) à une zone et moment défini",
-      "en": "Observation of several fires (bush fires, forest fires, slash-and-burn farming, ...) in a defined area and time",
-      "mg": "Fisehoana afo maromaro (doro tanety, doro ala, tavy, ..)amin'ny toerana sy fotoana voafaritra"
-    },
-    {
-      "fr": "Perception d’odeur inhabituelle autour d’une usine implantée ou dans une zone définie au sein de la population",
-      "en": "Perception of an unusual odour around a factory or within a defined area among the population",
-      "mg": "Ny fahatsapana fofona tsy mahazatra manodidina ny orinasa iray ao anatin'ny mponina"
-    },
-    {
-      "fr": "Trace d'exploittation de forêt",
-      "en": "Signs of forest exploitation",
-      "mg": "Mariky ny fitrandrahana ala"
-    },
-    {
-      "fr": "Dechets cumulés",
+      "fr": "Déchets cumulés",
       "en": "Accumulated waste",
       "mg": "Fako mivangongo"
     },
     {
-      "fr": "Cadavre d'animaux sauvages",
-      "en": "Carcass of wild animals",
-      "mg": "Fahafatesana vorondia"
+      "fr": "Décès groupés humains",
+      "en": "Clustered human deaths",
+      "mg": "Fahafatesan'olona maromaro miaraka"
+    },
+    {
+      "fr": "Déplacements anormaux de population",
+      "en": "Abnormal population movements",
+      "mg": "Fifindra-monina tsy ara-dalàna"
+    },
+    {
+      "fr": "Espèces envahissantes",
+      "en": "Invasive species",
+      "mg": "Karazana manafika"
+    },
+    {
+      "fr": "Feux multiples",
+      "en": "Multiple fires",
+      "mg": "Afo maromaro"
+    },
+    {
+      "fr": "Maladie groupée des animaux",
+      "en": "Clustered animal illness",
+      "mg": "Aretina mitambatra amin'ny biby"
     },
     {
       "fr": "Maladies des plants",
@@ -1011,39 +1016,34 @@
       "mg": "Aretin'ny zavamaniry"
     },
     {
-      "fr": "Especes envahissantes",
-      "en": "Invasive species",
-      "mg": "Fidirana singa vaovao izay mety hanimba tontolo iainana"
+      "fr": "Morsures / griffures multiples",
+      "en": "Multiple bites / scratches",
+      "mg": "Kaikitra / rangotra maromaro"
     },
     {
-      "fr": "Tarissement puits/rivières",
-      "en": "Drying up of wells and rivers",
-      "mg": "Faharitran'ny vovo sy ny renirano"
+      "fr": "Mortalité animale inexpliquée",
+      "en": "Unexplained animal mortality",
+      "mg": "Fahafatesan-biby tsy hay hazavaina"
     },
     {
-      "fr": "Survenue de signes/symptômes similaires et inhabituels chez deux ou plusieurs personnes dans un village ou une communauté ou une carrière de mine ou une école ou un établissement dans une semaine",
-      "en": "Occurrence of similar and unusual signs or symptoms in two or more people within a week in a village, community, mine, school, or other establishment",
-      "mg": "Fisehoan'ny soritr'aretina mitovy sy tsy mahazatra amin'ny olona roa na maromaro ao amin'ny tanàna iray na vondrom-piarahamonina na toeram-pitrandrahana harena an-kibon'ny tany na sekoly na orinasa ao anatin'ny herinandro"
+      "fr": "Odeur inhabituelle (pollution)",
+      "en": "Unusual odour (pollution)",
+      "mg": "Fofona tsy mahazatra (fandotoana)"
     },
     {
-      "fr": "Décès groupés humains d’apparition soudaine dans la même communauté et au cours d’une semaine",
-      "en": "Clustered human deaths of sudden onset in the same community within one week",
-      "mg": "fahafatesan'ny vondron'olona izay nipoitra tampoka tao anatin'ny vondrompiarahamonina iray ihany tao anatin'ny herinandro"
+      "fr": "Signes/symptômes similaires chez ≥2 personnes",
+      "en": "Similar signs/symptoms in ≥2 people",
+      "mg": "Soritr'aretina mitovy amin'olona ≥2"
     },
     {
-      "fr": "Morsures et ou griffures de plusieurs personnes par un seul chien/animal à sang chaud (chat ; Fosa ; chauves-souris …)",
-      "en": "Bites and/or scratches of several people by a single dog or other warm-blooded animal (cat, fossa, bats, ...)",
-      "mg": "Kaikitra sy/na rangotra mahavoa olona maromaro amin'ny alika tokana/biby mafana ra na mampinono (saka; Fosa; ramanavy, sns.)"
+      "fr": "Tarissement puits / rivières",
+      "en": "Drying up of wells / rivers",
+      "mg": "Faharitan'ny fantsakana / renirano"
     },
     {
-      "fr": "Absentéisme des écoliers issus d’un même établissement scolaire pendant une semaine ou plus",
-      "en": "Absenteeism among pupils from the same school for one week or more",
-      "mg": "Ny tsy fahatongavan'ny mpianatra amin'ny sekoly iray ihany mandritra ny herinandro na mihoatra"
-    },
-    {
-      "fr": "Déplacements anormaux de la population d’une communauté à une autre",
-      "en": "Abnormal population movements from one community to another",
-      "mg": "Fifindra-monina tsy ara-dalàna avy amin'ny vondrom-piarahamonina iray mankany amin'ny iray hafa"
+      "fr": "Trace d'exploitation forestière",
+      "en": "Signs of forest exploitation",
+      "mg": "Mariky ny fitrandrahana ala"
     },
     {
       "fr": "La SBE repère les évènements inhabituels liés à la santé humaine, animale ou environnementale et potentiellement indicateurs d'émergence, au plus près du terrain — agents communautaires, centres de santé de base, districts. Chaque signal est collecté par les agents de terrain (application CommCare), trié, vérifié puis évalué selon son niveau de risque, et peut déclencher une alerte. i-Tafaray, plateforme digitale One Health gérée par l'Unité de Gouvernance Digitale (UGD), centralise les signaux des trois secteurs et révèle, par leur croisement dans l'espace et le temps, des menaces qu'aucun secteur ne verrait seul.",

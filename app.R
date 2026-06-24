@@ -32,6 +32,8 @@ source("i18n_setup.R")
 source("prepare_data.R")
 # Pont X-Road (données réelles) — point d'intégration, optionnel
 if (file.exists("xroad_bridge.R")) source("xroad_bridge.R")
+# Module d'envoi d'alertes (E-Notification UGD : SMS / WhatsApp / Email)
+if (file.exists("e_notification.R")) source("e_notification.R")
 
 DATA <- tryCatch(
   charger_donnees(),
@@ -842,7 +844,24 @@ ui <- dashboardPage(
               box(title = titre_info("Alertes (signaux ayant déclenché une alerte)",
                     "Détail de tous les signaux passés en alerte, avec la chaîne de décision (triage, vérification, évaluation du risque). Cliquez une ligne pour afficher le parcours complet du signal."),
                   width = 12,
-                  status = "danger", solidHeader = TRUE, DTOutput("t_alertes"))
+                  status = "danger", solidHeader = TRUE, DTOutput("t_alertes")),
+              box(title = "Notifier l'autorité (E-Notification UGD)",
+                  width = 12, status = "warning", solidHeader = TRUE, collapsible = TRUE,
+                  helpText("Sélectionnez une alerte dans le tableau ci-dessus, choisissez le canal et le destinataire, puis cliquez « Notifier ». Tant que l'envoi réel n'est pas activé (EN_ENABLED), il s'agit d'un essai à blanc : rien n'est envoyé."),
+                  fluidRow(
+                    column(4, checkboxGroupInput("en_canaux", "Canal", inline = TRUE,
+                                                 choices = c("SMS", "WhatsApp", "Email"),
+                                                 selected = "SMS")),
+                    column(5, textInput("en_dest", "Destinataire (numéro +261… ou email)",
+                                        placeholder = "+261340000000")),
+                    column(3, br(), actionButton("en_send", "Notifier",
+                                                 icon = icon("paper-plane"), class = "btn-warning"))
+                  ),
+                  tags$div(style = "margin-top:6px;",
+                           tags$b("Aperçu du message :"),
+                           verbatimTextOutput("en_apercu")),
+                  uiOutput("en_statut")
+              )
       ),
       tabItem("qualite",
               fluidRow(valueBoxOutput("q_verif", 4), valueBoxOutput("q_doublon", 4), valueBoxOutput("q_delai", 4)),
@@ -2176,7 +2195,99 @@ server <- function(input, output, session) {
       size = "l", easyClose = TRUE, footer = modalButton("Fermer")
     ))
   }, ignoreInit = TRUE)
-  
+
+  # --- Notification de l'autorité (E-Notification UGD) ------------------
+  # Alerte sélectionnée + éventuelle grappe One Health (secteurs croisés, avance)
+  en_info <- reactive({
+    i <- input$t_alertes_rows_selected
+    if (length(i) != 1) return(NULL)
+    a  <- al_data()[i, ]
+    g  <- tryCatch(grappe_par_alerte(exec_data()), error = function(e) NULL)
+    gr <- if (!is.null(g)) g[g$a_id == a$id_signal, ] else NULL
+    oh <- !is.null(gr) && nrow(gr) == 1 && !is.na(gr$nsec) && gr$nsec >= 2
+    list(a = a, oh = oh,
+         secteurs = if (oh) gr$secteurs else NA_character_,
+         avance   = if (oh) gr$avance   else NA_real_)
+  })
+
+  en_titre <- function(info) {
+    paste0(if (isTRUE(info$oh)) "ALERTE ONE HEALTH i-Tafaray" else "ALERTE i-Tafaray",
+           " — ", info$a$code)
+  }
+
+  # Contenu adapté au canal (SMS bref / WhatsApp formaté / Email structuré)
+  en_message_for <- function(canal, info) {
+    a    <- info$a
+    date <- format(a$date_de_survenue, "%d/%m/%Y")
+    av   <- if (isTRUE(info$oh) && !is.na(info$avance) && info$avance > 0)
+              paste0(" (+", round(info$avance), " j d'avance)") else ""
+    if (canal == "SMS") {
+      s <- paste0(if (isTRUE(info$oh)) "ALERTE ONE HEALTH i-Tafaray. " else "ALERTE i-Tafaray. ",
+                  a$code, " ", a$fokontany, ". Risque ", as.character(a$niveau_risque),
+                  ". Cas ", a$Nombre_cas, "/Deces ", a$Nombre_deces, ". ", date)
+      if (isTRUE(info$oh)) s <- paste0(s, ". Grappe: ", info$secteurs, av)
+      return(s)
+    }
+    if (canal == "WhatsApp") {
+      l <- c(if (isTRUE(info$oh)) "\U0001F534 *ALERTE ONE HEALTH — i-Tafaray*"
+             else "\U0001F514 *ALERTE i-Tafaray*",
+             paste0("*Signal* : ", a$code, " — ", a$signal),
+             paste0("*Secteur* : ", a$secteur),
+             paste0("\U0001F4CD *Fokontany* : ", a$fokontany),
+             paste0("⚠️ *Risque* : ", as.character(a$niveau_risque)),
+             paste0("\U0001F465 *Cas* : ", a$Nombre_cas, "  ·  *Décès* : ", a$Nombre_deces),
+             paste0("\U0001F5D3️ *Date* : ", date))
+      if (isTRUE(info$oh))
+        l <- c(l, paste0("\U0001F517 *Grappe One Health* : ", info$secteurs, av))
+      return(paste(l, collapse = "\n"))
+    }
+    # Email — texte structuré (HTML possible si la passerelle l'interprète : à confirmer)
+    l <- c(if (isTRUE(info$oh)) "ALERTE ONE HEALTH — i-Tafaray" else "ALERTE i-Tafaray", "",
+           paste0("Signal        : ", a$code, " — ", a$signal),
+           paste0("Secteur       : ", a$secteur),
+           paste0("Fokontany     : ", a$fokontany),
+           paste0("Niveau risque : ", as.character(a$niveau_risque)),
+           paste0("Cas / Décès   : ", a$Nombre_cas, " / ", a$Nombre_deces),
+           paste0("Date          : ", date))
+    if (isTRUE(info$oh))
+      l <- c(l, paste0("Grappe OH     : ", info$secteurs, av), "",
+             "Cette alerte croise plusieurs secteurs (One Health).")
+    paste(l, collapse = "\n")
+  }
+
+  output$en_apercu <- renderText({
+    info <- en_info()
+    if (is.null(info)) return("Sélectionnez une alerte dans le tableau ci-dessus.")
+    cn <- input$en_canaux; if (length(cn) == 0) cn <- "SMS"
+    paste(vapply(cn, function(x) paste0("[", x, "]\n", en_message_for(x, info)),
+                 character(1)), collapse = "\n\n")
+  })
+
+  observeEvent(input$en_send, {
+    info <- en_info()
+    if (is.null(info)) { showNotification("Sélectionnez d'abord une alerte.", type = "warning"); return() }
+    canaux <- input$en_canaux
+    if (length(canaux) == 0) { showNotification("Choisissez au moins un canal.", type = "warning"); return() }
+    dest <- trimws(if (is.null(input$en_dest)) "" else input$en_dest)
+    prio <- if (isTRUE(info$oh)) "URGENT" else "HIGH"
+    titre <- en_titre(info)
+    res <- lapply(canaux, function(cn)
+      envoyer_notification(title = titre, message = en_message_for(cn, info),
+                           targets = dest, canaux = cn, priority = prio))
+    ok  <- all(vapply(res, function(r) isTRUE(r$ok), logical(1)))
+    dry <- any(vapply(res, function(r) isTRUE(r$dry), logical(1)))
+    statuses <- paste0(canaux, " : ", vapply(res, function(r) r$status, character(1)))
+    showNotification(paste0(if (ok) "OK" else "Erreur", " — ", paste(statuses, collapse = " | ")),
+                     type = if (ok) "message" else "error", duration = 8)
+    output$en_statut <- renderUI({
+      col <- if (!ok) "#9E2A2B" else if (dry) "#8A6D00" else "#1E7E34"
+      tags$div(style = paste0("margin-top:8px; font-weight:600; color:", col, ";"),
+        HTML(paste(vapply(seq_along(canaux), function(k)
+          paste0(canaux[k], " — ", res[[k]]$status, " : ", res[[k]]$message),
+          character(1)), collapse = "<br>")))
+    })
+  })
+
   ## Qualité / pipeline
   output$q_verif <- renderValueBox({
     d <- base_filtree(); pct <- if (nrow(d)) round(100 * mean(d$is_verifie == "Oui", na.rm = TRUE)) else 0

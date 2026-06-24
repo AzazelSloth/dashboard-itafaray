@@ -63,11 +63,28 @@ en_token <- function() {
   req <- httr2::request(paste0(EN_BASE, "/auth/token")) |>
     httr2::req_headers("Content-Type" = "application/json") |>
     httr2::req_body_json(list(username = cfg$user, password = cfg$pass)) |>
-    httr2::req_timeout(30)
+    httr2::req_timeout(30) |>
+    httr2::req_error(is_error = function(resp) FALSE)   # on lit même les réponses 4xx
   resp <- httr2::req_perform(req)
-  body <- jsonlite::fromJSON(httr2::resp_body_string(resp), simplifyVector = TRUE)
-  tok <- tryCatch(body$data$access_token, error = function(e) NULL)
-  if (is.null(tok) || !nzchar(tok)) stop("Jeton d'accès introuvable dans la réponse.")
+  txt  <- httr2::resp_body_string(resp)
+  body <- tryCatch(jsonlite::fromJSON(txt, simplifyVector = TRUE), error = function(e) NULL)
+  # Cherche le jeton à plusieurs emplacements possibles
+  tok <- NULL
+  if (!is.null(body)) {
+    cand <- list(
+      tryCatch(body$data$access_token, error = function(e) NULL),
+      tryCatch(body$access_token,      error = function(e) NULL),
+      tryCatch(body$data$accessToken,  error = function(e) NULL),
+      tryCatch(body$accessToken,       error = function(e) NULL),
+      tryCatch(body$data$token,        error = function(e) NULL),
+      tryCatch(body$token,             error = function(e) NULL))
+    for (x in cand) if (!is.null(x) && length(x) == 1 && nzchar(x)) { tok <- x; break }
+  }
+  if (is.null(tok)) {
+    st  <- httr2::resp_status(resp)
+    msg <- if (!is.null(body) && !is.null(body$message)) body$message else substr(txt, 1, 200)
+    stop(paste0("Jeton introuvable (HTTP ", st, "). Réponse : ", msg))
+  }
   tok
 }
 

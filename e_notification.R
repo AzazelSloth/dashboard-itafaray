@@ -63,6 +63,111 @@ en_resp_message <- function(resp, default = "") {
   if (!nzchar(txt)) default else substr(txt, 1, 300)
 }
 
+en_pick_first <- function(...) {
+  vals <- list(...)
+  for (x in vals) {
+    if (!is.null(x) && length(x) == 1 && !is.na(x) && nzchar(trimws(as.character(x)))) {
+      return(as.character(x))
+    }
+  }
+  NULL
+}
+
+en_status_is_final <- function(status) {
+  st <- toupper(trimws(as.character(status %||% "")))
+  nzchar(st) && !(st %in% c("PENDING", "PROCESSING", "QUEUED", "ACCEPTED", "RECEIVED", "IN_PROGRESS"))
+}
+
+en_status_tracking_cfg <- function() {
+  wait_sec <- suppressWarnings(as.numeric(en_env_value("EN_STATUS_WAIT_SEC", "12")))
+  poll_sec <- suppressWarnings(as.numeric(en_env_value("EN_STATUS_POLL_SEC", "3")))
+  if (is.na(wait_sec) || wait_sec < 0) wait_sec <- 12
+  if (is.na(poll_sec) || poll_sec <= 0) poll_sec <- 3
+  list(wait_sec = wait_sec, poll_sec = poll_sec)
+}
+
+en_extract_status <- function(body) {
+  en_pick_first(
+    tryCatch(body$data$status, error = function(e) NULL),
+    tryCatch(body$data$notification$status, error = function(e) NULL),
+    tryCatch(body$notification$status, error = function(e) NULL),
+    tryCatch(body$data$state, error = function(e) NULL),
+    tryCatch(body$state, error = function(e) NULL),
+    tryCatch(body$status, error = function(e) NULL)
+  )
+}
+
+en_extract_id <- function(body) {
+  en_pick_first(
+    tryCatch(body$data$id, error = function(e) NULL),
+    tryCatch(body$data$notification$id, error = function(e) NULL),
+    tryCatch(body$notification$id, error = function(e) NULL),
+    tryCatch(body$id, error = function(e) NULL)
+  )
+}
+
+en_get_notification_status <- function(notification_id, token) {
+  cfg <- en_cfg()
+  endpoints <- c(
+    paste0(cfg$base_url, "/service-notification/notifications/", notification_id),
+    paste0(cfg$base_url, "/service-notification/notifications/", notification_id, "/status")
+  )
+  last_error <- NULL
+  for (url in endpoints) {
+    req <- httr2::request(url) |>
+      httr2::req_headers("Authorization" = paste("Bearer", token),
+                         "Accept" = "application/json") |>
+      httr2::req_error(is_error = function(resp) FALSE) |>
+      httr2::req_timeout(20)
+    resp <- tryCatch(httr2::req_perform(req), error = function(e) e)
+    if (inherits(resp, "error")) {
+      last_error <- conditionMessage(resp)
+      next
+    }
+    st <- httr2::resp_status(resp)
+    if (st == 404) next
+    if (st >= 400) {
+      last_error <- paste0("HTTP ", st, " sur ", url, ". Réponse : ", en_resp_message(resp, "réponse vide"))
+      next
+    }
+    txt <- httr2::resp_body_string(resp)
+    body <- tryCatch(jsonlite::fromJSON(txt, simplifyVector = TRUE), error = function(e) NULL)
+    if (is.null(body)) {
+      last_error <- paste0("Réponse JSON illisible sur ", url)
+      next
+    }
+    status <- en_extract_status(body)
+    id <- en_extract_id(body) %||% notification_id
+    if (is.null(status)) {
+      last_error <- paste0("Statut absent dans la réponse de suivi sur ", url)
+      next
+    }
+    return(list(
+      ok = TRUE,
+      id = id,
+      status = status,
+      final = en_status_is_final(status),
+      raw = body,
+      message = paste0("Statut actuel : ", status)
+    ))
+  }
+  list(ok = FALSE, id = notification_id, status = NULL, final = FALSE,
+       raw = NULL, message = last_error %||% "Endpoint de suivi introuvable")
+}
+
+en_wait_final_status <- function(notification_id, token) {
+  cfg <- en_status_tracking_cfg()
+  deadline <- Sys.time() + cfg$wait_sec
+  last <- list(ok = FALSE, id = notification_id, status = NULL, final = FALSE,
+               raw = NULL, message = "Suivi non disponible")
+  repeat {
+    last <- en_get_notification_status(notification_id, token)
+    if (isTRUE(last$ok) && isTRUE(last$final)) return(last)
+    if (Sys.time() >= deadline) return(last)
+    Sys.sleep(min(cfg$poll_sec, max(0, as.numeric(deadline - Sys.time(), units = "secs"))))
+  }
+}
+
 # Configuration lue à chaud (permet de changer le .env sans relancer le code)
 en_cfg <- function() {
   list(
@@ -204,11 +309,38 @@ envoyer_notification <- function(title, message, targets,
       ))
     }
     body <- jsonlite::fromJSON(httr2::resp_body_string(resp), simplifyVector = TRUE)
-    list(ok = TRUE, dry = FALSE, status = body$status %||% "PROCESSING",
-         message = paste0("Notification transmise (",
-                          paste(canaux, collapse = "+"), ") à : ",
-                          paste(targets, collapse = ", ")),
-         id = body$id %||% NA_character_, targets = targets)
+    notification_id <- en_extract_id(body) %||% NA_character_
+    status_initial <- en_extract_status(body) %||% "PROCESSING"
+    status_final <- status_initial
+    status_message <- paste0("Notification transmise (",
+                             paste(canaux, collapse = "+"), ") à : ",
+                             paste(targets, collapse = ", "))
+    if (!is.na(notification_id) && nzchar(notification_id) && !en_status_is_final(status_initial)) {
+      suivi <- en_wait_final_status(notification_id, token)
+      if (isTRUE(suivi$ok) && nzchar(suivi$status %||% "")) {
+        status_final <- suivi$status
+        if (isTRUE(suivi$final)) {
+          status_message <- paste0("Notification suivie jusqu'au statut final ",
+                                   status_final, " (id ", notification_id, ") à : ",
+                                   paste(targets, collapse = ", "))
+        } else {
+          status_message <- paste0("Notification acceptée par la passerelle (id ",
+                                   notification_id, ") ; statut actuel : ",
+                                   status_final, " à : ", paste(targets, collapse = ", "))
+        }
+      } else {
+        status_message <- paste0("Notification acceptée par la passerelle (id ",
+                                 notification_id, ") ; suivi final indisponible. À : ",
+                                 paste(targets, collapse = ", "))
+      }
+    } else if (!is.na(notification_id) && nzchar(notification_id)) {
+      status_message <- paste0("Notification transmise avec statut ",
+                               status_final, " (id ", notification_id, ") à : ",
+                               paste(targets, collapse = ", "))
+    }
+    list(ok = TRUE, dry = FALSE, status = status_final,
+         message = status_message,
+         id = notification_id, targets = targets)
   }, error = function(e) {
     list(ok = FALSE, dry = FALSE, status = "ERREUR",
          message = paste0("Échec de l'envoi : ", conditionMessage(e)),

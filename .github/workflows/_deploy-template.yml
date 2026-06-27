@@ -191,6 +191,8 @@ jobs:
           EN_BASE_URL: ${{ vars.EN_BASE_URL }}
           EN_ENABLED: ${{ vars.EN_ENABLED }}
           EN_TEST_TARGET: ${{ vars.EN_TEST_TARGET }}
+          EN_STATUS_WAIT_SEC: ${{ vars.EN_STATUS_WAIT_SEC }}
+          EN_STATUS_POLL_SEC: ${{ vars.EN_STATUS_POLL_SEC }}
           EN_USER: ${{ secrets.EN_USER }}
           EN_PASS: ${{ secrets.EN_PASS }}
           EN_SERVICE_ID: ${{ secrets.EN_SERVICE_ID }}
@@ -307,6 +309,8 @@ jobs:
           EN_BASE_URL: ${{ vars.EN_BASE_URL }}
           EN_ENABLED: ${{ vars.EN_ENABLED }}
           EN_TEST_TARGET: ${{ vars.EN_TEST_TARGET }}
+          EN_STATUS_WAIT_SEC: ${{ vars.EN_STATUS_WAIT_SEC }}
+          EN_STATUS_POLL_SEC: ${{ vars.EN_STATUS_POLL_SEC }}
           EN_USER: ${{ secrets.EN_USER }}
           EN_PASS: ${{ secrets.EN_PASS }}
           EN_SERVICE_ID: ${{ secrets.EN_SERVICE_ID }}
@@ -325,6 +329,8 @@ jobs:
           EN_BASE_URL=${EN_BASE_URL}
           EN_ENABLED=${EN_ENABLED}
           EN_TEST_TARGET=${EN_TEST_TARGET}
+          EN_STATUS_WAIT_SEC=${EN_STATUS_WAIT_SEC}
+          EN_STATUS_POLL_SEC=${EN_STATUS_POLL_SEC}
           EN_USER=${EN_USER}
           EN_PASS=${EN_PASS}
           EN_SERVICE_ID=${EN_SERVICE_ID}

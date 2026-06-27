@@ -55,6 +55,14 @@ en_targets_from_input <- function(value) {
   unique(parts[nzchar(parts)])
 }
 
+en_resp_message <- function(resp, default = "") {
+  txt <- tryCatch(httr2::resp_body_string(resp), error = function(e) "")
+  txt <- gsub("<[^>]+>", " ", txt)
+  txt <- gsub("[\r\n\t ]+", " ", txt)
+  txt <- trimws(txt)
+  if (!nzchar(txt)) default else substr(txt, 1, 300)
+}
+
 # Configuration lue à chaud (permet de changer le .env sans relancer le code)
 en_cfg <- function() {
   list(
@@ -89,8 +97,27 @@ en_token <- function() {
     httr2::req_timeout(30) |>
     httr2::req_error(is_error = function(resp) FALSE)   # on lit même les réponses 4xx
   resp <- httr2::req_perform(req)
+  st   <- httr2::resp_status(resp)
   txt  <- httr2::resp_body_string(resp)
   body <- tryCatch(jsonlite::fromJSON(txt, simplifyVector = TRUE), error = function(e) NULL)
+  if (st >= 500) {
+    stop(paste0(
+      "Passerelle E-Notification indisponible (HTTP ", st, ") sur /auth/token. ",
+      "Réponse : ", en_resp_message(resp, "réponse vide")
+    ))
+  }
+  if (st %in% c(401, 403)) {
+    stop(paste0(
+      "Authentification E-Notification refusée (HTTP ", st, "). ",
+      "Vérifiez EN_USER et EN_PASS. Réponse : ", en_resp_message(resp, "réponse vide")
+    ))
+  }
+  if (st >= 400) {
+    stop(paste0(
+      "Échec d'authentification E-Notification (HTTP ", st, ") sur /auth/token. ",
+      "Réponse : ", en_resp_message(resp, "réponse vide")
+    ))
+  }
   # Cherche le jeton à plusieurs emplacements possibles
   tok <- NULL
   if (!is.null(body)) {
@@ -104,7 +131,6 @@ en_token <- function() {
     for (x in cand) if (!is.null(x) && length(x) == 1 && nzchar(x)) { tok <- x; break }
   }
   if (is.null(tok)) {
-    st  <- httr2::resp_status(resp)
     msg <- if (!is.null(body) && !is.null(body$message)) body$message else substr(txt, 1, 200)
     stop(paste0("Jeton introuvable (HTTP ", st, "). Réponse : ", msg))
   }
@@ -167,8 +193,16 @@ envoyer_notification <- function(title, message, targets,
       httr2::req_headers("Authorization" = paste("Bearer", token),
                          "Content-Type" = "application/json") |>
       httr2::req_body_json(payload) |>
+      httr2::req_error(is_error = function(resp) FALSE) |>
       httr2::req_timeout(30)
     resp <- httr2::req_perform(req)
+    st <- httr2::resp_status(resp)
+    if (st >= 400) {
+      stop(paste0(
+        "Passerelle E-Notification a refusé l'envoi (HTTP ", st, ") sur /service-notification/notifications. ",
+        "Réponse : ", en_resp_message(resp, "réponse vide")
+      ))
+    }
     body <- jsonlite::fromJSON(httr2::resp_body_string(resp), simplifyVector = TRUE)
     list(ok = TRUE, dry = FALSE, status = body$status %||% "PROCESSING",
          message = paste0("Notification transmise (",

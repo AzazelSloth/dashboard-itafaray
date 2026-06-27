@@ -8,8 +8,10 @@
 #     d'environnement (fichier .env, NON versionné). Voir .env.example.
 #   - Envoi réel DÉSACTIVÉ par défaut : tant que EN_ENABLED != "true",
 #     la fonction fait un « essai à blanc » (dry-run) et n'envoie rien.
-#   - EN_TEST_TARGET : si renseigné, TOUS les envois sont forcés vers ce
-#     seul numéro/email de test (garde-fou pour les démonstrations).
+#   - EN_TEST_TARGET : si renseigné (typiquement en dev), TOUS les envois
+#     sont forcés vers cette ou ces cibles de test. S'il est absent ou
+#     vide (pré-prod / prod), les destinataires saisis dans l'interface
+#     sont utilisés tels quels.
 # =====================================================================
 
 # Chargement local du .env (en production Docker, les variables sont déjà
@@ -31,22 +33,43 @@ en_load_dotenv <- function(path = ".env") {
 }
 en_load_dotenv()
 
-EN_BASE        <- Sys.getenv("EN_BASE_URL", "https://e-notification-gateway.tsirylab.com/api/v1")
-EN_ENABLED     <- tolower(Sys.getenv("EN_ENABLED", "false")) %in% c("true", "1", "oui", "yes")
-EN_TEST_TARGET <- trimws(Sys.getenv("EN_TEST_TARGET", ""))
+en_env_value <- function(key, default = "") {
+  val <- Sys.getenv(key, default)
+  val <- trimws(val)
+  val <- gsub("^[\"']|[\"']$", "", val)
+  if (identical(val, "\"\"") || identical(val, "''")) val <- ""
+  val
+}
+
+en_flag <- function(key, default = FALSE) {
+  raw <- en_env_value(key, if (default) "true" else "false")
+  tolower(raw) %in% c("true", "1", "oui", "yes")
+}
+
+en_targets_from_input <- function(value) {
+  if (length(value) == 0 || all(is.na(value))) return(character(0))
+  raw <- paste(value, collapse = ",")
+  raw <- gsub("[\r\n]+", ",", raw)
+  parts <- unlist(strsplit(raw, "[,;]+", perl = TRUE), use.names = FALSE)
+  parts <- trimws(parts)
+  unique(parts[nzchar(parts)])
+}
 
 # Configuration lue à chaud (permet de changer le .env sans relancer le code)
 en_cfg <- function() {
   list(
-    user     = Sys.getenv("EN_USER"),
-    pass     = Sys.getenv("EN_PASS"),
-    service  = Sys.getenv("EN_SERVICE_ID"),
-    agent    = Sys.getenv("EN_AGENT_ID"),
-    category = Sys.getenv("EN_CATEGORY_ID"),
+    base_url = en_env_value("EN_BASE_URL", "https://e-notification-gateway.tsirylab.com/api/v1"),
+    enabled  = en_flag("EN_ENABLED", FALSE),
+    test_target = en_targets_from_input(en_env_value("EN_TEST_TARGET", "")),
+    user     = en_env_value("EN_USER"),
+    pass     = en_env_value("EN_PASS"),
+    service  = en_env_value("EN_SERVICE_ID"),
+    agent    = en_env_value("EN_AGENT_ID"),
+    category = en_env_value("EN_CATEGORY_ID"),
     channels = list(
-      SMS      = Sys.getenv("EN_CH_SMS"),
-      WhatsApp = Sys.getenv("EN_CH_WHATSAPP"),
-      Email    = Sys.getenv("EN_CH_EMAIL")
+      SMS      = en_env_value("EN_CH_SMS"),
+      WhatsApp = en_env_value("EN_CH_WHATSAPP"),
+      Email    = en_env_value("EN_CH_EMAIL")
     )
   )
 }
@@ -60,7 +83,7 @@ en_configure <- function() {
 # --- Étape 1 : jeton d'accès (valable 30 min) -----------------------
 en_token <- function() {
   cfg <- en_cfg()
-  req <- httr2::request(paste0(EN_BASE, "/auth/token")) |>
+  req <- httr2::request(paste0(cfg$base_url, "/auth/token")) |>
     httr2::req_headers("Content-Type" = "application/json") |>
     httr2::req_body_json(list(username = cfg$user, password = cfg$pass)) |>
     httr2::req_timeout(30) |>
@@ -114,13 +137,13 @@ envoyer_notification <- function(title, message, targets,
     status = "ERREUR", message = "Identifiants de canal non configurés (.env)."))
 
   # Garde-fou : si un numéro de test est défini, on force tous les envois dessus
-  if (nzchar(EN_TEST_TARGET)) targets <- EN_TEST_TARGET
-  targets <- targets[nzchar(trimws(targets))]
+  if (length(cfg$test_target) > 0) targets <- cfg$test_target
+  targets <- en_targets_from_input(targets)
   if (length(targets) == 0) return(list(ok = FALSE, dry = FALSE,
     status = "ERREUR", message = "Aucun destinataire."))
 
   # Essai à blanc tant que l'envoi réel n'est pas explicitement activé
-  if (!EN_ENABLED) {
+  if (!isTRUE(cfg$enabled)) {
     return(list(ok = TRUE, dry = TRUE, status = "ESSAI À BLANC",
       message = paste0("Aucun message envoyé (EN_ENABLED désactivé). ",
                        "Prêt à envoyer via ", paste(canaux, collapse = "+"),
@@ -140,7 +163,7 @@ envoyer_notification <- function(title, message, targets,
       channelIds = as.list(channel_ids),
       targets = as.list(targets)
     )
-    req <- httr2::request(paste0(EN_BASE, "/service-notification/notifications")) |>
+    req <- httr2::request(paste0(cfg$base_url, "/service-notification/notifications")) |>
       httr2::req_headers("Authorization" = paste("Bearer", token),
                          "Content-Type" = "application/json") |>
       httr2::req_body_json(payload) |>

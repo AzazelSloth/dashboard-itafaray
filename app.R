@@ -852,13 +852,13 @@ ui <- dashboardPage(
                   status = "danger", solidHeader = TRUE, DTOutput("t_alertes")),
               box(title = "Notifier l'autorité (E-Notification UGD)",
                   width = 12, status = "warning", solidHeader = TRUE, collapsible = TRUE,
-                  helpText("Sélectionnez une alerte dans le tableau ci-dessus, choisissez le canal et le destinataire, puis cliquez « Notifier ». Tant que l'envoi réel n'est pas activé (EN_ENABLED), il s'agit d'un essai à blanc : rien n'est envoyé."),
+                  helpText("Sélectionnez une alerte dans le tableau ci-dessus, choisissez le canal et le ou les destinataires, puis cliquez « Notifier ». Vous pouvez saisir plusieurs destinataires séparés par des virgules ou des points-virgules. En dev, une cible de test (EN_TEST_TARGET) peut forcer les envois. En pré-prod / prod, si cette variable est absente, les destinataires saisis ici sont utilisés. Tant que l'envoi réel n'est pas activé (EN_ENABLED), il s'agit d'un essai à blanc : rien n'est envoyé."),
                   fluidRow(
                     column(4, checkboxGroupInput("en_canaux", "Canal", inline = TRUE,
                                                  choices = c("SMS", "WhatsApp", "Email"),
                                                  selected = "SMS")),
-                    column(5, textInput("en_dest", "Destinataire (numéro +261… ou email)",
-                                        placeholder = "+261340000000")),
+                    column(5, textInput("en_dest", "Destinataire(s) (numéro +261… ou email)",
+                                        placeholder = "+261340000000, +261320000000, autorite@example.org")),
                     column(3, br(), actionButton("en_send", "Notifier",
                                                  icon = icon("paper-plane"), class = "btn-warning"))
                   ),

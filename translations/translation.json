@@ -6,6 +6,91 @@
   ],
   "translation": [
     {
+      "fr": "Accueil",
+      "en": "Home",
+      "mg": "Fandraisana"
+    },
+    {
+      "fr": "Plateforme nationale de surveillance",
+      "en": "National surveillance platform",
+      "mg": "Sehatra nasionaly fanaraha-maso"
+    },
+    {
+      "fr": "iTafaray centralise les signaux humains, animaux et environnementaux pour offrir une lecture partagée des risques sanitaires à Madagascar, accélérer la détection précoce et faciliter la coordination entre acteurs One Health.",
+      "en": "iTafaray brings together human, animal and environmental signals to provide a shared view of health risks in Madagascar, speed up early detection and support coordination across One Health stakeholders.",
+      "mg": "iTafaray dia manangona ny famantarana avy amin'ny olombelona, biby ary tontolo iainana mba hanomezana fijery iombonana momba ny loza ara-pahasalamana eto Madagasikara, hanafaingana ny fahitana mialoha ary hanamora ny fandrindrana eo amin'ireo mpisehatra One Health."
+    },
+    {
+      "fr": "Santé humaine",
+      "en": "Human health",
+      "mg": "Fahasalamana olombelona"
+    },
+    {
+      "fr": "Suivi des signaux communautaires, des cas suspects et des foyers nécessitant une action rapide.",
+      "en": "Monitoring community signals, suspected cases and clusters requiring rapid action.",
+      "mg": "Fanaraha-maso ireo famantarana avy eny ifotony, ireo tranga ahiahiana ary ireo toerana mila fandraisana andraikitra haingana."
+    },
+    {
+      "fr": "Santé animale",
+      "en": "Animal health",
+      "mg": "Fahasalamana biby"
+    },
+    {
+      "fr": "Croisement des événements animaux pour mieux repérer les zoonoses prioritaires et leurs signaux sentinelles.",
+      "en": "Cross-analysis of animal events to better identify priority zoonoses and their sentinel signals.",
+      "mg": "Fampifandraisana ireo tranga momba ny biby mba hahitana tsara kokoa ireo zoonose laharam-pahamehana sy ireo famantarana mialoha azy."
+    },
+    {
+      "fr": "Environnement",
+      "en": "Environment",
+      "mg": "Tontolo iainana"
+    },
+    {
+      "fr": "Intégration des facteurs climatiques et environnementaux pour contextualiser les menaces et anticiper les tensions.",
+      "en": "Integration of climate and environmental factors to contextualize threats and anticipate pressures.",
+      "mg": "Fampidirana ireo antony ara-toetrandro sy ara-tontolo iainana mba hanazavana ny loza sy hanantenana mialoha ny tsindry mety hitranga."
+    },
+    {
+      "fr": "Scannez-moi !",
+      "en": "Scan me!",
+      "mg": "Alaivo sary aho!"
+    },
+    {
+      "fr": "Accédez rapidement à la plateforme depuis un appareil mobile ou partagez l'entrée du tableau de bord avec vos partenaires.",
+      "en": "Quickly open the platform from a mobile device or share dashboard access with your partners.",
+      "mg": "Midira haingana amin'ny sehatra amin'ny alalan'ny finday na zarao amin'ireo mpiara-miombon'antoka aminao ny fidirana amin'ny takelaka fanaraha-maso."
+    },
+    {
+      "fr": "Vision",
+      "en": "Vision",
+      "mg": "Vinavina"
+    },
+    {
+      "fr": "Une porte d'entrée claire pour comprendre le rôle de la plateforme avant d'explorer les tableaux, cartes et alertes.",
+      "en": "A clear entry point to understand the role of the platform before exploring dashboards, maps and alerts.",
+      "mg": "Fidirana mazava hahafantarana ny andraikitry ny sehatra alohan'ny hijerena ireo tabilao, sarintany ary fanairana."
+    },
+    {
+      "fr": "Coordination",
+      "en": "Coordination",
+      "mg": "Fandrindrana"
+    },
+    {
+      "fr": "Une lecture commune des signaux pour les acteurs de la santé humaine, animale et environnementale.",
+      "en": "A shared reading of signals for human, animal and environmental health actors.",
+      "mg": "Famakiana iombonana ireo famantarana ho an'ireo mpisehatra amin'ny fahasalamana olombelona, biby ary tontolo iainana."
+    },
+    {
+      "fr": "Accès rapide",
+      "en": "Quick access",
+      "mg": "Fidirana haingana"
+    },
+    {
+      "fr": "Le code QR facilite le partage du tableau de bord pendant les réunions, revues de situation et activités terrain.",
+      "en": "The QR code makes it easier to share the dashboard during meetings, situation reviews and field activities.",
+      "mg": "Ny kaody QR dia manamora ny fizarana ny takelaka fanaraha-maso mandritra ny fivoriana, ny famerenana toe-draharaha ary ny asa eny an-kianja."
+    },
+    {
       "fr": "Synthèse",
       "en": "Summary",
       "mg": "Famintinana"

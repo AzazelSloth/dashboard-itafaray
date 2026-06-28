@@ -36,7 +36,7 @@ if (is.null(i18n_dict$translation) || length(i18n_dict$translation) == 0)
 i18n_dicts <- .build_i18n_dicts(i18n_dict$translation)
 
 # i18n$t() : renvoie la clé FR (le swap visuel se fait côté client)
-i18n <- list(t = function(key) key)
+i18n <- list(t = function(key) i18n_lookup(key, I18N_DEFAULT))
 
 # Traduction serveur-side
 i18n_lookup <- function(key, lang = "fr") {

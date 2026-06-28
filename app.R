@@ -148,6 +148,12 @@ translate_signal <- function(x, lang = "fr") i18n_vec(x, lang)
 format_signal_label <- function(code, signal, lang = "fr", sep = " — ")
   paste0(code, sep, translate_signal(signal, lang))
 translate_alert <- function(x, lang = "fr") i18n_vec(x, lang)
+asset_version <- function(path) {
+  info <- suppressWarnings(file.info(path))
+  if (is.na(info$mtime[1])) return("0")
+  format(as.POSIXct(info$mtime[1], tz = "UTC"), "%Y%m%d%H%M%S")
+}
+QR_CODE_SRC <- paste0("itafaray-qr.png?v=", asset_version("www/itafaray-qr.png"))
 # Ventilation complète d'un vecteur de niveaux de risque -> phrase qui totalise l'effectif
 repartition_risque <- function(x, lang = "fr") {
   ord <- names(sort(SEV, decreasing = TRUE))
@@ -488,6 +494,7 @@ ui <- dashboardPage(
       uiOutput("data_source_badge")),
     sidebarMenu(
       id = "tabs",
+      menuItem(i18n$t("Accueil"), tabName = "accueil", icon = icon("house")),
       menuItem(i18n$t("Synthèse"), tabName = "synthese", icon = icon("gauge-high")),
       tags$li(tags$hr(style = "border:0; border-top:1px solid rgba(255,255,255,.16); margin:9px 16px;")),
       menuItem(i18n$t("Vue d'ensemble"), tabName = "vue", icon = icon("gauge")),
@@ -502,7 +509,7 @@ ui <- dashboardPage(
       menuItem(i18n$t("À propos"), tabName = "apropos", icon = icon("circle-info"))
     ),
     conditionalPanel(
-      condition = "input.tabs != 'synthese'",
+      condition = "input.tabs != 'synthese' && input.tabs != 'accueil'",
       sliderInput("dates", "Période :", min = DRANGE[1], max = DRANGE[2],
                   value = c(DRANGE[1], DRANGE[2]), timeFormat = "%d/%m/%Y"),
       selectInput("fokontany", "Fokontany (district d'Ifanadiana) :",
@@ -635,6 +642,68 @@ ui <- dashboardPage(
         border:1px solid #1e3a5f; border-radius:4px; color:#1e3a5f; font-weight:700; font-size:13px; }
       td.details-control:hover .oh-toggle { background:#1e3a5f; color:#fff; }
       .oh-childwrap:hover { background:#EAF1F7 !important; }
+      .home-shell { padding:8px 4px 0; }
+      .home-hero {
+        position:relative; overflow:hidden; margin-bottom:18px; border-radius:24px;
+        padding:34px 34px 28px; color:#fff;
+        background:linear-gradient(135deg, #153554 0%, #1e3a5f 46%, #2F6E78 100%);
+        box-shadow:0 24px 60px rgba(20,40,60,.18);
+      }
+      .home-hero::before, .home-hero::after {
+        content:''; position:absolute; border-radius:999px; pointer-events:none;
+        background:rgba(255,255,255,.08);
+      }
+      .home-hero::before { width:280px; height:280px; top:-110px; right:-70px; }
+      .home-hero::after { width:220px; height:220px; bottom:-110px; left:-80px; }
+      .home-grid {
+        display:grid; grid-template-columns:minmax(0, 1.45fr) minmax(280px, .9fr);
+        gap:28px; align-items:center; position:relative; z-index:1;
+      }
+      .home-eyebrow {
+        display:inline-flex; align-items:center; gap:8px; margin-bottom:14px; padding:7px 12px;
+        border:1px solid rgba(255,255,255,.18); border-radius:999px; background:rgba(255,255,255,.08);
+        font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+      }
+      .home-title { margin:0; font-size:42px; line-height:1.05; font-weight:700; letter-spacing:-.03em; }
+      .home-copy { margin:18px 0 0; max-width:700px; font-size:17px; line-height:1.75; color:rgba(255,255,255,.88); }
+      .home-pillars { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px; margin-top:26px; }
+      .home-pillar {
+        min-height:116px; padding:16px 16px 14px; border-radius:18px;
+        background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.12);
+        backdrop-filter:blur(6px);
+      }
+      .home-pillar i { font-size:18px; color:#BAE6FD; }
+      .home-pillar h3 { margin:14px 0 8px; font-size:16px; font-weight:600; color:#fff; }
+      .home-pillar p { margin:0; font-size:13px; line-height:1.6; color:rgba(255,255,255,.78); }
+      .home-qr-card {
+        justify-self:end; width:min(100%, 360px); padding:18px; border-radius:24px;
+        background:rgba(247,250,252,.96); box-shadow:0 18px 44px rgba(15,23,42,.22);
+      }
+      .home-qr-card img {
+        display:block; width:100%; height:auto; border-radius:18px; background:#fff;
+      }
+      .home-qr-title { margin:16px 0 6px; color:#1e3a5f; font-size:24px; font-weight:700; text-align:center; }
+      .home-qr-copy { margin:0; color:#52606D; font-size:13px; line-height:1.6; text-align:center; }
+      .home-strip {
+        display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:14px; margin-bottom:18px;
+      }
+      .home-strip-card {
+        padding:18px 20px; border-radius:18px; background:#FFFFFF; border:1px solid #D8E0E8;
+        box-shadow:0 10px 30px rgba(20,40,60,.07);
+      }
+      .home-strip-kicker { color:#1e3a5f; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+      .home-strip-card p { margin:10px 0 0; color:#4C5A67; line-height:1.7; font-size:14px; }
+      @media (max-width: 1100px) {
+        .home-grid { grid-template-columns:1fr; }
+        .home-qr-card { justify-self:start; max-width:340px; }
+      }
+      @media (max-width: 768px) {
+        .home-hero { padding:24px 20px 22px; border-radius:20px; }
+        .home-title { font-size:34px; }
+        .home-copy { font-size:15px; }
+        .home-pillars, .home-strip { grid-template-columns:1fr; }
+        .home-qr-card { max-width:none; width:100%; }
+      }
     ")),
       tags$script(HTML("
         window.exportEChart = function(id, name){
@@ -654,6 +723,47 @@ ui <- dashboardPage(
       "))
     ),
     tabItems(
+      tabItem("accueil",
+              tags$div(class = "home-shell",
+                       tags$section(class = "home-hero",
+                                    tags$div(class = "home-grid",
+                                             tags$div(
+                                               tags$div(class = "home-eyebrow",
+                                                        tags$i(class = "fa-solid fa-satellite-dish"),
+                                                        i18n$t("Plateforme nationale de surveillance")),
+                                               tags$h1(class = "home-title", HTML("iTafaray &middot; One Health Madagascar")),
+                                               tags$p(class = "home-copy",
+                                                      i18n$t("iTafaray centralise les signaux humains, animaux et environnementaux pour offrir une lecture partag\u00e9e des risques sanitaires \u00e0 Madagascar, acc\u00e9l\u00e9rer la d\u00e9tection pr\u00e9coce et faciliter la coordination entre acteurs One Health.")),
+                                               tags$div(class = "home-pillars",
+                                                        tags$div(class = "home-pillar",
+                                                                 tags$i(class = "fa-solid fa-user-group"),
+                                                                 tags$h3(i18n$t("Sant\u00e9 humaine")),
+                                                                 tags$p(i18n$t("Suivi des signaux communautaires, des cas suspects et des foyers n\u00e9cessitant une action rapide."))),
+                                                        tags$div(class = "home-pillar",
+                                                                 tags$i(class = "fa-solid fa-paw"),
+                                                                 tags$h3(i18n$t("Sant\u00e9 animale")),
+                                                                 tags$p(i18n$t("Croisement des \u00e9v\u00e9nements animaux pour mieux rep\u00e9rer les zoonoses prioritaires et leurs signaux sentinelles."))),
+                                                        tags$div(class = "home-pillar",
+                                                                 tags$i(class = "fa-solid fa-leaf"),
+                                                                 tags$h3(i18n$t("Environnement")),
+                                                                 tags$p(i18n$t("Int\u00e9gration des facteurs climatiques et environnementaux pour contextualiser les menaces et anticiper les tensions."))))),
+                                             tags$aside(class = "home-qr-card",
+                                                        tags$img(src = QR_CODE_SRC,
+                                                                 alt = "Code QR iTafaray"),
+                                                        tags$h2(class = "home-qr-title", i18n$t("Scannez-moi !")),
+                                                        tags$p(class = "home-qr-copy",
+                                                               i18n$t("Acc\u00e9dez rapidement \u00e0 la plateforme depuis un appareil mobile ou partagez l'entr\u00e9e du tableau de bord avec vos partenaires."))))),
+                       tags$div(class = "home-strip",
+                                tags$div(class = "home-strip-card",
+                                         tags$div(class = "home-strip-kicker", i18n$t("Vision")),
+                                         tags$p(i18n$t("Une porte d'entr\u00e9e claire pour comprendre le r\u00f4le de la plateforme avant d'explorer les tableaux, cartes et alertes."))),
+                                tags$div(class = "home-strip-card",
+                                         tags$div(class = "home-strip-kicker", i18n$t("Coordination")),
+                                         tags$p(i18n$t("Une lecture commune des signaux pour les acteurs de la sant\u00e9 humaine, animale et environnementale."))),
+                                tags$div(class = "home-strip-card",
+                                         tags$div(class = "home-strip-kicker", i18n$t("Acc\u00e8s rapide")),
+                                         tags$p(i18n$t("Le code QR facilite le partage du tableau de bord pendant les r\u00e9unions, revues de situation et activit\u00e9s terrain."))))),
+              ),
       tabItem("synthese",
               tags$div(class = "synth-head",
                        fluidRow(

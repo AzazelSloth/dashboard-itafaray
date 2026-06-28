@@ -69,6 +69,13 @@ charger_xroad <- function() {
     stats::setNames(ifelse(!is.na(vi), as.character(vi), as.character(vs)), props)
   }
   G <- function(pm, key, default = NA_character_) if (key %in% names(pm)) unname(pm[[key]]) else default
+  G_first <- function(pm, keys, default = NA_character_) {
+    for (key in keys) {
+      val <- G(pm, key, NA_character_)
+      if (!is.na(val) && nzchar(trimws(as.character(val)))) return(val)
+    }
+    default
+  }
   oui_non <- function(x){ x <- tolower(as.character(x)); if (length(x)==0 || is.na(x) || x=="") NA_character_
                           else if (x %in% c("oui","yes","true","1")) "Oui" else "Non" }
   to_date <- function(x){ suppressWarnings(as.Date(substr(as.character(x), 1, 10))) }
@@ -79,10 +86,18 @@ charger_xroad <- function() {
   sig_code_obs <- vapply(seq_len(n), function(i){
     cd <- tryCatch(r$code$coding[[i]]$code, error = function(e) NULL)
     if (is.null(cd)) NA_character_ else as.character(cd)[1] }, character(1))
+  sig_label_obs <- vapply(seq_len(n), function(i){
+    disp <- tryCatch(r$code$coding[[i]]$display, error = function(e) NULL)
+    txt  <- tryCatch(r$code$text[[i]], error = function(e) NULL)
+    val <- if (!is.null(disp) && length(disp) > 0 && !is.na(disp[1]) && nzchar(trimws(as.character(disp[1]))))
+      as.character(disp)[1] else txt
+    if (is.null(val) || !length(val) || is.na(val[1])) NA_character_ else as.character(val)[1]
+  }, character(1))
 
   rows <- lapply(seq_len(n), function(i){
     pm  <- prop_map(comps[[i]])
     code <- G(pm, "case_name", sig_code_obs[i])
+    signal_raw <- G_first(pm, c("signaux_label", "signal_label", "case_name_label", "case_label"), sig_label_obs[i])
     sec_raw <- tolower(G(pm, "types_de_signaux", ""))
     secteur <- if (grepl("environ", sec_raw)) "Environnement"
                else if (grepl("animal", sec_raw)) "Animal"
@@ -94,6 +109,7 @@ charger_xroad <- function() {
     data.frame(
       id_signal = if (i <= length(obs_id) && !is.na(obs_id[i]) && nzchar(obs_id[i])) obs_id[i] else paste0("xr-", i),
       code = code, secteur = secteur, fokontany = fok,
+      signal_raw = signal_raw,
       date_de_survenue = dsurv, date_detection = to_date(G(pm, "date_detection")),
       Nombre_cas   = suppressWarnings(as.numeric(G(pm, "Nombre_cas", "0"))),
       Nombre_deces = suppressWarnings(as.numeric(G(pm, "Nombre_deces", "0"))),
@@ -105,11 +121,38 @@ charger_xroad <- function() {
   m$Nombre_deces[is.na(m$Nombre_deces)] <- 0
 
   # Libellé français + secteur canonique depuis REF18 si disponible
-  signal_lbl <- m$code
+  signal_lbl <- ifelse(!is.na(m$signal_raw) & nzchar(trimws(m$signal_raw)), m$signal_raw, m$code)
   if (exists("REF18") && is.data.frame(REF18) && all(c("code","signal","secteur") %in% names(REF18))) {
+    norm_txt <- function(x) {
+      x <- tolower(trimws(as.character(x)))
+      x <- iconv(x, from = "", to = "ASCII//TRANSLIT")
+      x <- gsub("[^a-z0-9]+", " ", x)
+      x <- gsub("\\s+", " ", x)
+      trimws(x)
+    }
+    best_ref_signal <- function(raw_signal, secteur, code) {
+      cand <- REF18
+      if (!is.na(secteur) && nzchar(secteur)) {
+        cand_sec <- cand[cand$secteur == secteur, , drop = FALSE]
+        if (nrow(cand_sec) > 0) cand <- cand_sec
+      }
+      if (!is.na(code) && code %in% cand$code) return(cand$signal[match(code, cand$code)])
+      raw_norm <- norm_txt(raw_signal)
+      if (!nzchar(raw_norm)) return(raw_signal)
+      ref_norm <- norm_txt(cand$signal)
+      exact_idx <- match(raw_norm, ref_norm)
+      if (!is.na(exact_idx)) return(cand$signal[exact_idx])
+      d <- utils::adist(raw_norm, ref_norm, ignore.case = TRUE)
+      score <- as.numeric(d) / pmax(nchar(raw_norm), nchar(ref_norm), 1)
+      best <- which.min(score)
+      if (length(best) == 1 && is.finite(score[best]) && score[best] <= 0.45) cand$signal[best] else raw_signal
+    }
     lut_sig <- stats::setNames(REF18$signal,  REF18$code)
     lut_sec <- stats::setNames(REF18$secteur, REF18$code)
-    signal_lbl <- ifelse(m$code %in% names(lut_sig), unname(lut_sig[m$code]), m$code)
+    signal_lbl <- vapply(seq_len(nrow(m)), function(i) {
+      if (m$code[i] %in% names(lut_sig)) unname(lut_sig[m$code[i]])
+      else best_ref_signal(signal_lbl[i], m$secteur[i], m$code[i])
+    }, character(1))
     m$secteur  <- ifelse(m$code %in% names(lut_sec), unname(lut_sec[m$code]), m$secteur)
   }
 

@@ -2013,16 +2013,32 @@ server <- function(input, output, session) {
   .ord_signaux <- REF18 %>%
     mutate(sord = match(secteur, c("Humain", "Animal", "Environnement"))) %>%
     arrange(sord, code)
+  heat_signal_levels <- function(labels, lg) {
+    ref_levels <- rev(translate_signal(.ord_signaux$signal, lg))
+    extra_levels <- sort(unique(labels[!(labels %in% ref_levels)]))
+    if (length(extra_levels) == 0) ref_levels else c(ref_levels, extra_levels)
+  }
+  heat_visual_max <- function(values) {
+    values <- values[is.finite(values) & !is.na(values)]
+    if (!length(values)) return(1)
+    vmax <- suppressWarnings(as.numeric(stats::quantile(values, 0.9, na.rm = TRUE, names = FALSE)))
+    vmax <- max(2, ceiling(vmax))
+    min(vmax, max(values, na.rm = TRUE))
+  }
   output$p_heat_temps <- renderEcharts4r({
     lg <- current_lang()
     d <- filtree(); shiny::validate(shiny::need(nrow(d) > 0, "Aucun signal."))
-    sig_order <- rev(translate_signal(.ord_signaux$signal, lg))
     dd <- d %>% mutate(signal_label = translate_signal(signal, lg),
                        m = floor_date(date_de_survenue, "month")) %>%
+      filter(!is.na(m), !is.na(signal_label), nzchar(signal_label)) %>%
       count(signal_label, m) %>% arrange(m) %>% mutate(mois = format(m, "%b %y"))
+    shiny::validate(shiny::need(nrow(dd) > 0, "Aucune donnée datée pour ces filtres."))
+    sig_order <- heat_signal_levels(dd$signal_label, lg)
+    vmax <- heat_visual_max(dd$n)
     dd %>% e_charts(mois) %>%
       e_heatmap(signal_label, n) %>%
-      e_visual_map(n, inRange = list(color = c("#EEF3F8", "#8FB3CE", "#16324F"))) %>%
+      e_visual_map(n, min = 1, max = vmax,
+                   inRange = list(color = c("#DCEAF6", "#B7D0E4", "#7FA7C7", "#3E6C94", "#16324F"))) %>%
       e_y_axis(type = "category", data = sig_order) %>%
       e_x_axis(type = "category", axisLabel = list(rotate = 45)) %>%
       e_tooltip() %>%
@@ -2031,11 +2047,17 @@ server <- function(input, output, session) {
   output$p_heat_geo <- renderEcharts4r({
     lg <- current_lang()
     d <- filtree(); shiny::validate(shiny::need(nrow(d) > 0, "Aucun signal."))
-    sig_order <- rev(translate_signal(.ord_signaux$signal, lg))
-    dd <- d %>% mutate(signal_label = translate_signal(signal, lg)) %>% count(signal_label, fokontany)
+    dd <- d %>% mutate(signal_label = translate_signal(signal, lg),
+                       fokontany = trimws(as.character(fokontany))) %>%
+      filter(!is.na(signal_label), nzchar(signal_label), !is.na(fokontany), nzchar(fokontany)) %>%
+      count(signal_label, fokontany)
+    shiny::validate(shiny::need(nrow(dd) > 0, "Aucune localisation disponible pour ces filtres."))
+    sig_order <- heat_signal_levels(dd$signal_label, lg)
+    vmax <- heat_visual_max(dd$n)
     dd %>% e_charts(fokontany) %>%
       e_heatmap(signal_label, n) %>%
-      e_visual_map(n, inRange = list(color = c("#EDF3EE", "#9CC0A6", "#2E5A40"))) %>%
+      e_visual_map(n, min = 1, max = vmax,
+                   inRange = list(color = c("#DFEEE3", "#BFD8C4", "#8EB697", "#4E7D5E", "#2E5A40"))) %>%
       e_y_axis(type = "category", data = sig_order) %>%
       e_x_axis(type = "category", axisLabel = list(rotate = 45)) %>%
       e_tooltip() %>%

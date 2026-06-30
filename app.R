@@ -502,7 +502,7 @@ ui <- dashboardPage(
       menuItem(i18n$t("Cartographie"), tabName = "carte", icon = icon("map-location-dot")),
       menuItem(i18n$t("Climat & environnement"), tabName = "climat", icon = icon("cloud-sun-rain")),
       menuItem(i18n$t("Environnement (SMART)"), tabName = "smartenv", icon = icon("tree")),
-      menuItem(i18n$t("Alertes"), tabName = "alertes", icon = icon("triangle-exclamation")),
+      menuItem(i18n_text("Alertes"), tabName = "alertes", icon = icon("triangle-exclamation")),
       menuItem(i18n$t("Indicateurs (18 signaux)"), tabName = "indic", icon = icon("table-cells")),
       menuItem(i18n$t("One Health (croisements)"), tabName = "onehealth", icon = icon("diagram-project")),
       menuItem(i18n$t("Pipeline & qualité"), tabName = "qualite", icon = icon("circle-check")),
@@ -518,14 +518,15 @@ ui <- dashboardPage(
     ),
     # Bandeau de logos partenaires (même ordre que l'onglet « À propos »)
     tags$div(style = "margin:16px 12px 12px; background:#fff; border-radius:8px; padding:10px 8px;",
-      tags$div(style = "display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+      tags$div(style = "display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 10px;
                          align-items:center; justify-items:center;",
-        lapply(c("afd.png", "banque_mondiale.png", "madagascar.png",
-                 "sante.png", "elevage.png", "environnement.png",
-                 "africam_prezode.png", "cirad.png", "pivot.png"),
+        lapply(c("madagascar.png", "sante.png", "environnement.png",
+                 "elevage.png", "afd.png", "banque_mondiale.png",
+                 "tafa1.png", "africam_prezode.png", "cirad.png",
+                 "pivot.png"),
                function(f) tags$img(src = file.path("logos", f),
                                     style = paste0("max-height:",
-                                                   if (f == "afd.png") "22px" else "32px",
+                                                   if (f == "afd.png") "22px" else if (f == "tafa1.png") "28px" else "32px",
                                                    "; max-width:100%; object-fit:contain;"),
                                     alt = "Logo partenaire"))))
   ),

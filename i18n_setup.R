@@ -38,6 +38,16 @@ i18n_dicts <- .build_i18n_dicts(i18n_dict$translation)
 # i18n$t() : renvoie la clé FR (le swap visuel se fait côté client)
 i18n <- list(t = function(key) i18n_lookup(key, I18N_DEFAULT))
 
+# Rend un libellé avec sa clé source pour éviter les ambiguïtés quand
+# plusieurs entrées partagent la même traduction dans une autre langue.
+i18n_text <- function(key, class = NULL) {
+  shiny::tags$span(
+    class = class,
+    `data-i18n-key` = key,
+    i18n_lookup(key, I18N_DEFAULT)
+  )
+}
+
 # Traduction serveur-side
 i18n_lookup <- function(key, lang = "fr") {
   if (is.null(key) || !nzchar(key)) return(key)
@@ -110,7 +120,12 @@ lang_switcher_js <- function() {
         var fromLang = window._currentLang;
         var fwd = window._i18nFwd[newLang] || {};
         var bwd = (fromLang === 'fr') ? null : (window._i18nBwd[fromLang] || {});
-        function lookupNew(t) {
+        function lookupNew(t, node) {
+          var keyedParent = node && node.parentNode && node.parentNode.dataset ? node.parentNode.dataset.i18nKey : null;
+          if (keyedParent) {
+            var keyedOut = fwd[keyedParent];
+            return (keyedOut === undefined) ? null : keyedOut;
+          }
           var frKey = (fromLang === 'fr') ? t : bwd[t];
           if (!frKey) return null;
           var out = fwd[frKey]; return (out === undefined) ? null : out;
@@ -129,7 +144,7 @@ lang_switcher_js <- function() {
         nodes.forEach(function(node) {
           var raw = node.nodeValue;
           var leading=(raw.match(/^\\s*/)||[''])[0], trailing=(raw.match(/\\s*$/)||[''])[0];
-          var trimmed=raw.replace(/^\\s+|\\s+$/g,''); var fresh=lookupNew(trimmed);
+          var trimmed=raw.replace(/^\\s+|\\s+$/g,''); var fresh=lookupNew(trimmed, node);
           if (fresh!==null && fresh!==trimmed) node.nodeValue = leading+fresh+trailing;
         });
         window._currentLang = newLang; setActivePill(newLang);
@@ -152,7 +167,9 @@ lang_switcher_js <- function() {
         nodes.forEach(function(node) {
           var raw = node.nodeValue;
           var leading=(raw.match(/^\\s*/)||[''])[0], trailing=(raw.match(/\\s*$/)||[''])[0];
-          var trimmed=raw.replace(/^\\s+|\\s+$/g,''); var fresh=fwd[trimmed];
+          var trimmed=raw.replace(/^\\s+|\\s+$/g,'');
+          var keyedParent = node.parentNode && node.parentNode.dataset ? node.parentNode.dataset.i18nKey : null;
+          var fresh = keyedParent ? fwd[keyedParent] : fwd[trimmed];
           if (fresh!==undefined && fresh!==trimmed) node.nodeValue = leading+fresh+trailing;
         });
       }

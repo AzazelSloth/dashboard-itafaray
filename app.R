@@ -1055,11 +1055,12 @@ ui <- dashboardPage(
       tags$div(style = "font-weight:600; color:#26333F;", titre),
       tags$div(style = "color:#5A6672; font-size:13px;", desc)))
 }
-show_guide_modal <- function() {
+show_guide_modal <- function(lang = I18N_DEFAULT) {
+  Tr <- function(key) i18n_lookup(key, lang)
   showModal(modalDialog(
     title = tags$div(style = "color:#1e3a5f; font-weight:700;",
-                     icon("compass"), " ", i18n$t("Guide de la plateforme i-Tafaray")),
-    easyClose = TRUE, size = "l", footer = modalButton(i18n$t("Fermer")),
+                     icon("compass"), " ", Tr("Guide de la plateforme i-Tafaray")),
+    easyClose = TRUE, size = "l", footer = modalButton(Tr("Fermer")),
     tags$div(style = "font-size:14px; line-height:1.55;",
       tags$p(i18n$t("Plateforme de surveillance One Health (Une seule santé). Elle réunit les signaux humains, animaux et environnementaux pour révéler, par leur croisement, des menaces qu'aucun secteur ne verrait seul.")),
       tags$div(style = "font-size:11px; text-transform:uppercase; letter-spacing:.05em;
@@ -1090,6 +1091,46 @@ show_guide_modal <- function() {
         tags$li(tags$b("« + »"), " : déplie les signaux de la grappe ; ", tags$b("clic sur la ligne"),
                 " : ouvre la chaîne de décision."),
         tags$li(tags$b("Rapport officiel"), " : génère le bulletin PDF prêt à partager."))
+    )
+  ))
+}
+
+show_guide_modal_i18n <- function(lang = I18N_DEFAULT) {
+  Tr <- function(key) i18n_lookup(key, lang)
+  showModal(modalDialog(
+    title = tags$div(style = "color:#1e3a5f; font-weight:700;",
+                     icon("compass"), " ", Tr("Guide de la plateforme i-Tafaray")),
+    easyClose = TRUE, size = "l", footer = modalButton(Tr("Fermer")),
+    tags$div(style = "font-size:14px; line-height:1.55;",
+      tags$p(Tr("Plateforme de surveillance One Health (Une seule santé). Elle réunit les signaux humains, animaux et environnementaux pour révéler, par leur croisement, des menaces qu'aucun secteur ne verrait seul.")),
+      tags$div(style = "font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+                         color:#8A93A0; margin:14px 0 8px;", Tr("Les modules")),
+      fluidRow(
+        column(6,
+          .guide_item("gauge-high", Tr("Synthèse"),
+                      Tr("Vue d'ensemble pour le comité : chiffres clés, tendance, alertes prioritaires.")),
+          .guide_item("gauge", Tr("Vue d'ensemble"),
+                      Tr("Volumes par mois et secteur, niveau de risque, pathogènes suspectés.")),
+          .guide_item("map-location-dot", Tr("Cartographie"),
+                      Tr("Localisation des signaux, anneaux d'alerte et cercles de grappes One Health.")),
+          .guide_item("triangle-exclamation", Tr("Alertes"),
+                      Tr("Liste des alertes et leur chaîne de décision, du signalement à l'action."))),
+        column(6,
+          .guide_item("table-cells", Tr("Indicateurs"),
+                      Tr("Les 18 signaux prioritaires et leurs mesures (volumes, cas, décès, alertes).")),
+          .guide_item("diagram-project", "One Health",
+                      Tr("Grappes inter-secteurs et avance de détection gagnée sur le 1er cas humain.")),
+          .guide_item("circle-check", Tr("Pipeline & qualité"),
+                      Tr("Du signal collecté à l'alerte : délais de vérification, doublons, taux de tri.")))),
+      tags$hr(style = "margin:10px 0;"),
+      tags$div(style = "font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+                         color:#8A93A0; margin-bottom:8px;", Tr("Sur la page Synthèse")),
+      tags$ul(style = "color:#5A6672; font-size:13px; padding-left:18px; margin:0;",
+        tags$li(tags$b(Tr("Période")), " : ", Tr("sélecteur en haut à droite (mois, 3 mois, 12 mois, tout).")),
+        tags$li(tags$b(Tr("Croisement One Health")), " : ", Tr("dans le tableau des alertes, secteurs croisés et avance de détection.")),
+        tags$li(tags$b(Tr("« + »")), " : ", Tr("déplie les signaux de la grappe ; "), tags$b(Tr("clic sur la ligne")),
+                " : ", Tr("ouvre la chaîne de décision.")),
+        tags$li(tags$b(Tr("Rapport officiel")), " : ", Tr("génère le bulletin PDF prêt à partager.")))
     )
   ))
 }
@@ -1156,7 +1197,7 @@ server <- function(input, output, session) {
   })
 
   ## ---- Guide de la plateforme (fenêtre modale) ----
-  observeEvent(input$tour, show_guide_modal())
+  observeEvent(input$tour, show_guide_modal_i18n(current_lang()))
 
   ## Bornes de dates calées sur la SOURCE ACTIVE (démo ou X-Road réel),
   ## sinon les données réelles (datées après la démo) seraient toutes filtrées.

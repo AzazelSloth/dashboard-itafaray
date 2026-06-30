@@ -246,6 +246,46 @@
       "mg": "Akatona"
     },
     {
+      "fr": "Rapport officiel",
+      "en": "Official report",
+      "mg": "Tatitra ofisialy"
+    },
+    {
+      "fr": "« + »",
+      "en": "\"+\"",
+      "mg": "\"+\""
+    },
+    {
+      "fr": "clic sur la ligne",
+      "en": "click the row",
+      "mg": "tsindrio ny andalana"
+    },
+    {
+      "fr": "sélecteur en haut à droite (mois, 3 mois, 12 mois, tout).",
+      "en": "selector at the top right (month, 3 months, 12 months, all).",
+      "mg": "safidy eo an-tampony ankavanana (volana, 3 volana, 12 volana, rehetra)."
+    },
+    {
+      "fr": "dans le tableau des alertes, secteurs croisés et avance de détection.",
+      "en": "in the alerts table, crossed sectors and detection lead time.",
+      "mg": "ao amin'ny tabilao fanairana, sehatra nifameno ary fotoana azo tamin'ny fitsirihana mialoha."
+    },
+    {
+      "fr": "déplie les signaux de la grappe ; ",
+      "en": "expands the cluster signals; ",
+      "mg": "manokatra ny trangan'ny vondrona ; "
+    },
+    {
+      "fr": "ouvre la chaîne de décision.",
+      "en": "opens the decision chain.",
+      "mg": "manokatra ny rojom-panapahan-kevitra."
+    },
+    {
+      "fr": "génère le bulletin PDF prêt à partager.",
+      "en": "generates the PDF bulletin ready to share.",
+      "mg": "mamorona ny bulletin PDF vonona hozaraina."
+    },
+    {
       "fr": "Vue d'ensemble pour le comité : chiffres clés, tendance, alertes prioritaires.",
       "en": "Overview for the committee: key figures, trend, priority alerts.",
       "mg": "Topimaso ho an'ny komity : isa fototra, fironana, fanairana laharam-pahamehana."

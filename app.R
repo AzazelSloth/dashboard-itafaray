@@ -1010,28 +1010,18 @@ ui <- dashboardPage(
                             i18n$t("L'appui de la Banque mondiale")),
                     tags$p(i18n$t("Le Projet de préparation et de réponse aux pandémies (PPSB), financé par la Banque mondiale, soutient la mise en place d'un système de notification électronique, en temps réel, interopérable et interconnecté, conforme au Règlement sanitaire international (RSI). i-Tafaray contribue à cet objectif via l'interopérabilité des données (standard FHIR, échange par X-Road).")))),
               box(width = 12, status = "info", solidHeader = TRUE, title = i18n$t("Partenaires"),
-                  tags$div(style = "background:#fff; border-radius:8px; padding:14px 8px;
-                                    display:flex; flex-wrap:wrap; gap:16px;
-                                    align-items:center; justify-content:center;",
+                  tags$div(style = "background:#fff; border-radius:8px; padding:14px 8px;",
                     # Bailleurs (tailles ajustées individuellement)
-                    tags$div(style = "display:flex; flex-wrap:wrap; gap:22px; align-items:center;",
-                      tags$img(src = "logos/afd.png",
-                               style = "height:42px; width:auto; object-fit:contain;", alt = "AFD"),
-                      tags$img(src = "logos/banque_mondiale.png",
-                               style = "height:66px; width:auto; object-fit:contain;", alt = "Banque mondiale")),
-                    tags$div(style = "width:1px; align-self:stretch; min-height:52px;
-                                      background:#D9DEE4; margin:0 4px;"),
-                    # Gouvernement (Primature)
-                    tags$img(src = "logos/madagascar.png",
-                             style = "height:54px; width:auto; object-fit:contain;", alt = "Primature"),
-                    tags$div(style = "width:1px; align-self:stretch; min-height:52px;
-                                      background:#D9DEE4; margin:0 4px;"),
-                    # Ministères & partenaires de mise en œuvre
-                    tags$div(style = "display:flex; flex-wrap:wrap; gap:22px; align-items:center;",
-                      lapply(c("sante.png", "elevage.png", "environnement.png",
-                               "africam_prezode.png", "cirad.png", "pivot.png"),
+                    tags$div(style = "display:flex; flex-wrap:wrap; gap:22px 28px; align-items:center;
+                                      justify-content:center; width:100%;",
+                      lapply(c("madagascar.png", "sante.png", "environnement.png",
+                               "elevage.png", "afd.png", "banque_mondiale.png",
+                               "tafa1.png", "africam_prezode.png", "cirad.png",
+                               "pivot.png"),
                              function(f) tags$img(src = file.path("logos", f),
-                                                  style = "height:54px; width:auto; object-fit:contain;",
+                                                  style = paste0("max-height:",
+                                                                 if (f == "afd.png") "48px" else if (f == "banque_mondiale.png") "74px" else if (f == "tafa1.png") "52px" else "60px",
+                                                                 "; max-width:clamp(72px, 11vw, 120px); width:auto; flex:0 1 auto; object-fit:contain;"),
                                                   alt = "Partenaire"))))),
               box(width = 12, status = "info", solidHeader = TRUE,
                   title = i18n$t("À propos de cette démonstration"),

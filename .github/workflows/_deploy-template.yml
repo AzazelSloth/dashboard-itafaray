@@ -463,6 +463,8 @@ jobs:
           if [ -d "$DEPLOY_PATH/.git" ]; then
             git -C "$DEPLOY_PATH" remote set-url origin "$REPOSITORY_URL"
             git -C "$DEPLOY_PATH" fetch --prune origin
+            git -C "$DEPLOY_PATH" reset --hard
+            git -C "$DEPLOY_PATH" clean -fd
           elif [ -n "$(find "$DEPLOY_PATH" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
             echo "Deployment path exists and is not an initialized Git repository: $DEPLOY_PATH"
             exit 1
@@ -472,7 +474,7 @@ jobs:
           fi
 
           git -C "$DEPLOY_PATH" fetch --prune origin
-          git -C "$DEPLOY_PATH" checkout -B "$GIT_REF" "origin/$GIT_REF"
+          git -C "$DEPLOY_PATH" checkout --force -B "$GIT_REF" "origin/$GIT_REF"
           git -C "$DEPLOY_PATH" reset --hard "$GIT_SHA"
           git -C "$DEPLOY_PATH" clean -fd
           git -C "$DEPLOY_PATH" rev-parse HEAD

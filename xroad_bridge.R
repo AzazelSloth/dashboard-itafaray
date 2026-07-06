@@ -139,6 +139,15 @@ charger_xroad <- function() {
     "Non évalué"
   }
   coa <- function(a, b, d) { out <- a; out[is.na(out)] <- b[is.na(out)]; out[is.na(out)] <- d; out }
+  # Le flux réel code les signaux SHC_/SAC_/SEC_ ; le dashboard (REF18, démo)
+  # utilise H/A/E. On aligne pour que Par signal, Indicateurs et REF18 matchent.
+  norm_code <- function(code) {
+    if (is.null(code) || !length(code) || is.na(code)) return(NA_character_)
+    u <- toupper(code)
+    m <- regmatches(u, regexec("^(SHC|SAC|SEC)_?([0-9]+)$", u))[[1]]
+    if (length(m) == 3) return(paste0(switch(m[2], SHC = "H", SAC = "A", SEC = "E"), m[3]))
+    as.character(code)
+  }
 
   # ------------------------------------------------- séparation signaux / évènements
   is_event <- vapply(resources, function(r) !is.na(ident_val(r, "/evenement")), logical(1))
@@ -199,25 +208,36 @@ charger_xroad <- function() {
     pm       <- comp_kv(r)
     sid      <- ident_val(r, "/signal")
     obs_code <- first_coding_code(r$code)
-    code     <- G(pm, "case_name", if (!is.na(obs_code)) obs_code else NA_character_)
+    code     <- norm_code(G(pm, "case_name", if (!is.na(obs_code)) obs_code else NA_character_))
     sec_raw  <- tolower(G(pm, "types_de_signaux", ""))
-    sec_code <- if (is.na(code) || !nzchar(code)) "" else substr(toupper(code), 1, 3)
+    sec_ltr  <- if (is.na(code) || !nzchar(code)) "" else substr(toupper(code), 1, 1)
     secteur  <- if (grepl("environ", sec_raw)) "Environnement"
                 else if (grepl("animal", sec_raw)) "Animal"
                 else if (grepl("humain", sec_raw)) "Humain"
-                else switch(sec_code,
-                            SEC = "Environnement", SAC = "Animal", SHC = "Humain", "Non précisé")
+                else switch(sec_ltr, H = "Humain", A = "Animal", E = "Environnement", "Non précisé")
     subj_ref <- tryCatch(r$subject$reference, error = function(e) NA_character_)
     fok      <- G(pm, "code_fkt_survenue", G(pm, "user_fok_code",
                    sub("^Location/", "", (subj_ref %||% NA))))
     classif  <- { nm <- G(pm, "classification_event_name", NA)
                   if (!is.na(nm)) nm else G(pm, "classification_event", NA) }
+    # Coordonnées : composant "gps" ("lat lon alt acc") ou gps_latitude/gps_longitude
+    lat <- suppressWarnings(as.numeric(G(pm, "gps_latitude", NA)))
+    lon <- suppressWarnings(as.numeric(G(pm, "gps_longitude", NA)))
+    if (is.na(lat) || is.na(lon)) {
+      g <- G(pm, "gps", NA)
+      if (!is.na(g)) {
+        pp <- suppressWarnings(as.numeric(strsplit(trimws(g), "[[:space:]]+")[[1]]))
+        if (length(pp) >= 2) { if (is.na(lat)) lat <- pp[1]; if (is.na(lon)) lon <- pp[2] }
+      }
+    }
     data.frame(
       jk                = if (!is.na(sid)) sid else (r$id %||% NA_character_),
       id_signal         = if (!is.null(r$id)) as.character(r$id) else paste0("xr-", sid),
       code              = code,
       secteur           = secteur,
       fokontany         = fok,
+      lat               = lat,
+      lon               = lon,
       date_de_survenue  = to_date(r$effectiveDateTime %||% G(pm, "date_detection")),
       date_detection    = to_date(G(pm, "date_detection")),
       date_verification = to_date(G(pm, "date_verification")),
@@ -271,14 +291,14 @@ charger_xroad <- function() {
     fokontany            = ifelse(is.na(m$fokontany) | m$fokontany == "", "Non précisé", m$fokontany),
     commune              = NA_character_,
     district             = "Ifanadiana",
-    lat = NA_real_, lon = NA_real_,
+    lat = m$lat, lon = m$lon,
     date_de_survenue     = m$date_de_survenue,
     date_detection       = m$date_detection,
     date_verification    = m$date_verification,
     delai_verif          = m$delai_verif,
     Nombre_cas           = m$Nombre_cas,
     Nombre_deces         = m$Nombre_deces,
-    niveau_risque        = factor(ifelse(is.na(m$niveau_risque), "Non évalué", m$niveau_risque), levels = niv),
+    niveau_risque        = factor(ifelse(is.na(m$niveau_risque), "Non évalué", as.character(m$niveau_risque)), levels = niv),
     classification_event = coa(m$classification_event, m$classif_sig, "Non précisé"),
     classe_source        = m$classe_source,
     is_verifie           = m$is_verifie,

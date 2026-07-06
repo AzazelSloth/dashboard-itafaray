@@ -71,7 +71,10 @@ charger_xroad <- function() {
   if (length(resources) == 0) stop("Aucune Observation exploitable reçue de X-Road.")
 
   # ------------------------------------------------------------------ helpers
-  first_coding_code <- function(x) tryCatch(as.character(x$coding[[1]]$code), error = function(e) NA_character_)
+  first_coding_code <- function(x) {
+    v <- tryCatch(x$coding[[1]]$code, error = function(e) NULL)
+    if (is.null(v) || !length(v)) NA_character_ else as.character(v)[1]
+  }
 
   comp_kv <- function(res) {
     comp <- res$component
@@ -79,30 +82,35 @@ charger_xroad <- function() {
     out <- list()
     for (cp in comp) {
       code <- tryCatch(cp$code$coding[[1]]$code, error = function(e) NULL)
-      if (is.null(code) || is.na(code)) next
+      if (is.null(code) || !length(code) || is.na(code[1])) next
+      code <- as.character(code)[1]
       v <- NULL
       for (f in c("valueString", "valueCode", "valueInteger", "valueBoolean", "valueDecimal", "valueDateTime"))
-        if (!is.null(cp[[f]])) { v <- cp[[f]]; break }
+        if (!is.null(cp[[f]]) && length(cp[[f]])) { v <- cp[[f]]; break }
       if (is.null(v) && !is.null(cp$valueCodeableConcept))
         v <- tryCatch(cp$valueCodeableConcept$coding[[1]]$code,
                       error = function(e) cp$valueCodeableConcept$text)
-      out[[as.character(code)]] <- if (is.null(v)) NA else v
+      out[[code]] <- if (is.null(v) || !length(v)) NA else v[[1]]
     }
     out
   }
 
   ident_val <- function(res, suffix) {
     ids <- res$identifier
-    if (is.null(ids)) return(NA_character_)
-    for (id in ids)
-      if (!is.null(id$system) && grepl(paste0(suffix, "$"), id$system))
-        return(as.character(id$value))
+    if (is.null(ids) || !length(ids)) return(NA_character_)
+    for (id in ids) {
+      sys <- id$system
+      if (!is.null(sys) && length(sys) && grepl(paste0(suffix, "$"), sys[1])) {
+        v <- id$value
+        return(if (is.null(v) || !length(v)) NA_character_ else as.character(v)[1])
+      }
+    }
     NA_character_
   }
 
   G <- function(pm, key, default = NA_character_) {
     v <- pm[[key]]
-    if (is.null(v) || (length(v) == 1 && is.na(v))) default else as.character(v)
+    if (is.null(v) || !length(v) || is.na(v[1])) default else as.character(v)[1]
   }
   oui_non <- function(x) {
     x <- tolower(as.character(x))
@@ -193,10 +201,11 @@ charger_xroad <- function() {
     obs_code <- first_coding_code(r$code)
     code     <- G(pm, "case_name", if (!is.na(obs_code)) obs_code else NA_character_)
     sec_raw  <- tolower(G(pm, "types_de_signaux", ""))
+    sec_code <- if (is.na(code) || !nzchar(code)) "" else substr(toupper(code), 1, 3)
     secteur  <- if (grepl("environ", sec_raw)) "Environnement"
                 else if (grepl("animal", sec_raw)) "Animal"
                 else if (grepl("humain", sec_raw)) "Humain"
-                else switch(substr(toupper(code), 1, 3),
+                else switch(sec_code,
                             SEC = "Environnement", SAC = "Animal", SHC = "Humain", "Non précisé")
     subj_ref <- tryCatch(r$subject$reference, error = function(e) NA_character_)
     fok      <- G(pm, "code_fkt_survenue", G(pm, "user_fok_code",

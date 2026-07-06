@@ -148,9 +148,26 @@ charger_xroad <- function() {
     if (length(m) == 3) return(paste0(switch(m[2], SHC = "H", SAC = "A", SEC = "E"), m[3]))
     as.character(code)
   }
+  # Les 18 signaux prioritaires (nomenclature du dashboard). Tout code hors de
+  # cette liste n'est pas un signal (évaluation, alerte, secteur, instance…).
+  VALID_CODES <- c(paste0("H", 1:5), paste0("A", 1:4), paste0("E", 1:9))
+  # Le type du signal est porté par Observation.code ; case_name est un
+  # identifiant d'instance (SEC_107…), à n'utiliser qu'en dernier recours.
+  pick_code <- function(obs_code, case_name) {
+    for (cc in c(obs_code, case_name)) {
+      nc <- norm_code(cc)
+      if (!is.na(nc) && nc %in% VALID_CODES) return(nc)
+    }
+    norm_code(obs_code %||% case_name)
+  }
 
   # ------------------------------------------------- séparation signaux / évènements
-  is_event <- vapply(resources, function(r) !is.na(ident_val(r, "/evenement")), logical(1))
+  is_event <- vapply(resources, function(r) {
+    if (!is.na(ident_val(r, "/evenement")) || !is.na(ident_val(r, "/alerte"))) return(TRUE)
+    if (grepl("^(event|evenement|evaluation|alerte)", tolower(r$id %||% ""))) return(TRUE)
+    pm <- comp_kv(r)
+    !is.null(pm[["eval_orientee_alertes"]]) || !is.null(pm[["niveau_risque"]])
+  }, logical(1))
   sig_res  <- resources[!is_event]
   evt_res  <- resources[is_event]
   if (length(sig_res) == 0) stop("Aucun signal (Observation) reçu de X-Road.")
@@ -208,7 +225,7 @@ charger_xroad <- function() {
     pm       <- comp_kv(r)
     sid      <- ident_val(r, "/signal")
     obs_code <- first_coding_code(r$code)
-    code     <- norm_code(G(pm, "case_name", if (!is.na(obs_code)) obs_code else NA_character_))
+    code     <- pick_code(obs_code, G(pm, "case_name", NA))
     sec_raw  <- tolower(G(pm, "types_de_signaux", ""))
     sec_ltr  <- if (is.na(code) || !nzchar(code)) "" else substr(toupper(code), 1, 1)
     secteur  <- if (grepl("environ", sec_raw)) "Environnement"
@@ -261,6 +278,10 @@ charger_xroad <- function() {
   m <- m[!duplicated(m$jk, fromLast = TRUE), , drop = FALSE]
   m$Nombre_cas[is.na(m$Nombre_cas)]     <- 0
   m$Nombre_deces[is.na(m$Nombre_deces)] <- 0
+  # Ne garder que les vrais signaux (18 codes) ; le reste (évaluations, alertes,
+  # secteurs, instances) est écarté du grain "signal".
+  m <- m[!is.na(m$code) & m$code %in% VALID_CODES, , drop = FALSE]
+  if (nrow(m) == 0) stop("Aucun signal valide (18 codes) après filtrage X-Road.")
 
   # ------------------------------------------------- jointure évènements -> signaux
   if (nrow(ev_summary) > 0) {

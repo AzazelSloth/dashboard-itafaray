@@ -249,8 +249,10 @@ charger_xroad <- function() {
                 else if (grepl("humain", sec_raw)) "Humain"
                 else switch(sec_ltr, H = "Humain", A = "Animal", E = "Environnement", "Non précisé")
     subj_ref <- tryCatch(r$subject$reference, error = function(e) NA_character_)
-    fok      <- G(pm, "code_fkt_survenue", G(pm, "user_fok_code",
-                   sub("^Location/", "", (subj_ref %||% NA))))
+    # Affichage : on privilégie le nom du lieu (lieu de survenue) au code fokontany.
+    fok      <- G(pm, "lieu_de_survenue",
+                  G(pm, "code_fkt_survenue", G(pm, "user_fok_code",
+                    sub("^Location/", "", (subj_ref %||% NA)))))
     classif  <- { nm <- G(pm, "classification_event_name", NA)
                   if (!is.na(nm)) nm else G(pm, "classification_event", NA) }
     # Coordonnées : composant "gps" ("lat lon alt acc") ou gps_latitude/gps_longitude

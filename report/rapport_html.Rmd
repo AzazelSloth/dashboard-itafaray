@@ -90,15 +90,6 @@ cat(sprintf('<h2 class="sec">5. %s</h2>', Tr("ALERTES PRIORITAIRES")))
 r_tab
 ```
 
-```{r reco, results='asis'}
-cat(sprintf('<h2 class="sec">6. %s</h2>', Tr("RECOMMANDATIONS")))
-items <- trimws(sub("^-\\s*", "", strsplit(reco, "\n")[[1]]))
-items <- items[nchar(items) > 0]
-cat('<ul class="reco">')
-for (it in items) cat(sprintf('<li>%s</li>', htmltools::htmlEscape(it)))
-cat('</ul>')
-```
-
 ```{r footer, results='asis'}
 cat(sprintf('<div class="footer">%s</div>',
   paste0("i-Tafaray — ", Tr("Surveillance intégrée One Health - Comité de pilotage."),

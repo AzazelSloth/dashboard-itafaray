@@ -160,6 +160,22 @@ charger_xroad <- function() {
     }
     norm_code(obs_code %||% case_name)
   }
+  # Référentiel des 18 signaux (code -> secteur, libellé) — repli quand REF18
+  # (global de l'app) n'existe pas, ex. lors de l'ingestion via ingest_xroad.R.
+  REF18_LOCAL <- data.frame(
+    code    = c(paste0("A", 1:4), paste0("E", 1:9), paste0("H", 1:5)),
+    secteur = c(rep("Animal", 4), rep("Environnement", 9), rep("Humain", 5)),
+    signal  = c(
+      "Avortements en série (ruminants)", "Mortalité animale inexpliquée",
+      "Maladie groupée des animaux", "Augmentation de vecteurs (puces)",
+      "Changement couleur/goût/odeur de l'eau", "Feux multiples",
+      "Odeur inhabituelle (pollution)", "Trace d'exploitation forestière",
+      "Déchets cumulés", "Cadavres d'animaux sauvages", "Maladies des plants",
+      "Espèces envahissantes", "Tarissement puits / rivières",
+      "Signes/symptômes similaires chez ≥2 personnes", "Décès groupés humains",
+      "Morsures / griffures multiples", "Absentéisme scolaire",
+      "Déplacements anormaux de population"),
+    stringsAsFactors = FALSE)
 
   # ------------------------------------------------- séparation signaux / évènements
   is_event <- vapply(resources, function(r) {
@@ -294,14 +310,14 @@ charger_xroad <- function() {
     m$date_evaluation <- as.Date(NA)
   }
 
-  # Libellé français + secteur canonique depuis REF18 si disponible
-  signal_lbl <- m$code
-  if (exists("REF18") && is.data.frame(REF18) && all(c("code", "signal", "secteur") %in% names(REF18))) {
-    lut_sig <- stats::setNames(REF18$signal,  REF18$code)
-    lut_sec <- stats::setNames(REF18$secteur, REF18$code)
-    signal_lbl <- ifelse(m$code %in% names(lut_sig), unname(lut_sig[m$code]), m$code)
-    m$secteur  <- ifelse(m$code %in% names(lut_sec), unname(lut_sec[m$code]), m$secteur)
-  }
+  # Libellé français + secteur canonique : REF18 (global de l'app) si présent,
+  # sinon le référentiel local (cas de l'ingestion hors app).
+  RF <- if (exists("REF18") && is.data.frame(REF18) && all(c("code", "signal", "secteur") %in% names(REF18)))
+          REF18 else REF18_LOCAL
+  lut_sig <- stats::setNames(RF$signal,  RF$code)
+  lut_sec <- stats::setNames(RF$secteur, RF$code)
+  signal_lbl <- ifelse(m$code %in% names(lut_sig), unname(lut_sig[m$code]), m$code)
+  m$secteur  <- ifelse(m$code %in% names(lut_sec), unname(lut_sec[m$code]), m$secteur)
 
   niv <- c("Très élevé", "Haute", "Modéré", "Faible", "Non évalué")
   data.frame(

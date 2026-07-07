@@ -34,6 +34,11 @@ source("prepare_data.R")
 if (file.exists("xroad_bridge.R")) source("xroad_bridge.R")
 # Module d'envoi d'alertes (E-Notification UGD : SMS / WhatsApp / Email)
 if (file.exists("e_notification.R")) source("e_notification.R")
+# Sites d'exploitation environnementale (e-voary) via HAPI FHIR — couche carto
+if (file.exists("fhir_exploitations.R")) source("fhir_exploitations.R")
+EXPLOITATIONS <- tryCatch(
+  if (exists("charger_exploitations")) charger_exploitations() else data.frame(),
+  error = function(e) data.frame())
 
 DATA <- tryCatch(
   charger_donnees(),
@@ -154,6 +159,18 @@ asset_version <- function(path) {
   format(as.POSIXct(info$mtime[1], tz = "UTC"), "%Y%m%d%H%M%S")
 }
 QR_CODE_SRC <- paste0("itafaray-qr.png?v=", asset_version("www/itafaray-qr.png"))
+# Complète les combinaisons mois × secteur manquantes avec n = 0. Sans cela, les
+# séries n'ont pas les mêmes catégories d'axe X et les barres empilées echarts
+# "flottent" (ne partent pas de zéro) — surtout en données réelles.
+.complete_ms <- function(dd) {
+  if (!nrow(dd)) return(dd)
+  ms <- sort(unique(dd$mois)); ss <- sort(unique(dd$secteur))
+  grille <- data.frame(mois = rep(ms, times = length(ss)),
+                       secteur = rep(ss, each = length(ms)), stringsAsFactors = FALSE)
+  grille <- dplyr::left_join(grille, dd, by = c("mois", "secteur"))
+  grille$n[is.na(grille$n)] <- 0
+  dplyr::arrange(grille, mois)
+}
 # Ventilation complète d'un vecteur de niveaux de risque -> phrase qui totalise l'effectif
 repartition_risque <- function(x, lang = "fr") {
   ord <- names(sort(SEV, decreasing = TRUE))
@@ -183,7 +200,9 @@ report_contexte <- function(lg, d, na, al, periode_lbl) {
   dom <- st$secteur[which.max(st$n)]; domp <- round(100 * max(st$n) / sum(st$n))
   susp <- d %>% filter(a_une_alerte, classification_event != "Non précisé") %>%
     count(classification_event, sort = TRUE) %>% head(3) %>% pull(classification_event)
-  foks <- d %>% filter(a_une_alerte) %>% distinct(fokontany) %>% pull(fokontany) %>% head(4)
+  foks <- d %>% filter(a_une_alerte) %>% distinct(fokontany) %>% pull(fokontany)
+  foks <- foks[!grepl("test|code_fkt|non précis", foks, ignore.case = TRUE)]   # écarte les codes placeholder
+  foks <- head(foks, 4)
   repart <- repartition_risque(al$niveau_risque, lg)
   sec <- i18n_lookup(tolower(dom), lg); n <- nrow(d)
   if (lg == "en") {
@@ -276,7 +295,7 @@ report_html_render <- function(file, d, d_all, lg, periode_lbl) {
   full_start <- lubridate::floor_date(rcur %m-% months(11), "month")
   dd <- d_all %>% dplyr::filter(date_de_survenue >= full_start) %>%
     dplyr::mutate(mois = lubridate::floor_date(date_de_survenue, "month")) %>%
-    dplyr::count(mois, secteur) %>% dplyr::arrange(mois)
+    dplyr::count(mois, secteur) %>% dplyr::arrange(mois) %>% .complete_ms()
   secs <- sort(unique(dd$secteur)); cols <- unname(COL_SECTEUR[secs])
   dd$secteur <- factor(i18n_vec(dd$secteur, lg), levels = i18n_vec(secs, lg))
   r_trend <- dd %>% dplyr::group_by(secteur) %>% echarts4r::e_charts(mois) %>%
@@ -1204,6 +1223,18 @@ server <- function(input, output, session) {
       if (rng[1] == rng[2]) rng <- c(rng[1] - 1, rng[2] + 1)
       updateSliderInput(session, "dates", min = rng[1], max = rng[2], value = c(rng[1], rng[2]))
     }
+    if (identical(input$data_source, "reel")) {
+      showModal(modalDialog(
+        title = tags$div(style = "color:#1e3a5f; font-weight:700;",
+                         icon("database"), " Données réelles (X-Road)"),
+        easyClose = TRUE, size = "l", footer = modalButton("Compris"),
+        tags$div(style = "font-size:14px; line-height:1.6;",
+          tags$p(HTML("Vous consultez à présent les <b>données réelles</b>, remontées du système national via la passerelle <b>X-Road</b> (standard FHIR, gouvernance UGD).")),
+          tags$p(HTML("<b>Note méthodologique.</b> À ce stade pilote, les regroupements « One Health » présentés en mode réel sont <b>préliminaires</b> et ne sont pas encore destinés à l'interprétation épidémiologique. Un regroupement s'entend ici, à titre exploratoire, comme la co-occurrence de signaux de plusieurs secteurs (humain, animal, environnemental) au sein d'une même unité géographique sur une fenêtre glissante de 14 jours.")),
+          tags$p(HTML("Cette approche exploratoire a vocation à être remplacée par des <b>méthodes statistiques validées</b> de détection d'agrégats spatio-temporels (statistique de balayage de Kulldorff, algorithmes d'aberration de type EARS / Farrington), dont les performances seront <b>caractérisées &mdash; sensibilité, spécificité, précocité de détection &mdash;</b> avant toute interprétation opérationnelle."))
+        )
+      ))
+    }
   }, ignoreInit = TRUE)
 
   ## ---- Synthèse exécutive (comité de pilotage) ----
@@ -1259,7 +1290,7 @@ server <- function(input, output, session) {
     lg <- current_lang()
     full_start <- floor_date(act_curstart() %m-% months(11), "month")
     dd <- DATA_ACTIVE() %>% filter(date_de_survenue >= full_start) %>%
-      mutate(mois = floor_date(date_de_survenue, "month")) %>% count(mois, secteur) %>% arrange(mois)
+      mutate(mois = floor_date(date_de_survenue, "month")) %>% count(mois, secteur) %>% arrange(mois) %>% .complete_ms()
     secs <- sort(unique(dd$secteur)); cols <- unname(COL_SECTEUR[secs])
     dd$secteur <- factor(i18n_vec(dd$secteur, lg), levels = i18n_vec(secs, lg))
     # Le curseur cadre automatiquement la fenêtre choisie en haut de page
@@ -1528,9 +1559,8 @@ server <- function(input, output, session) {
         transmute(Date = format(date_de_survenue, "%d/%m/%Y"), Secteur = secteur,
                   Signal = format_signal_label(code, signal, lg, sep = " - "), Fokontany = fokontany,
                   Suspicion = ifelse(classification_event == "Non précisé", "-", classification_event),
-                  Risque = as.character(niveau_risque),
-                  Alerte = translate_alert(alerte_label, lg)) %>% head(12)
-      names(alertes) <- c(T("Date"), T("Secteur"), T("Signal"), T("Fokontany"), T("Suspicion"), T("Risque"), T("Alerte"))
+                  Risque = as.character(niveau_risque)) %>% head(8)
+      names(alertes) <- c(T("Date"), T("Secteur"), T("Signal"), T("Fokontany"), T("Suspicion"), T("Risque"))
       tt <- gridExtra::ttheme_minimal(base_size = 8, padding = grid::unit(c(4, 3), "mm"),
               core = list(fg_params = list(hjust = 0, x = 0.04)),
               colhead = list(bg_params = list(fill = "#1e3a5f"),
@@ -1568,7 +1598,7 @@ server <- function(input, output, session) {
       TABFIG <- function(tg, yTop, x0 = 0.06, x1 = 0.94) {
         h <- grid::grobHeight(tg)
         grid::pushViewport(grid::viewport(x = grid::unit((x0 + x1) / 2, "npc"),
-                                          y = grid::unit(yTop, "npc") - 0.5 * h,
+                                          y = grid::unit(yTop, "npc"), just = c("centre", "top"),
                                           width = grid::unit(x1 - x0, "npc"), height = h))
         grid::grid.draw(tg); grid::popViewport()
       }
@@ -1621,12 +1651,7 @@ server <- function(input, output, session) {
 
       TXT(0.06, 0.59, paste0("5.  ", T("ALERTES PRIORITAIRES")), 11.5, "#1e3a5f", "bold", 0, 1)
       RULE(0.572)
-      TABFIG(tab, 0.555)
-      th_npc  <- grid::convertHeight(grid::grobHeight(tab), "npc", valueOnly = TRUE)
-      sec6_y  <- 0.555 - th_npc - 0.045
-      TXT(0.06, sec6_y, paste0("6.  ", T("RECOMMANDATIONS")), 11.5, "#1e3a5f", "bold", 0, 1)
-      RULE(sec6_y - 0.018)
-      TXT(0.06, sec6_y - 0.030, reco_txt, 9.5, "#26333F", "plain", 0, 1, 1.65)
+      TABFIG(tab, 0.535)
       RULE(0.05, 0.06, 0.94, "#D9DEE4", 0.8)
       TXT(0.06, 0.033, paste0("i-Tafaray - ", T("Surveillance intégrée One Health - Comité de pilotage.")),
           7.5, "#8A93A0", "plain", 0, 0.5)
@@ -1665,7 +1690,7 @@ server <- function(input, output, session) {
     lg <- current_lang()
     d <- filtree(); shiny::validate(shiny::need(nrow(d) > 0, "Aucun signal."))
     dd <- d %>% mutate(mois = floor_date(date_de_survenue, "month")) %>%
-      count(mois, secteur) %>% arrange(mois)
+      count(mois, secteur) %>% arrange(mois) %>% .complete_ms()
     secs <- sort(unique(dd$secteur)); cols <- unname(COL_SECTEUR[secs])
     dd$secteur <- factor(i18n_vec(dd$secteur, lg), levels = i18n_vec(secs, lg))
     dd %>% group_by(secteur) %>% e_charts(mois) %>%
@@ -1771,11 +1796,23 @@ server <- function(input, output, session) {
                         "Niveau de risque : ", niveau_risque, "<br>",
                         "Action : ", translate_alert(alerte_label, lg)))
 
+    ## Couche : sites d'exploitation environnementale (e-voary / Ministère de l'Environnement)
+    if (exists("EXPLOITATIONS") && is.data.frame(EXPLOITATIONS) && nrow(EXPLOITATIONS) > 0)
+      m <- m %>% addCircleMarkers(
+        data = EXPLOITATIONS, lng = ~lon, lat = ~lat, radius = 6,
+        stroke = TRUE, weight = 1, color = "#5B3A1E",
+        fillColor = "#8C6239", fillOpacity = 0.85, group = "Sites d'exploitation",
+        popup = ~paste0("<b>", nom, "</b><br>Type : ", type, "<br>",
+                        "District : ", district, "<br>Région : ", region))
+
+    bb <- d
     m %>%
       addLegend("bottomright", pal = pal, values = SECTEURS, title = "Secteur") %>%
-      addLayersControl(overlayGroups = c("Signaux", "Grappes One Health", "Alertes"),
+      addLayersControl(overlayGroups = c("Signaux", "Grappes One Health", "Alertes", "Sites d'exploitation"),
                        options = layersControlOptions(collapsed = FALSE)) %>%
-      hideGroup("Grappes One Health")
+      fitBounds(min(bb$lon), min(bb$lat), max(bb$lon), max(bb$lat)) %>%
+      hideGroup("Grappes One Health") %>%
+      hideGroup("Sites d'exploitation")
   })
   ## Cibles de navigation (grappes + alertes) pour le sélecteur de la carte
   carte_targets <- reactive({

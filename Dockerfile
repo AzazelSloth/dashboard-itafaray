@@ -51,7 +51,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /tmp/downloaded_packages /tmp/*.rds
 
 WORKDIR /app
-COPY app.R prepare_data.R i18n_setup.R xroad_bridge.R e_notification.R credentials.sqlite ./
+COPY app.R prepare_data.R i18n_setup.R xroad_bridge.R ingest_xroad.R e_notification.R credentials.sqlite ./
 COPY data_poc/ ./data_poc/
 COPY translations/ ./translations/
 COPY report/ ./report/

@@ -319,6 +319,11 @@ jobs:
           EN_CH_SMS: ${{ secrets.EN_CH_SMS }}
           EN_CH_WHATSAPP: ${{ secrets.EN_CH_WHATSAPP }}
           EN_CH_EMAIL: ${{ secrets.EN_CH_EMAIL }}
+          XROAD_BASE_URL: ${{ vars.XROAD_BASE_URL }}
+          XROAD_CLIENT_HEADER: ${{ vars.XROAD_CLIENT_HEADER }}
+          XROAD_SERVICE_PATH: ${{ vars.XROAD_SERVICE_PATH }}
+          XROAD_ALLOW_INSECURE_TLS: ${{ vars.XROAD_ALLOW_INSECURE_TLS }}
+          XROAD_CACHE_PATH: ${{ vars.XROAD_CACHE_PATH }}
         run: |
           set -euo pipefail
 
@@ -340,6 +345,20 @@ jobs:
           EN_CH_WHATSAPP=${EN_CH_WHATSAPP}
           EN_CH_EMAIL=${EN_CH_EMAIL}
           EOF
+
+          append_optional_env() {
+            local name="$1"
+            local value="${!name:-}"
+            if [ -n "$value" ]; then
+              printf '%s=%s\n' "$name" "$value" >> .deploy.env
+            fi
+          }
+
+          append_optional_env XROAD_BASE_URL
+          append_optional_env XROAD_CLIENT_HEADER
+          append_optional_env XROAD_SERVICE_PATH
+          append_optional_env XROAD_ALLOW_INSECURE_TLS
+          append_optional_env XROAD_CACHE_PATH
 
           REMOTE_TMP="/tmp/dashboard-itafaray.env"
 
@@ -394,6 +413,16 @@ jobs:
                 DOCKER_CMD='docker'
               fi
 
+              if install -d -m 775 /var/lib/itafaray-dashboard/xroad 2>/dev/null; then
+                :
+              elif sudo -n install -d -m 775 /var/lib/itafaray-dashboard/xroad 2>/dev/null; then
+                :
+              else
+                echo 'Unable to prepare the persistent X-Road cache directory.'
+                echo 'Grant write access to /var/lib/itafaray-dashboard or allow passwordless sudo for install.'
+                exit 1
+              fi
+
               APP_IMAGE=\"\$APP_IMAGE\" \$DOCKER_CMD compose pull app
               APP_IMAGE=\"\$APP_IMAGE\" \$DOCKER_CMD compose up -d --force-recreate --no-build app
 
@@ -414,6 +443,32 @@ jobs:
               fi
 
               \$DOCKER_CMD compose ps app
+            "
+
+      - name: Run X-Road ingestion after main deployment
+        if: steps.check.outputs.enabled == 'true' && inputs.deploy_mode == 'docker-compose' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ vars.EC2_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          ssh "$EC2_USER@$EC2_HOST" \
+            "
+              set -euo pipefail
+              if docker info >/dev/null 2>&1; then
+                DOCKER_CMD='docker'
+              elif sudo -n docker info >/dev/null 2>&1; then
+                DOCKER_CMD='sudo docker'
+              else
+                echo 'Docker is not accessible for the deployment user.'
+                echo 'Add the user to the docker group or allow passwordless sudo for docker.'
+                exit 1
+              fi
+
+              cd '$DEPLOY_PATH'
+              \$DOCKER_CMD compose exec -T app Rscript ingest_xroad.R
             "
 
       - name: Sync repository to deployment path

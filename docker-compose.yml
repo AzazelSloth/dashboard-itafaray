@@ -8,3 +8,5 @@ services:
       - .env
     ports:
       - "3838:3838"
+    volumes:
+      - /var/lib/itafaray-dashboard/xroad:/data/xroad

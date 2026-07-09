@@ -50,12 +50,16 @@ DATA_SIM <- DATA   # jeu de démonstration (synthétique) — référence pour l
 
 ## ---- Cache X-Road (alimenté par ingest_xroad.R, relu en auto-refresh) ----
 # En production, pointer XROAD_CACHE_PATH vers un volume persistant monté dans le conteneur.
-XROAD_CACHE <- Sys.getenv("XROAD_CACHE_PATH", unset = "data_poc/xroad_cache.rds")
+# Chemin figé en absolu dès le chargement (le wd est alors le dossier de l'app) :
+# le cache est relu plus tard dans un reactivePoll, où le wd peut avoir changé.
+XROAD_CACHE <- Sys.getenv("XROAD_CACHE_PATH",
+  unset = normalizePath(file.path("data_poc", "xroad_cache.rds"), mustWork = FALSE))
 xroad_cache_mtime <- function()
   if (file.exists(XROAD_CACHE)) as.numeric(file.info(XROAD_CACHE)$mtime) else 0
 lire_cache_xroad <- function() {
-  if (!file.exists(XROAD_CACHE)) return(NULL)
-  tryCatch(readRDS(XROAD_CACHE), error = function(e) NULL)
+  if (!file.exists(XROAD_CACHE)) { message("[cache] introuvable -> ", XROAD_CACHE, " (wd=", getwd(), ")"); return(NULL) }
+  tryCatch(readRDS(XROAD_CACHE),
+           error = function(e) { message("[cache] readRDS ERREUR: ", conditionMessage(e)); NULL })
 }
 
 ## ---- Données climatiques du district (extraites de MDG via extract_climate_mdg.R) ----
@@ -249,7 +253,7 @@ oh_clusters <- function(d) {
     dplyr::transmute(a_fok = fokontany, a_date = date_de_survenue, a_id = id_signal)
   if (nrow(anchors) == 0) return(data.frame())
   cl <- anchors %>%
-    dplyr::inner_join(d, by = c("a_fok" = "fokontany")) %>%
+    dplyr::inner_join(d, by = c("a_fok" = "fokontany"), relationship = "many-to-many") %>%
     dplyr::filter(date_de_survenue >= a_date - 14, date_de_survenue <= a_date + 3) %>%
     dplyr::group_by(a_id, a_fok, a_date) %>%
     dplyr::summarise(debut = min(date_de_survenue), fin = max(date_de_survenue),
@@ -516,6 +520,19 @@ ui <- dashboardPage(
       menuItem(i18n$t("Accueil"), tabName = "accueil", icon = icon("house")),
       menuItem(i18n$t("Synthèse"), tabName = "synthese", icon = icon("gauge-high")),
       tags$li(tags$hr(style = "border:0; border-top:1px solid rgba(255,255,255,.16); margin:9px 16px;")),
+      menuItem(i18n$t("Filtres"), icon = icon("filter"), startExpanded = FALSE,
+        tags$div(style = "padding:4px 14px 10px;",
+          selectInput("periode_preset", "Période :", width = "100%",
+                      choices = c("Semaine en cours", "2 dernières semaines", "Mois en cours",
+                                  "3 derniers mois", "6 derniers mois", "12 derniers mois", "Tout"),
+                      selected = "Tout"),
+          sliderInput("dates", "Ajuster :", width = "100%", min = DRANGE[1], max = DRANGE[2],
+                      value = c(DRANGE[1], DRANGE[2]), timeFormat = "%d/%m/%Y"),
+          selectInput("fokontany", "Fokontany :", width = "100%",
+                      choices = c("Tous", sort(unique(na.omit(DATA$fokontany)))), selected = "Tous"),
+          checkboxInput("verif_only", "Signaux vérifiés uniquement", value = FALSE))
+      ),
+      tags$li(tags$hr(style = "border:0; border-top:1px solid rgba(255,255,255,.16); margin:9px 16px;")),
       menuItem(i18n$t("Vue d'ensemble"), tabName = "vue", icon = icon("gauge")),
       menuItem(i18n$t("Par signal"), tabName = "signal", icon = icon("layer-group")),
       menuItem(i18n$t("Cartographie"), tabName = "carte", icon = icon("map-location-dot")),
@@ -527,14 +544,7 @@ ui <- dashboardPage(
       menuItem(i18n$t("Pipeline & qualité"), tabName = "qualite", icon = icon("circle-check")),
       menuItem(i18n$t("À propos"), tabName = "apropos", icon = icon("circle-info"))
     ),
-    conditionalPanel(
-      condition = "input.tabs != 'synthese' && input.tabs != 'accueil'",
-      sliderInput("dates", "Période :", min = DRANGE[1], max = DRANGE[2],
-                  value = c(DRANGE[1], DRANGE[2]), timeFormat = "%d/%m/%Y"),
-      selectInput("fokontany", "Fokontany (district d'Ifanadiana) :",
-                  choices = c("Tous", sort(unique(na.omit(DATA$fokontany)))), selected = "Tous"),
-      checkboxInput("verif_only", "Signaux vérifiés uniquement", value = FALSE)
-    ),
+    # (Filtres période / date / lieu déplacés dans un box en haut de « Vue d'ensemble »)
     # Bandeau de logos partenaires (même ordre que l'onglet « À propos »)
     tags$div(style = "margin:16px 12px 12px; background:#fff; border-radius:8px; padding:10px 8px;",
       tags$div(style = "display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 10px;
@@ -1217,22 +1227,55 @@ server <- function(input, output, session) {
   act_curstart <- reactive(lubridate::floor_date(act_max(), "month"))
 
   # Bascule de source -> recale le curseur de dates du menu sur la plage active
+  # Sélecteur de période relatif (façon DHIS2) : calcule les bornes et met à
+  # jour le slider (toute la logique de filtrage en aval reste inchangée).
+  observeEvent(input$periode_preset, {
+    dr <- suppressWarnings(range(DATA_ACTIVE()$date_de_survenue, na.rm = TRUE))
+    if (!all(is.finite(dr))) return()
+    end <- dr[2]
+    start <- switch(input$periode_preset,
+      "Semaine en cours"     = lubridate::floor_date(end, "week", week_start = 1),
+      "2 dernières semaines" = end - 13,
+      "Mois en cours"        = lubridate::floor_date(end, "month"),
+      "3 derniers mois"      = end %m-% months(3),
+      "6 derniers mois"      = end %m-% months(6),
+      "12 derniers mois"     = end %m-% months(12),
+      dr[1])
+    start <- max(as.Date(start), dr[1])
+    updateSliderInput(session, "dates", value = c(start, end))
+  }, ignoreInit = TRUE)
+
   observeEvent(input$data_source, {
     rng <- suppressWarnings(range(DATA_ACTIVE()$date_de_survenue, na.rm = TRUE))
     if (all(is.finite(rng))) {
       if (rng[1] == rng[2]) rng <- c(rng[1] - 1, rng[2] + 1)
       updateSliderInput(session, "dates", min = rng[1], max = rng[2], value = c(rng[1], rng[2]))
+      updateSelectInput(session, "periode_preset", selected = "Tout")
     }
     if (identical(input$data_source, "reel")) {
+      lg <- current_lang()
+      m_title <- switch(lg, en = "Real data (X-Road)",
+                            mg = "Angona tena izy (X-Road)",
+                            "Données réelles (X-Road)")
+      m_close <- switch(lg, en = "Got it", mg = "Azoko", "Compris")
+      m_p1 <- switch(lg,
+        en = "You are now viewing <b>real data</b>, retrieved from the national system through the <b>X-Road</b> gateway (FHIR standard, UGD governance).",
+        mg = "Mijery <b>angona tena izy</b> ianao izao, alaina avy amin'ny rafitra nasionaly amin'ny alalan'ny <b>X-Road</b> (fenitra FHIR, fitantanana UGD).",
+        "Vous consultez à présent les <b>données réelles</b>, remontées du système national via la passerelle <b>X-Road</b> (standard FHIR, gouvernance UGD).")
+      m_p2 <- switch(lg,
+        en = "<b>Methodological note.</b> At this pilot stage, the &laquo;&nbsp;One Health&nbsp;&raquo; clusters shown in real-data mode are <b>preliminary</b> and not yet intended for epidemiological interpretation. Here, a cluster is defined, on an exploratory basis, as the co-occurrence of signals from several sectors (human, animal, environmental) within the same geographic unit over a rolling 14-day window.",
+        mg = "<b>Fanamarihana momba ny fomba fiasa.</b> Amin'izao dingana izao, ny fitambaran'ny famantarana &laquo;&nbsp;One Health&nbsp;&raquo; aseho amin'ny angona tena izy dia mbola <b>vonjimaika</b> ary tsy mbola natao hodinihina ara-epidemiolojia. Eto, ny fitambarana dia faritana, ho fikarohana fotsiny, ho fisehoan'ny famantarana avy amin'ny sehatra maromaro (olombelona, biby, tontolo iainana) ao anatin'ny faritra ara-jeografika iray ihany, mandritra ny fe-potoana mihodina 14 andro.",
+        "<b>Note méthodologique.</b> À ce stade pilote, les regroupements « One Health » présentés en mode réel sont <b>préliminaires</b> et ne sont pas encore destinés à l'interprétation épidémiologique. Un regroupement s'entend ici, à titre exploratoire, comme la co-occurrence de signaux de plusieurs secteurs (humain, animal, environnemental) au sein d'une même unité géographique sur une fenêtre glissante de 14 jours.")
+      m_p3 <- switch(lg,
+        en = "This exploratory approach is intended to be replaced by <b>validated statistical methods</b> for detecting space-time clusters (Kulldorff scan statistic, EARS / Farrington-type aberration algorithms), whose performance will be <b>characterised &mdash; sensitivity, specificity, timeliness of detection &mdash;</b> before any operational interpretation.",
+        mg = "Ity fomba fikarohana ity dia natao hosoloina <b>fomba statistika voamarina</b> hamantarana fitambarana amin'ny toerana sy fotoana (scan statistic an'i Kulldorff, algorithm karazana EARS / Farrington), ka <b>hodinihina ny fahombiazany &mdash; fahatsapana, fahamarinana, hafainganam-pamantarana &mdash;</b> alohan'ny handraisana azy amin'ny sehatra fampiharana.",
+        "Cette approche exploratoire a vocation à être remplacée par des <b>méthodes statistiques validées</b> de détection d'agrégats spatio-temporels (statistique de balayage de Kulldorff, algorithmes d'aberration de type EARS / Farrington), dont les performances seront <b>caractérisées &mdash; sensibilité, spécificité, précocité de détection &mdash;</b> avant toute interprétation opérationnelle.")
       showModal(modalDialog(
         title = tags$div(style = "color:#1e3a5f; font-weight:700;",
-                         icon("database"), " Données réelles (X-Road)"),
-        easyClose = TRUE, size = "l", footer = modalButton("Compris"),
+                         icon("database"), " ", m_title),
+        easyClose = TRUE, size = "l", footer = modalButton(m_close),
         tags$div(style = "font-size:14px; line-height:1.6;",
-          tags$p(HTML("Vous consultez à présent les <b>données réelles</b>, remontées du système national via la passerelle <b>X-Road</b> (standard FHIR, gouvernance UGD).")),
-          tags$p(HTML("<b>Note méthodologique.</b> À ce stade pilote, les regroupements « One Health » présentés en mode réel sont <b>préliminaires</b> et ne sont pas encore destinés à l'interprétation épidémiologique. Un regroupement s'entend ici, à titre exploratoire, comme la co-occurrence de signaux de plusieurs secteurs (humain, animal, environnemental) au sein d'une même unité géographique sur une fenêtre glissante de 14 jours.")),
-          tags$p(HTML("Cette approche exploratoire a vocation à être remplacée par des <b>méthodes statistiques validées</b> de détection d'agrégats spatio-temporels (statistique de balayage de Kulldorff, algorithmes d'aberration de type EARS / Farrington), dont les performances seront <b>caractérisées &mdash; sensibilité, spécificité, précocité de détection &mdash;</b> avant toute interprétation opérationnelle."))
-        )
+          tags$p(HTML(m_p1)), tags$p(HTML(m_p2)), tags$p(HTML(m_p3)))
       ))
     }
   }, ignoreInit = TRUE)
@@ -1355,7 +1398,7 @@ server <- function(input, output, session) {
       transmute(a_id = id_signal, a_fok = fokontany, a_date = date_de_survenue)
     if (nrow(anchors) == 0) return(NULL)
     members <- anchors %>%
-      inner_join(d, by = c("a_fok" = "fokontany")) %>%
+      inner_join(d, by = c("a_fok" = "fokontany"), relationship = "many-to-many") %>%
       filter(date_de_survenue >= a_date - 14, date_de_survenue <= a_date + 3)
     summ <- members %>% group_by(a_id) %>%
       summarise(nsec = n_distinct(secteur),
@@ -1693,7 +1736,8 @@ server <- function(input, output, session) {
       count(mois, secteur) %>% arrange(mois) %>% .complete_ms()
     secs <- sort(unique(dd$secteur)); cols <- unname(COL_SECTEUR[secs])
     dd$secteur <- factor(i18n_vec(dd$secteur, lg), levels = i18n_vec(secs, lg))
-    dd %>% group_by(secteur) %>% e_charts(mois) %>%
+    multi_mois <- length(unique(dd$mois)) > 1   # slider de zoom inutile (et mal rendu) sur un seul mois
+    p <- dd %>% group_by(secteur) %>% e_charts(mois) %>%
       e_bar(n, stack = "secteur", barWidth = "60%") %>%
       e_color(cols) %>%
       e_tooltip(trigger = "axis", axisPointer = list(type = "shadow")) %>%
@@ -1702,9 +1746,10 @@ server <- function(input, output, session) {
       e_toolbox(right = 8, top = 2) %>%
       e_toolbox_feature(feature = "saveAsImage", title = i18n_lookup("Exporter en PNG", lg),
                         name = "i-Tafaray_volume", backgroundColor = "#FFFFFF", pixelRatio = 2) %>%
-      e_datazoom(type = "slider", bottom = 6, height = 18) %>%
-      e_grid(left = 48, right = 18, top = 44, bottom = 64) %>%
+      e_grid(left = 48, right = 18, top = 44, bottom = if (multi_mois) 64 else 40) %>%
       e_x_axis(axisLabel = list(hideOverlap = TRUE))
+    if (multi_mois) p <- p %>% e_datazoom(type = "slider", bottom = 6, height = 18)
+    p
   })
   
   ## Risque (évalués)
@@ -2091,24 +2136,30 @@ server <- function(input, output, session) {
       count(signal_label, m) %>% arrange(m) %>% mutate(mois = format(m, "%b %y"))
     dd %>% e_charts(mois) %>%
       e_heatmap(signal_label, n) %>%
-      e_visual_map(n, inRange = list(color = c("#EEF3F8", "#8FB3CE", "#16324F"))) %>%
-      e_y_axis(type = "category", data = sig_order) %>%
+      e_visual_map(n, inRange = list(color = c("#EEF3F8", "#8FB3CE", "#16324F")),
+                   orient = "vertical", right = 8, top = "middle", align = "right") %>%
+      e_y_axis(type = "category", data = sig_order,
+               axisLabel = list(width = 240, overflow = "truncate")) %>%
       e_x_axis(type = "category", axisLabel = list(rotate = 45)) %>%
       e_tooltip() %>%
-      e_grid(left = 155, right = 18, top = 10, bottom = 55)
+      e_grid(left = 250, right = 60, top = 10, bottom = 55)
   })
   output$p_heat_geo <- renderEcharts4r({
     lg <- current_lang()
     d <- filtree(); shiny::validate(shiny::need(nrow(d) > 0, "Aucun signal."))
     sig_order <- rev(translate_signal(.ord_signaux$signal, lg))
-    dd <- d %>% mutate(signal_label = translate_signal(signal, lg)) %>% count(signal_label, fokontany)
+    dd <- d %>% mutate(signal_label = translate_signal(signal, lg)) %>%
+      filter(nchar(as.character(fokontany)) <= 40) %>%   # écarte un commentaire saisi dans le champ lieu
+      count(signal_label, fokontany)
     dd %>% e_charts(fokontany) %>%
       e_heatmap(signal_label, n) %>%
-      e_visual_map(n, inRange = list(color = c("#EDF3EE", "#9CC0A6", "#2E5A40"))) %>%
-      e_y_axis(type = "category", data = sig_order) %>%
+      e_visual_map(n, inRange = list(color = c("#EDF3EE", "#9CC0A6", "#2E5A40")),
+                   orient = "vertical", right = 8, top = "middle", align = "right") %>%
+      e_y_axis(type = "category", data = sig_order,
+               axisLabel = list(width = 240, overflow = "truncate")) %>%
       e_x_axis(type = "category", axisLabel = list(rotate = 45)) %>%
       e_tooltip() %>%
-      e_grid(left = 155, right = 18, top = 10, bottom = 70)
+      e_grid(left = 250, right = 60, top = 10, bottom = 70)
   })
   
   ## Indicateurs — 18 signaux (+ drill-down popup)
@@ -2124,7 +2175,7 @@ server <- function(input, output, session) {
       transmute(a_id = id_signal, a_fok = fokontany, a_date = date_de_survenue)
     oh_freq <- if (nrow(anchors) > 0)
       anchors %>%
-        inner_join(dd, by = c("a_fok" = "fokontany")) %>%
+        inner_join(dd, by = c("a_fok" = "fokontany"), relationship = "many-to-many") %>%
         filter(date_de_survenue >= a_date - 14, date_de_survenue <= a_date + 3) %>%
         group_by(a_id) %>% mutate(nsec_grp = n_distinct(secteur)) %>% ungroup() %>%
         filter(nsec_grp >= 2) %>%

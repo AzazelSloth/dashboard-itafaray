@@ -9,7 +9,7 @@ workflows:
     steps:
       - id: every-15-minutes
         type: cron
-        enabled: true
+        enabled: false
         cron_expression: '*/15 * * * *'
         cron_cursor_job_id: refresh-cache
         next:

@@ -1,68 +1,64 @@
-id: itafaray-xroad-cache
-name: i-Tafaray - Rafraichissement cache X-Road
-schema_version: '4.0'
+id: refresh-xroad-cache
+name: Rafraichir le cache X-Road
+start: every-15-minutes
+steps:
+  - id: every-15-minutes
+    type: cron
 
-workflows:
-  - id: refresh-xroad-cache
-    name: Rafraichir le cache X-Road
-    start: every-15-minutes
-    steps:
-      - id: every-15-minutes
-        type: cron
-        enabled: false
-        cron_expression: '*/15 * * * *'
-        cron_cursor_job_id: refresh-cache
-        next:
-          refresh-cache:
-            disabled: false
-            condition: always
+    enabled: false
+    cron_expression: '*/15 * * * *'
+    cron_cursor_job_id: refresh-cache
+    next:
+      refresh-cache:
+        disabled: false
+        condition: always
 
-      - id: refresh-cache
-        name: Executer ingest_xroad.R
-        adaptor: '@openfn/language-http@7.3.2'
-        expression: |
-          fn(state => {
-            const config = state.configuration || {};
-            if (!config.baseUrl || !config.token) {
-              throw new Error(
-                'Credential missing: configure baseUrl and token on this OpenFn step.'
-              );
-            }
-            state.requestedAt = new Date().toISOString();
-            return state;
-          });
-
-          post(
-            'ingest',
-            state => ({ requested_at: state.requestedAt }),
-            {
-              headers: state => ({
-                authorization: `Bearer ${state.configuration.token}`,
-                'content-type': 'application/json',
-              }),
-              timeout: 600000,
-            }
+  - id: refresh-cache
+    name: Executer ingest_xroad.R
+    adaptor: '@openfn/language-http@7.3.2'
+    expression: |
+      fn(state => {
+        const config = state.configuration || {};
+        if (!config.baseUrl || !config.token) {
+          throw new Error(
+            'Credential missing: configure baseUrl and token on this OpenFn step.'
           );
+        }
+        state.requestedAt = new Date().toISOString();
+        return state;
+      });
 
-          fn(state => {
-            if (!state.data || state.data.ok !== true) {
-              throw new Error(
-                `X-Road ingestion did not confirm success: ${JSON.stringify(state.data)}`
-              );
-            }
+      post(
+        'ingest',
+        state => ({ requested_at: state.requestedAt }),
+        {
+          headers: state => ({
+            authorization: `Bearer ${state.configuration.token}`,
+            'content-type': 'application/json',
+          }),
+          timeout: 600000,
+        }
+      );
 
-            console.log(
-              `X-Road cache refreshed at ${state.data.cache_modified_at} ` +
-              `(${state.data.cache_size_bytes} bytes).`
-            );
+      fn(state => {
+        if (!state.data || state.data.ok !== true) {
+          throw new Error(
+            `X-Road ingestion did not confirm success: ${JSON.stringify(state.data)}`
+          );
+        }
 
-            return {
-              data: {
-                ok: true,
-                cache_modified_at: state.data.cache_modified_at,
-                cache_size_bytes: state.data.cache_size_bytes,
-                duration_seconds: state.data.duration_seconds,
-              },
-              references: [],
-            };
-          });
+        console.log(
+          `X-Road cache refreshed at ${state.data.cache_modified_at} ` +
+          `(${state.data.cache_size_bytes} bytes).`
+        );
+
+        return {
+          data: {
+            ok: true,
+            cache_modified_at: state.data.cache_modified_at,
+            cache_size_bytes: state.data.cache_size_bytes,
+            duration_seconds: state.data.duration_seconds,
+          },
+          references: [],
+        };
+      });

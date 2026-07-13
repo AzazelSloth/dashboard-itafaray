@@ -1,7 +1,8 @@
 # Workflow OpenFn - cache X-Road
 
-Le fichier `itafaray-xroad-cache.yaml` est un Project Spec OpenFn v2 (schema 4.0)
-importable depuis les parametres d'un projet OpenFn. Son cron `*/15 * * * *`
+Le fichier `itafaray-xroad-cache.yaml` est une specification de workflow OpenFn
+importable directement depuis `Workflows > New Workflow > Import workflow`.
+Son cron `*/15 * * * *`
 rafraichit le cache toutes les 15 minutes. Il est importe desactive afin de
 permettre l'affectation du credential et une premiere execution manuelle.
 

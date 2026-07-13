@@ -1,7 +1,8 @@
 # Workflow OpenFn - cache X-Road
 
-Le fichier `itafaray-xroad-cache.yaml` est une specification de workflow OpenFn
-importable directement depuis `Workflows > New Workflow > Import workflow`.
+Le fichier `itafaray-xroad-cache.yaml` utilise le schema d'import de workflow
+attendu par Lightning v2.16.7 (`jobs`, `triggers`, `edges`). Il est importable
+directement depuis `Workflows > New Workflow > Import workflow`.
 Son cron `*/15 * * * *`
 rafraichit le cache toutes les 15 minutes. Il est importe desactive afin de
 permettre l'affectation du credential et une premiere execution manuelle.

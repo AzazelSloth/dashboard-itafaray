@@ -1,22 +1,11 @@
 id: refresh-xroad-cache
 name: Rafraichir le cache X-Road
-start: every-15-minutes
-steps:
-  - id: every-15-minutes
-    type: cron
 
-    enabled: false
-    cron_expression: '*/15 * * * *'
-    cron_cursor_job_id: refresh-cache
-    next:
-      refresh-cache:
-        disabled: false
-        condition: always
-
-  - id: refresh-cache
+jobs:
+  refresh-cache:
     name: Executer ingest_xroad.R
     adaptor: '@openfn/language-http@7.3.2'
-    expression: |
+    body: |
       fn(state => {
         const config = state.configuration || {};
         if (!config.baseUrl || !config.token) {
@@ -62,3 +51,17 @@ steps:
           references: [],
         };
       });
+
+triggers:
+  cron:
+    type: cron
+    enabled: false
+    cron_expression: '*/15 * * * *'
+    cron_cursor_job: refresh-cache
+
+edges:
+  cron->refresh-cache:
+    source_trigger: cron
+    target_job: refresh-cache
+    condition_type: always
+    enabled: true

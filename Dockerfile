@@ -38,6 +38,7 @@ RUN apt-get update \
       gridExtra \
       jsonlite \
       httr2 \
+      plumber \
       rmarkdown \
     # Keep runtime packages only: headers and toolchains are useful to build R libs
     # but they unnecessarily increase the final image attack surface.
@@ -51,7 +52,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /tmp/downloaded_packages /tmp/*.rds
 
 WORKDIR /app
-COPY app.R prepare_data.R i18n_setup.R xroad_bridge.R ingest_xroad.R e_notification.R credentials.sqlite ./
+COPY app.R prepare_data.R i18n_setup.R xroad_bridge.R ingest_xroad.R ingest_api.R e_notification.R credentials.sqlite ./
 COPY data_poc/ ./data_poc/
 COPY translations/ ./translations/
 COPY report/ ./report/

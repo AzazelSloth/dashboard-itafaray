@@ -6,7 +6,25 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      XROAD_CACHE_PATH: ${XROAD_CACHE_PATH:-/data/xroad/xroad_cache.rds}
     ports:
       - "3838:3838"
+    volumes:
+      - /var/lib/itafaray-dashboard/xroad:/data/xroad
+
+  ingest-api:
+    image: ${APP_IMAGE:-itafaray-poc:pre-prod}
+    build: .
+    container_name: itafaray-ingest-api
+    restart: unless-stopped
+    command: ["Rscript", "ingest_api.R"]
+    env_file:
+      - .env
+    environment:
+      XROAD_CACHE_PATH: ${XROAD_CACHE_PATH:-/data/xroad/xroad_cache.rds}
+      INGEST_API_PORT: 8000
+    ports:
+      - "127.0.0.1:8000:8000"
     volumes:
       - /var/lib/itafaray-dashboard/xroad:/data/xroad

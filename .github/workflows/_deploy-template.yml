@@ -201,6 +201,7 @@ jobs:
           EN_CH_SMS: ${{ secrets.EN_CH_SMS }}
           EN_CH_WHATSAPP: ${{ secrets.EN_CH_WHATSAPP }}
           EN_CH_EMAIL: ${{ secrets.EN_CH_EMAIL }}
+          OPENFN_INGEST_TOKEN: ${{ secrets.OPENFN_INGEST_TOKEN }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
           set -euo pipefail
@@ -226,6 +227,7 @@ jobs:
             [ -n "$EN_CH_SMS" ] || missing+=("EN_CH_SMS (secret)")
             [ -n "$EN_CH_WHATSAPP" ] || missing+=("EN_CH_WHATSAPP (secret)")
             [ -n "$EN_CH_EMAIL" ] || missing+=("EN_CH_EMAIL (secret)")
+            [ -n "$OPENFN_INGEST_TOKEN" ] || missing+=("OPENFN_INGEST_TOKEN (secret)")
           fi
 
           if [ "${#missing[@]}" -eq 0 ]; then
@@ -324,6 +326,7 @@ jobs:
           XROAD_SERVICE_PATH: ${{ vars.XROAD_SERVICE_PATH }}
           XROAD_ALLOW_INSECURE_TLS: ${{ vars.XROAD_ALLOW_INSECURE_TLS }}
           XROAD_CACHE_PATH: ${{ vars.XROAD_CACHE_PATH }}
+          OPENFN_INGEST_TOKEN: ${{ secrets.OPENFN_INGEST_TOKEN }}
         run: |
           set -euo pipefail
 
@@ -344,6 +347,7 @@ jobs:
           EN_CH_SMS=${EN_CH_SMS}
           EN_CH_WHATSAPP=${EN_CH_WHATSAPP}
           EN_CH_EMAIL=${EN_CH_EMAIL}
+          OPENFN_INGEST_TOKEN=${OPENFN_INGEST_TOKEN}
           EOF
 
           append_optional_env() {
@@ -423,26 +427,27 @@ jobs:
                 exit 1
               fi
 
-              APP_IMAGE=\"\$APP_IMAGE\" \$DOCKER_CMD compose pull app
-              APP_IMAGE=\"\$APP_IMAGE\" \$DOCKER_CMD compose up -d --force-recreate --no-build app
-
-              CONTAINER_ID=\$(\$DOCKER_CMD compose ps -q app)
-              if [ -z \"\$CONTAINER_ID\" ]; then
-                echo 'Deployment completed but no app container is running.'
-                exit 1
-              fi
-
-              RUNNING_IMAGE_ID=\$(\$DOCKER_CMD inspect --format '{{.Image}}' \"\$CONTAINER_ID\")
+              APP_IMAGE=\"\$APP_IMAGE\" \$DOCKER_CMD compose pull app ingest-api
+              APP_IMAGE=\"\$APP_IMAGE\" \$DOCKER_CMD compose up -d --force-recreate --no-build app ingest-api
               EXPECTED_IMAGE_ID=\$(\$DOCKER_CMD image inspect --format '{{.Id}}' \"\$APP_IMAGE\")
 
-              if [ \"\$RUNNING_IMAGE_ID\" != \"\$EXPECTED_IMAGE_ID\" ]; then
-                echo 'The running container is not using the freshly pulled image.'
-                echo \"Running image id: \$RUNNING_IMAGE_ID\"
-                echo \"Expected image id: \$EXPECTED_IMAGE_ID\"
-                exit 1
-              fi
+              for SERVICE in app ingest-api; do
+                CONTAINER_ID=\$(\$DOCKER_CMD compose ps -q \"\$SERVICE\")
+                if [ -z \"\$CONTAINER_ID\" ]; then
+                  echo \"Deployment completed but service \$SERVICE is not running.\"
+                  exit 1
+                fi
 
-              \$DOCKER_CMD compose ps app
+                RUNNING_IMAGE_ID=\$(\$DOCKER_CMD inspect --format '{{.Image}}' \"\$CONTAINER_ID\")
+                if [ \"\$RUNNING_IMAGE_ID\" != \"\$EXPECTED_IMAGE_ID\" ]; then
+                  echo \"Service \$SERVICE is not using the freshly pulled image.\"
+                  echo \"Running image id: \$RUNNING_IMAGE_ID\"
+                  echo \"Expected image id: \$EXPECTED_IMAGE_ID\"
+                  exit 1
+                fi
+              done
+
+              \$DOCKER_CMD compose ps app ingest-api
             "
 
       - name: Run X-Road ingestion after main deployment

@@ -56,7 +56,7 @@ triggers:
   cron:
     type: cron
     enabled: false
-    cron_expression: '*/15 * * * *'
+    cron_expression: '*/3 * * * *'
     cron_cursor_job: refresh-cache
 
 edges:

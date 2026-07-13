@@ -3,8 +3,8 @@
 Le fichier `itafaray-xroad-cache.yaml` utilise le schema d'import de workflow
 attendu par Lightning v2.16.7 (`jobs`, `triggers`, `edges`). Il est importable
 directement depuis `Workflows > New Workflow > Import workflow`.
-Son cron `*/15 * * * *`
-rafraichit le cache toutes les 15 minutes. Il est importe desactive afin de
+Son cron `*/3 * * * *`
+rafraichit le cache toutes les trois minutes. Il est importe desactive afin de
 permettre l'affectation du credential et une premiere execution manuelle.
 
 ## Configuration apres import
@@ -35,11 +35,12 @@ permettre l'affectation du credential et une premiere execution manuelle.
 
 La frequence se change dans `cron_expression`. Exemples :
 
+- toutes les minutes : `* * * * *` ;
 - toutes les 5 minutes : `*/5 * * * *` ;
 - toutes les 30 minutes : `*/30 * * * *` ;
 - toutes les heures : `0 * * * *`.
 
-OpenFn execute les crons en UTC. Ici la periodicite de 15 minutes ne depend pas
+OpenFn execute les crons en UTC. Ici la periodicite d'une minute ne depend pas
 du fuseau horaire.
 
 Configuration Nginx a ajouter dans le bloc HTTPS de

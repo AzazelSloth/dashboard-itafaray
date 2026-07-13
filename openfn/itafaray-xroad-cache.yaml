@@ -3,7 +3,7 @@ name: Rafraichir le cache X-Road
 
 jobs:
   refresh-cache:
-    name: Executer ingest_xroad.R
+    name: Execute XRoad ingestion
     adaptor: '@openfn/language-http@7.3.2'
     body: |
       fn(state => {

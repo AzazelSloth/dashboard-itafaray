@@ -18,7 +18,7 @@ permettre l'affectation du credential et une premiere execution manuelle.
    }
    ```
 
-2. Affecter ce credential a l'etape `Executer ingest_xroad.R`.
+2. Affecter ce credential a l'etape `Executer ingestion XRoad`.
 3. Dans le fichier `.env` du serveur, definir le meme secret dans
    `OPENFN_INGEST_TOKEN`.
 4. Exposer le service local `127.0.0.1:8000` derriere le reverse proxy HTTPS avec

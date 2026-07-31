@@ -33,6 +33,34 @@ permettre l'affectation du credential et une premiere execution manuelle.
 6. Effectuer une execution manuelle du workflow avec l'input `{}`. Activer le
    cron uniquement apres une execution reussie.
 
+## Cle API X-Road
+
+La cle X-Road n'est pas transmise par le job OpenFn. Le job ne contacte pas
+X-Road directement : il authentifie uniquement son appel a l'API d'ingestion
+avec `OPENFN_INGEST_TOKEN`. L'API lance ensuite `ingest_xroad.R` dans le
+conteneur, qui lit `X_API_KEY` et envoie sa valeur dans le header HTTP
+`X-API-KEY` attendu par X-Road.
+Cette separation evite de dupliquer la cle X-Road dans OpenFn.
+
+1. Dans GitHub, creer le secret d'environnement ou de depot nomme exactement
+   `X_API_KEY` (`Settings > Secrets and variables > Actions`).
+2. Relancer le workflow de deploiement. GitHub Actions mappe ce secret vers
+   `X_API_KEY` dans le `.env` du serveur; la valeur n'est jamais versionnee.
+3. Conserver dans le credential OpenFn uniquement `baseUrl` et `token`, comme
+   indique plus haut. Aucune modification du YAML OpenFn n'est necessaire.
+4. Lancer manuellement le workflow OpenFn et verifier que le cache est rafraichi.
+
+Les routes completes utilisees par l'ingestion sont configurables avec la
+variable GitHub Actions `XROAD_API_PATHS`. Sa valeur par defaut est :
+
+```text
+/api/v1/signaux,/api/v1/evenement,/api/v1/alertes
+```
+
+Les endpoints `/count` et les vues filtrees (secteur, triage, verification et
+niveau de risque) restent disponibles pour des usages cibles, mais ne sont pas
+necessaires au cache complet.
+
 La frequence se change dans `cron_expression`. Exemples :
 
 - toutes les minutes : `* * * * *` ;

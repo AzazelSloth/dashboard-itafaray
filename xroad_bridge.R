@@ -47,24 +47,53 @@ charger_xroad <- function() {
   SS         <- Sys.getenv("XROAD_BASE_URL", "https://ss.operator.xroad.digital.gov.mg")
   CLIENT_HDR <- Sys.getenv("XROAD_CLIENT_HEADER", "MG/GOV/UGD-MANAGEMENT/primature")
   SVC        <- Sys.getenv("XROAD_SERVICE_PATH", "MG/GOV/ONGMedicalePivot/SBE/hapifhir")
+  API_KEY    <- Sys.getenv("X_API_KEY", "")
+  API_PATHS  <- strsplit(Sys.getenv(
+    "XROAD_API_PATHS",
+    "/api/v1/signaux,/api/v1/evenement,/api/v1/alertes"
+  ), ",", fixed = TRUE)[[1]]
+  API_PATHS  <- trimws(API_PATHS)
+  API_PATHS  <- API_PATHS[nzchar(API_PATHS)]
   INSECURE   <- env_flag_xroad("XROAD_ALLOW_INSECURE_TLS", FALSE)
+
+  if (!nzchar(API_KEY)) stop("X_API_KEY est requis pour appeler les endpoints X-Road.")
+  if (!length(API_PATHS)) stop("XROAD_API_PATHS ne contient aucun endpoint X-Road.")
 
   if (INSECURE) {
     warning("La verification TLS X-Road est desactivee via XROAD_ALLOW_INSECURE_TLS=true.")
   }
 
-  fetch_raw <- function(resource, count = 3000) {
-    url <- paste0(SS, "/r1/", SVC, "/", resource, "?_count=", count)
+  fetch_raw <- function(path) {
+    url <- paste0(sub("/$", "", SS), "/r1/", SVC, "/", sub("^/", "", path))
     req <- httr2::request(url) |>
-      httr2::req_headers("X-Road-Client" = CLIENT_HDR, "Accept" = "application/json") |>
+      httr2::req_headers(
+        "X-Road-Client" = CLIENT_HDR,
+        "X-API-KEY" = API_KEY,
+        "Accept" = "application/json"
+      ) |>
       httr2::req_timeout(90)
     if (isTRUE(INSECURE)) req <- httr2::req_options(req, ssl_verifypeer = 0L, ssl_verifyhost = 0L)
     resp <- httr2::req_perform(req)
     jsonlite::fromJSON(httr2::resp_body_string(resp), simplifyVector = FALSE)
   }
 
-  bund <- fetch_raw("Observation")
-  entries <- bund$entry
+  extract_entries <- function(payload) {
+    if (!is.null(payload$entry)) return(payload$entry)
+    for (name in c("data", "results", "content", "items")) {
+      value <- payload[[name]]
+      if (is.list(value) && length(value)) {
+        if (!is.null(value$entry)) return(value$entry)
+        return(lapply(value, function(resource) list(resource = resource)))
+      }
+    }
+    if (is.list(payload) && length(payload) && is.null(names(payload))) {
+      return(lapply(payload, function(resource) list(resource = resource)))
+    }
+    list()
+  }
+
+  payloads <- lapply(API_PATHS, fetch_raw)
+  entries <- unlist(lapply(payloads, extract_entries), recursive = FALSE)
   if (is.null(entries) || length(entries) == 0) stop("Aucune Observation reçue de X-Road.")
   resources <- lapply(entries, function(e) e$resource)
   resources <- Filter(function(r) identical(r$resourceType, "Observation"), resources)

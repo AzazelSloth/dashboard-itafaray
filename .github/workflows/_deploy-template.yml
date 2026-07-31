@@ -202,6 +202,7 @@ jobs:
           EN_CH_WHATSAPP: ${{ secrets.EN_CH_WHATSAPP }}
           EN_CH_EMAIL: ${{ secrets.EN_CH_EMAIL }}
           OPENFN_INGEST_TOKEN: ${{ secrets.OPENFN_INGEST_TOKEN }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
           set -euo pipefail
@@ -228,6 +229,7 @@ jobs:
             [ -n "$EN_CH_WHATSAPP" ] || missing+=("EN_CH_WHATSAPP (secret)")
             [ -n "$EN_CH_EMAIL" ] || missing+=("EN_CH_EMAIL (secret)")
             [ -n "$OPENFN_INGEST_TOKEN" ] || missing+=("OPENFN_INGEST_TOKEN (secret)")
+            [ -n "$X_API_KEY" ] || missing+=("X_API_KEY (secret)")
           fi
 
           if [ "${#missing[@]}" -eq 0 ]; then
@@ -326,7 +328,9 @@ jobs:
           XROAD_SERVICE_PATH: ${{ vars.XROAD_SERVICE_PATH }}
           XROAD_ALLOW_INSECURE_TLS: ${{ vars.XROAD_ALLOW_INSECURE_TLS }}
           XROAD_CACHE_PATH: ${{ vars.XROAD_CACHE_PATH }}
+          XROAD_API_PATHS: ${{ vars.XROAD_API_PATHS }}
           OPENFN_INGEST_TOKEN: ${{ secrets.OPENFN_INGEST_TOKEN }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
         run: |
           set -euo pipefail
 
@@ -348,6 +352,7 @@ jobs:
           EN_CH_WHATSAPP=${EN_CH_WHATSAPP}
           EN_CH_EMAIL=${EN_CH_EMAIL}
           OPENFN_INGEST_TOKEN=${OPENFN_INGEST_TOKEN}
+          X_API_KEY=${X_API_KEY}
           EOF
 
           append_optional_env() {
@@ -363,6 +368,7 @@ jobs:
           append_optional_env XROAD_SERVICE_PATH
           append_optional_env XROAD_ALLOW_INSECURE_TLS
           append_optional_env XROAD_CACHE_PATH
+          append_optional_env XROAD_API_PATHS
 
           REMOTE_TMP="/tmp/dashboard-itafaray.env"
 

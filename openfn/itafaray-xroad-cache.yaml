@@ -8,9 +8,9 @@ jobs:
     body: |
       fn(state => {
         const config = state.configuration || {};
-        if (!config.baseUrl || !config.token) {
+        if (!config.baseUrl || !config.token || !config.xApiKey) {
           throw new Error(
-            'Credential missing: configure baseUrl and token on this OpenFn step.'
+            'Credential missing: configure baseUrl, token and xApiKey on this OpenFn step.'
           );
         }
         state.requestedAt = new Date().toISOString();
@@ -23,6 +23,7 @@ jobs:
         {
           headers: state => ({
             authorization: `Bearer ${state.configuration.token}`,
+            'X-API-KEY': state.configuration.xApiKey,
             'content-type': 'application/json',
           }),
           timeout: 600000,

@@ -15,9 +15,15 @@ json_error <- function(res, status, message) {
 }
 
 authorized <- function(req) {
-  expected <- Sys.getenv("OPENFN_INGEST_TOKEN", unset = "")
-  supplied <- req$HTTP_AUTHORIZATION %||% ""
-  nzchar(expected) && identical(supplied, paste("Bearer", expected))
+  expected_token <- Sys.getenv("OPENFN_INGEST_TOKEN", unset = "")
+  expected_api_key <- Sys.getenv("X_API_KEY", unset = "")
+  supplied_token <- req$HTTP_AUTHORIZATION %||% ""
+  supplied_api_key <- req$HTTP_X_API_KEY %||% ""
+
+  nzchar(expected_token) &&
+    nzchar(expected_api_key) &&
+    identical(supplied_token, paste("Bearer", expected_token)) &&
+    identical(supplied_api_key, expected_api_key)
 }
 
 `%||%` <- function(value, fallback) {
@@ -32,8 +38,11 @@ ingest_handler <- function(req, res) {
   if (!nzchar(Sys.getenv("OPENFN_INGEST_TOKEN", unset = ""))) {
     return(json_error(res, 503, "OPENFN_INGEST_TOKEN is not configured on the server."))
   }
+  if (!nzchar(Sys.getenv("X_API_KEY", unset = ""))) {
+    return(json_error(res, 503, "X_API_KEY is not configured on the server."))
+  }
   if (!authorized(req)) {
-    return(json_error(res, 401, "Invalid bearer token."))
+    return(json_error(res, 401, "Invalid ingestion credentials."))
   }
 
   cache <- cache_path()

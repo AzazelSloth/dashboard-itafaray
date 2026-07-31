@@ -14,7 +14,8 @@ permettre l'affectation du credential et une premiere execution manuelle.
    ```json
    {
      "baseUrl": "https://dashboard-itafaray.onehealthsismada.org/xroad-ingest/",
-     "token": "LE_MEME_SECRET_QUE_OPENFN_INGEST_TOKEN"
+     "token": "LE_MEME_SECRET_QUE_OPENFN_INGEST_TOKEN",
+     "xApiKey": "LA_MEME_VALEUR_QUE_LE_SECRET_GITHUB_X_API_KEY"
    }
    ```
 
@@ -35,19 +36,17 @@ permettre l'affectation du credential et une premiere execution manuelle.
 
 ## Cle API X-Road
 
-La cle X-Road n'est pas transmise par le job OpenFn. Le job ne contacte pas
-X-Road directement : il authentifie uniquement son appel a l'API d'ingestion
-avec `OPENFN_INGEST_TOKEN`. L'API lance ensuite `ingest_xroad.R` dans le
-conteneur, qui lit `X_API_KEY` et envoie sa valeur dans le header HTTP
-`X-API-KEY` attendu par X-Road.
-Cette separation evite de dupliquer la cle X-Road dans OpenFn.
+Le job OpenFn lit `xApiKey` depuis son credential et l'envoie dans le header
+HTTP `X-API-KEY` a l'API d'ingestion. Celle-ci verifie le bearer token et cette
+cle avant de lancer `ingest_xroad.R`. Le script lit ensuite `X_API_KEY` dans
+l'environnement du conteneur et l'envoie a X-Road sous le meme nom de header.
 
 1. Dans GitHub, creer le secret d'environnement ou de depot nomme exactement
    `X_API_KEY` (`Settings > Secrets and variables > Actions`).
 2. Relancer le workflow de deploiement. GitHub Actions mappe ce secret vers
    `X_API_KEY` dans le `.env` du serveur; la valeur n'est jamais versionnee.
-3. Conserver dans le credential OpenFn uniquement `baseUrl` et `token`, comme
-   indique plus haut. Aucune modification du YAML OpenFn n'est necessaire.
+3. Ajouter la propriete `xApiKey` au credential OpenFn, avec exactement la meme
+   valeur que le secret GitHub `X_API_KEY`, puis affecter ce credential au job.
 4. Lancer manuellement le workflow OpenFn et verifier que le cache est rafraichi.
 
 Les routes completes utilisees par l'ingestion sont configurables avec la
@@ -99,6 +98,7 @@ location = /xroad-ingest/ingest {
     proxy_http_version 1.1;
     proxy_set_header Host              $host;
     proxy_set_header Authorization     $http_authorization;
+    proxy_set_header X-API-KEY         $http_x_api_key;
     proxy_set_header X-Real-IP         $remote_addr;
     proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;

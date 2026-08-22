@@ -1,5 +1,5 @@
 # =====================================================================
-#  i-Tafaray - Tableau de bord One Health (R / Shiny)
+#  iTafaray - Tableau de bord One Health (R / Shiny)
 #  Image Docker autoportante : R + packages + application + donnees.
 #
 #  Build :  docker build -t itafaray .

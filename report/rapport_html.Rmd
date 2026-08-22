@@ -38,7 +38,7 @@ ul.reco { line-height:1.8; }
 cat(sprintf(
   '<div class="masthead"><h1>%s</h1><div class="sub">%s</div><div class="meta">%s</div></div>',
   paste0(Tr("BULLETIN DE SURVEILLANCE"), " — One Health"),
-  paste0("i-Tafaray — ", Tr("Plateforme nationale Une seule santé - République de Madagascar")),
+  paste0("iTafaray — ", Tr("Plateforme nationale Une seule santé - République de Madagascar")),
   paste0(Tr("Période :"), " ", meta$periode, "   |   ", Tr("arrêté au"), " ", meta$arrete)))
 ```
 
@@ -92,6 +92,6 @@ r_tab
 
 ```{r footer, results='asis'}
 cat(sprintf('<div class="footer">%s</div>',
-  paste0("i-Tafaray — ", Tr("Surveillance intégrée One Health - Comité de pilotage."),
+  paste0("iTafaray — ", Tr("Surveillance intégrée One Health - Comité de pilotage."),
          " ", Tr("Document généré automatiquement."))))
 ```

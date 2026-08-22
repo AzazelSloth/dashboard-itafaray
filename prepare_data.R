@@ -1,5 +1,5 @@
 # =====================================================================
-#  i-Tafaray — Préparation des données pour le tableau de bord
+#  iTafaray — Préparation des données pour le tableau de bord
 #  Lit les 3 tables (signaux / evenement_sbe / alerte), les joint via
 #  id_signal, et renvoie une table au grain « signal » prête à l'emploi.
 #  Fonctionne sur le jeu de démonstration (dossier data_poc) comme sur

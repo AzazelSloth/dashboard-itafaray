@@ -1,5 +1,5 @@
 # =====================================================================
-#  Pont X-Road -> tableau de bord i-Tafaray
+#  Pont X-Road -> tableau de bord iTafaray
 #  Récupère les données réelles FHIR (via le Security Server) et les mappe
 #  au schéma attendu par le dashboard (cf. prepare_data.R).
 #

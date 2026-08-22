@@ -1,5 +1,5 @@
 # =====================================================================
-#  i-Tafaray — Tableau de bord central One Health
+#  iTafaray — Tableau de bord central One Health
 #  PREUVE DE CONCEPT — données de DÉMONSTRATION (synthétiques)
 #  Branché sur le jeu de données à 6 scénarios (H5N1, Peste, Rage,
 #  Mpox, Ebola, contamination hydrique) — voir Scenarios_One_Health.md
@@ -552,7 +552,7 @@ ui <- dashboardPage(
         lapply(c("madagascar.png", "sante.png", "environnement.png",
                  "elevage.png", "afd.png", "banque_mondiale.png",
                  "tafa1.png", "africam_prezode.png", "cirad.png",
-                 "pivot.png"),
+                 "pivot.png", "EMIT@300x-8.png"),
                function(f) tags$img(src = file.path("logos", f),
                                     style = paste0("max-height:",
                                                    if (f == "afd.png") "22px" else if (f == "tafa1.png") "28px" else "32px",
@@ -1024,20 +1024,20 @@ ui <- dashboardPage(
       ),
       tabItem("apropos",
               box(width = 12, status = "info", solidHeader = TRUE,
-                  title = i18n$t("À propos d'i-Tafaray"),
+                  title = i18n$t("À propos d'iTafaray"),
                   tags$div(style = "font-size:14px; line-height:1.65; color:#26333F; text-align:justify;",
                     tags$h4(style = "color:#1e3a5f; margin-top:4px; font-weight:600; text-align:left;",
                             i18n$t("L'approche One Health (Une seule santé)")),
                     tags$p(i18n$t("One Health reconnaît que les santés humaine, animale et environnementale sont interdépendantes. La plupart des maladies émergentes sont d'origine animale (zoonoses) et leur apparition est liée aux contacts exacerbés entre hommes et animaux, aux pressions sur les écosystèmes et au changement climatique. Surveiller les trois secteurs — homme, animal, environnement — simultanément permet de détecter plus tôt et d'agir de façon précoce et coordonnée.")),
                     tags$h4(style = "color:#1e3a5f; font-weight:600;",
                             i18n$t("Le projet AFRICAM Madagascar")),
-                    tags$p(i18n$t("AFRICAM Madagascar, porté par l'initiative PREZODE et coordonné par le CIRAD avec le financement de l'AFD, vise à renforcer la surveillance des maladies zoonotiques prioritaires selon une approche One Health intégrée. Dans le district d'Ifanadiana, il développe un système de surveillance associant santé humaine, animale, et de la faune et de l'environnement. La réalisation technique est confiée à l'ONG Pivot.")),
+                    tags$p(i18n$t("AFRICAM Madagascar, porté par l'initiative PREZODE et coordonné par le CIRAD avec le financement de l'AFD, vise à renforcer la surveillance des maladies zoonotiques prioritaires selon une approche One Health intégrée. Dans le district d'Ifanadiana, il développe un système de surveillance associant santé humaine, animale, et de la faune et de l'environnement. La réalisation technique est confiée à l'ONG Pivot avec l'appui d'une équipe d'étudiants de l'EMIT.")),
                     tags$h4(style = "color:#1e3a5f; font-weight:600;",
                             i18n$t("La surveillance à base évènementielle (SBE)")),
-                    tags$p(i18n$t("La SBE repère les évènements inhabituels liés à la santé humaine, animale ou environnementale et potentiellement indicateurs d'émergence, au plus près du terrain — agents communautaires, centres de santé de base, districts. Chaque signal est collecté par les agents de terrain (application CommCare), trié, vérifié puis évalué selon son niveau de risque, et peut déclencher une alerte. i-Tafaray, plateforme digitale One Health gérée par l'Unité de Gouvernance Digitale (UGD), centralise les signaux des trois secteurs et révèle, par leur croisement dans l'espace et le temps, des menaces qu'aucun secteur ne verrait seul.")),
+                    tags$p(i18n$t("La SBE repère les évènements inhabituels liés à la santé humaine, animale ou environnementale et potentiellement indicateurs d'émergence, au plus près du terrain — agents communautaires, centres de santé de base, districts. Chaque signal est collecté par les agents de terrain (application CommCare), trié, vérifié puis évalué selon son niveau de risque, et peut déclencher une alerte. iTafaray, plateforme digitale One Health gérée par l'Unité de Gouvernance Digitale (UGD), centralise les signaux des trois secteurs et révèle, par leur croisement dans l'espace et le temps, des menaces qu'aucun secteur ne verrait seul.")),
                     tags$h4(style = "color:#1e3a5f; font-weight:600;",
                             i18n$t("L'appui de la Banque mondiale")),
-                    tags$p(i18n$t("Le Projet de préparation et de réponse aux pandémies (PPSB), financé par la Banque mondiale, soutient la mise en place d'un système de notification électronique, en temps réel, interopérable et interconnecté, conforme au Règlement sanitaire international (RSI). i-Tafaray contribue à cet objectif via l'interopérabilité des données (standard FHIR, échange par X-Road).")))),
+                    tags$p(i18n$t("Le Projet de préparation et de réponse aux pandémies (PPSB), financé par la Banque mondiale, soutient la mise en place d'un système de notification électronique, en temps réel, interopérable et interconnecté, conforme au Règlement sanitaire international (RSI). iTafaray contribue à cet objectif via l'interopérabilité des données (standard FHIR, échange par X-Road).")))),
               box(width = 12, status = "info", solidHeader = TRUE, title = i18n$t("Partenaires"),
                   tags$div(style = "background:#fff; border-radius:8px; padding:14px 8px;",
                     # Bailleurs (tailles ajustées individuellement)
@@ -1046,7 +1046,7 @@ ui <- dashboardPage(
                       lapply(c("madagascar.png", "sante.png", "environnement.png",
                                "elevage.png", "afd.png", "banque_mondiale.png",
                                "tafa1.png", "africam_prezode.png", "cirad.png",
-                               "pivot.png"),
+                               "pivot.png", "EMIT@300x-8.png"),
                              function(f) tags$img(src = file.path("logos", f),
                                                   style = paste0("max-height:",
                                                                  if (f == "afd.png") "48px" else if (f == "banque_mondiale.png") "74px" else if (f == "tafa1.png") "52px" else "60px",
@@ -1078,7 +1078,7 @@ show_guide_modal <- function(lang = I18N_DEFAULT) {
   Tr <- function(key) i18n_lookup(key, lang)
   showModal(modalDialog(
     title = tags$div(style = "color:#1e3a5f; font-weight:700;",
-                     icon("compass"), " ", Tr("Guide de la plateforme i-Tafaray")),
+                     icon("compass"), " ", Tr("Guide de la plateforme iTafaray")),
     easyClose = TRUE, size = "l", footer = modalButton(Tr("Fermer")),
     tags$div(style = "font-size:14px; line-height:1.55;",
       tags$p(i18n$t("Plateforme de surveillance One Health (Une seule santé). Elle réunit les signaux humains, animaux et environnementaux pour révéler, par leur croisement, des menaces qu'aucun secteur ne verrait seul.")),
@@ -1118,7 +1118,7 @@ show_guide_modal_i18n <- function(lang = I18N_DEFAULT) {
   Tr <- function(key) i18n_lookup(key, lang)
   showModal(modalDialog(
     title = tags$div(style = "color:#1e3a5f; font-weight:700;",
-                     icon("compass"), " ", Tr("Guide de la plateforme i-Tafaray")),
+                     icon("compass"), " ", Tr("Guide de la plateforme iTafaray")),
     easyClose = TRUE, size = "l", footer = modalButton(Tr("Fermer")),
     tags$div(style = "font-size:14px; line-height:1.55;",
       tags$p(Tr("Plateforme de surveillance One Health (Une seule santé). Elle réunit les signaux humains, animaux et environnementaux pour révéler, par leur croisement, des menaces qu'aucun secteur ne verrait seul.")),
@@ -1652,7 +1652,7 @@ server <- function(input, output, session) {
       ## ===================== PAGE 1 =====================
       BAND(0.905, 1)
       TXT(0.06, 0.963, paste0(T("BULLETIN DE SURVEILLANCE"), "  -  One Health"), 15, "#FFFFFF", "bold", 0, 0.5)
-      TXT(0.06, 0.927, paste0("i-Tafaray - ", T("Plateforme nationale Une seule santé - République de Madagascar")),
+      TXT(0.06, 0.927, paste0("iTafaray - ", T("Plateforme nationale Une seule santé - République de Madagascar")),
           8.5, "#CFE0EE", "plain", 0, 0.5)
       TXT(0.94, 0.963, T("RAPPORT DE SYNTHÈSE"), 10.5, "#9FD3EE", "bold", 1, 0.5)
       TXT(0.94, 0.927, paste0(T("Période :"), " ", periode_lbl, "   |   ", T("arrêté au"), " ",
@@ -1675,14 +1675,14 @@ server <- function(input, output, session) {
       TXT(0.06, 0.095, T("Figure 1. Nombre de signaux validés par mois et par secteur (humain, animal, environnement)."),
           8, "#5A6672", "plain", 0, 1)
       RULE(0.05, 0.06, 0.94, "#D9DEE4", 0.8)
-      TXT(0.06, 0.033, paste0("i-Tafaray - ", T("Données de démonstration (synthétiques). Document généré automatiquement.")),
+      TXT(0.06, 0.033, paste0("iTafaray - ", T("Données de démonstration (synthétiques). Document généré automatiquement.")),
           7.5, "#8A93A0", "plain", 0, 0.5)
       TXT(0.94, 0.033, "Page 1 / 2", 7.5, "#8A93A0", "plain", 1, 0.5)
 
       ## ===================== PAGE 2 =====================
       grid::grid.newpage()
       BAND(0.95, 1)
-      TXT(0.06, 0.975, paste0("i-Tafaray - ", T("Bulletin de surveillance One Health (suite)")), 10.5, "#FFFFFF", "bold", 0, 0.5)
+      TXT(0.06, 0.975, paste0("iTafaray - ", T("Bulletin de surveillance One Health (suite)")), 10.5, "#FFFFFF", "bold", 0, 0.5)
       TXT(0.94, 0.975, paste0(T("Période :"), " ", periode_lbl), 8, "#CFE0EE", "plain", 1, 0.5)
 
       TXT(0.06, 0.925, paste0("4.  ", T("NIVEAU DE RISQUE")), 11.5, "#1e3a5f", "bold", 0, 1)
@@ -1696,7 +1696,7 @@ server <- function(input, output, session) {
       RULE(0.572)
       TABFIG(tab, 0.535)
       RULE(0.05, 0.06, 0.94, "#D9DEE4", 0.8)
-      TXT(0.06, 0.033, paste0("i-Tafaray - ", T("Surveillance intégrée One Health - Comité de pilotage.")),
+      TXT(0.06, 0.033, paste0("iTafaray - ", T("Surveillance intégrée One Health - Comité de pilotage.")),
           7.5, "#8A93A0", "plain", 0, 0.5)
       TXT(0.94, 0.033, "Page 2 / 2", 7.5, "#8A93A0", "plain", 1, 0.5)
     }
@@ -2459,7 +2459,7 @@ server <- function(input, output, session) {
   })
 
   en_titre <- function(info) {
-    paste0(if (isTRUE(info$oh)) "ALERTE ONE HEALTH i-Tafaray" else "ALERTE i-Tafaray",
+    paste0(if (isTRUE(info$oh)) "ALERTE ONE HEALTH iTafaray" else "ALERTE iTafaray",
            " — ", info$a$code)
   }
 
@@ -2470,15 +2470,15 @@ server <- function(input, output, session) {
     av   <- if (isTRUE(info$oh) && !is.na(info$avance) && info$avance > 0)
               paste0(" (+", round(info$avance), " j d'avance)") else ""
     if (canal == "SMS") {
-      s <- paste0(if (isTRUE(info$oh)) "ALERTE ONE HEALTH i-Tafaray. " else "ALERTE i-Tafaray. ",
+      s <- paste0(if (isTRUE(info$oh)) "ALERTE ONE HEALTH iTafaray. " else "ALERTE iTafaray. ",
                   a$code, " ", a$fokontany, ". Risque ", as.character(a$niveau_risque),
                   ". Cas ", a$Nombre_cas, "/Deces ", a$Nombre_deces, ". ", date)
       if (isTRUE(info$oh)) s <- paste0(s, ". Grappe: ", info$secteurs, av)
       return(s)
     }
     if (canal == "WhatsApp") {
-      l <- c(if (isTRUE(info$oh)) "\U0001F534 *ALERTE ONE HEALTH — i-Tafaray*"
-             else "\U0001F514 *ALERTE i-Tafaray*",
+      l <- c(if (isTRUE(info$oh)) "\U0001F534 *ALERTE ONE HEALTH — iTafaray*"
+             else "\U0001F514 *ALERTE iTafaray*",
              paste0("*Signal* : ", a$code, " — ", a$signal),
              paste0("*Secteur* : ", a$secteur),
              paste0("\U0001F4CD *Fokontany* : ", a$fokontany),
@@ -2490,7 +2490,7 @@ server <- function(input, output, session) {
       return(paste(l, collapse = "\n"))
     }
     # Email — texte structuré (HTML possible si la passerelle l'interprète : à confirmer)
-    l <- c(if (isTRUE(info$oh)) "ALERTE ONE HEALTH — i-Tafaray" else "ALERTE i-Tafaray", "",
+    l <- c(if (isTRUE(info$oh)) "ALERTE ONE HEALTH — iTafaray" else "ALERTE iTafaray", "",
            paste0("Signal        : ", a$code, " — ", a$signal),
            paste0("Secteur       : ", a$secteur),
            paste0("Fokontany     : ", a$fokontany),

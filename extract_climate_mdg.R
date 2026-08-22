@@ -1,6 +1,6 @@
 # =====================================================================
 #  Extraction des variables climatiques (district d'Ifanadiana)
-#  depuis le projet MDG (MDG_platform_SHINY_DASH) vers i-Tafaray.
+#  depuis le projet MDG (MDG_platform_SHINY_DASH) vers iTafaray.
 #
 #  À LANCER UNE FOIS dans R (RStudio). Produit :
 #    Dashboard_POC_iTafaray/data_poc/climate_ifanadiana.csv

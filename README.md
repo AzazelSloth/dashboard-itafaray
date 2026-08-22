@@ -1,4 +1,4 @@
-# i-Tafaray
+# iTafaray
 
 Application `R / Shiny` pour le tableau de bord One Health.
 

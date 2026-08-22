@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # =====================================================================
-#  i-Tafaray — Ingestion X-Road → cache local lu par le dashboard
+#  iTafaray — Ingestion X-Road → cache local lu par le dashboard
 # ---------------------------------------------------------------------
 #  Récupère les données réelles via le Security Server (charger_xroad)
 #  et les écrit dans un cache .rds que le dashboard relit automatiquement.
